@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.http.util.Asserts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +24,16 @@ public class LetterService {
 
     private final LetterRepository letterRepository;
     private final PdfCreator pdfCreator;
-    private final uk.gov.hmcts.reform.sendletter.entity.LetterRepository repo;
 
-    public LetterService(LetterRepository letterRepository,
-                         PdfCreator pdfCreator,
-                         uk.gov.hmcts.reform.sendletter.entity.LetterRepository repo) {
+    public LetterService(
+        LetterRepository letterRepository,
+        PdfCreator pdfCreator
+    ) {
         this.letterRepository = letterRepository;
         this.pdfCreator = pdfCreator;
-        this.repo = repo;
     }
 
-    public UUID send(Letter letter, String serviceName) throws JsonProcessingException {
+    public UUID send(Letter letter, String serviceName) {
         Asserts.notEmpty(serviceName, "serviceName");
 
         final String messageId = generateChecksum(letter);
@@ -50,7 +48,7 @@ public class LetterService {
         uk.gov.hmcts.reform.sendletter.entity.Letter dbLetter = new uk.gov.hmcts.reform.sendletter.entity.Letter(
             messageId, serviceName, null, letter.type, pdf);
 
-        repo.save(dbLetter);
+        letterRepository.save(dbLetter);
         return dbLetter.getId();
     }
 
@@ -60,12 +58,19 @@ public class LetterService {
     }
 
     public LetterStatus getStatus(UUID id, String serviceName) {
-        uk.gov.hmcts.reform.sendletter.entity.Letter l =
-            repo.findByIdAndService(id, serviceName)
-            .orElseThrow(() -> new LetterNotFoundException(id));
+        uk.gov.hmcts.reform.sendletter.entity.Letter letter =
+            letterRepository
+                .findByIdAndService(id, serviceName)
+                .orElseThrow(() -> new LetterNotFoundException(id));
 
-        return new LetterStatus(id, l.messageId, toDateTime(l.createdAt),
-            toDateTime(l.sentToPrintAt), toDateTime(l.printedAt), l.isFailed);
+        return new LetterStatus(
+            id,
+            letter.messageId,
+            toDateTime(letter.createdAt),
+            toDateTime(letter.sentToPrintAt),
+            toDateTime(letter.printedAt),
+            letter.isFailed
+        );
     }
 
     public static ZonedDateTime toDateTime(Timestamp stamp) {

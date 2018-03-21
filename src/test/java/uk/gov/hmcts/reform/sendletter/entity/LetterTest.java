@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.sendletter.entity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
@@ -36,9 +34,13 @@ public class LetterTest {
 
     public static Letter getTestLetter(String service) {
         try {
-            JsonNode n = new ObjectMapper().readTree("{}");
-            return new Letter("messageId",
-                service, n, "a type", new byte[1]);
+            return new Letter(
+                "messageId",
+                service,
+                new ObjectMapper().readTree("{}"),
+                "a type",
+                new byte[1]
+            );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -57,7 +59,7 @@ public class LetterTest {
     }
 
     @Test
-    public void compatible_with_existing_records() throws JsonProcessingException {
+    public void compatible_with_existing_records() throws Exception {
         // Save a letter using the existing repository code.
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         ObjectMapper objectMapper = new ObjectMapper();

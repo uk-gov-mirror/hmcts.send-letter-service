@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sendletter.data;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +12,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.data.model.DbLetter;
-import uk.gov.hmcts.reform.sendletter.model.in.Letter;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 
 import java.time.Instant;
@@ -28,11 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 public class LetterRepositoryTest {
 
-    private final Letter letter = SampleData.letter();
-
     private LetterRepository letterRepository;
-
-    private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -42,14 +36,13 @@ public class LetterRepositoryTest {
 
     @Before
     public void setUp() {
-        jdbcTemplate = new NamedParameterJdbcTemplate(repository);
-        letterRepository = new LetterRepository(jdbcTemplate, objectMapper);
+        letterRepository = new LetterRepository(new NamedParameterJdbcTemplate(repository), objectMapper);
     }
 
     @Test
-    public void should_successfully_save_report_in_db() throws JsonProcessingException {
+    public void should_successfully_save_report_in_db() throws Exception {
         //given
-        DbLetter dbLetter = new DbLetter(UUID.randomUUID(), "cmc", letter);
+        DbLetter dbLetter = new DbLetter(UUID.randomUUID(), "cmc", SampleData.letter());
 
         //when
         letterRepository.save(dbLetter, Instant.now(), UUID.randomUUID().toString());

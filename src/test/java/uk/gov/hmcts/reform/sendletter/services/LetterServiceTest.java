@@ -29,32 +29,25 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DataJpaTest
 public class LetterServiceTest {
 
-    private final uk.gov.hmcts.reform.sendletter.model.in.Letter letter = SampleData.letter();
-
     private LetterService service;
 
     @Autowired
     private LetterRepository letterRepository;
 
-    @Autowired
-    private uk.gov.hmcts.reform.sendletter.entity.LetterRepository newRepo;
-
     @Before
     public void setUp() {
         PdfCreator creator = new PdfCreator(new DuplexPreparator());
-        service = new LetterService(letterRepository,
-            creator, newRepo);
+        service = new LetterService(letterRepository, creator);
     }
 
     @Test
     public void generates_and_saves_pdf() throws IOException {
-        uk.gov.hmcts.reform.sendletter.model.in.Letter l = SampleData.letter();
-        UUID id = service.send(l, "a_service");
-        Letter result = newRepo.findOne(id);
-        DataSource d = new ByteArrayDataSource(new ByteArrayInputStream(result.pdf));
-        PreflightParser p = new PreflightParser(d);
-        p.parse();
-        PreflightDocument document = p.getPreflightDocument();
+        UUID id = service.send(SampleData.letter(), "a_service");
+        Letter result = letterRepository.findOne(id);
+        DataSource dataSource = new ByteArrayDataSource(new ByteArrayInputStream(result.pdf));
+        PreflightParser pdfParser = new PreflightParser(dataSource);
+        pdfParser.parse();
+        PreflightDocument document = pdfParser.getPreflightDocument();
         // This will throw an exception if the file format is invalid,
         // but ignores more minor errors such as missing metadata.
         document.validate();

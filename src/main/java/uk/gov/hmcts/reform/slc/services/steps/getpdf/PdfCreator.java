@@ -7,9 +7,7 @@ import uk.gov.hmcts.reform.sendletter.model.in.Document;
 import uk.gov.hmcts.reform.sendletter.model.in.Letter;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
@@ -17,21 +15,10 @@ import static java.util.stream.Collectors.toList;
 public class PdfCreator {
 
     private final DuplexPreparator duplexPreparator;
+    private static HTMLToPDFConverter converter = new HTMLToPDFConverter();
 
     public PdfCreator(DuplexPreparator duplexPreparator) {
         this.duplexPreparator = duplexPreparator;
-    }
-
-    private static HTMLToPDFConverter converter = new HTMLToPDFConverter();
-
-    public static synchronized byte[] generatePdf(byte[] template, Map<String, Object> content) {
-        return converter.convert(template, content);
-    }
-
-    private byte[] generatePdf(Document document) {
-        Instant start = Instant.now();
-        byte[] pdf = generatePdf(document.template.getBytes(), document.values);
-        return pdf;
     }
 
     public byte[] create(Letter letter) {
@@ -47,13 +34,9 @@ public class PdfCreator {
         return PdfMerger.mergeDocuments(docs);
     }
 
-    public PdfDoc create(Letter letter, String service, String id) {
-        Asserts.notNull(letter, "letter");
-
-        byte[] finalContent = create(letter);
-        return new PdfDoc(
-            FileNameHelper.generateName(letter, "pdf", service, id),
-            finalContent
-        );
+    private byte[] generatePdf(Document document) {
+        synchronized (PdfCreator.class) {
+            return converter.convert(document.template.getBytes(), document.values);
+        }
     }
 }
