@@ -5,23 +5,18 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.model.in.Letter;
-import uk.gov.hmcts.reform.sendletter.model.in.LetterPrintedAtPatch;
-import uk.gov.hmcts.reform.sendletter.model.in.LetterSentToPrintAtPatch;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.model.out.SendLetterResponse;
 import uk.gov.hmcts.reform.sendletter.services.AuthService;
@@ -30,7 +25,6 @@ import uk.gov.hmcts.reform.sendletter.services.LetterService;
 import java.util.UUID;
 import javax.validation.Valid;
 
-import static org.springframework.http.ResponseEntity.noContent;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
@@ -85,62 +79,6 @@ public class SendLetterController {
         LetterStatus letterStatus = letterService.getStatus(getLetterIdFromString(id), serviceName);
 
         return ok(letterStatus);
-    }
-
-    @PutMapping(path = "/{id}/sent-to-print-at")
-    @ApiOperation(value = "Update when letter was sent to print")
-    @ApiResponses({
-        @ApiResponse(code = 401, message = ControllerResponseMessage.RESPONSE_401),
-        @ApiResponse(code = 403, message = ControllerResponseMessage.RESPONSE_403)
-    })
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Void> updateSentToPrint(
-        @PathVariable("id") String id,
-        @RequestBody LetterSentToPrintAtPatch patch,
-        @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader
-    ) {
-        String serviceName = authService.authenticate(serviceAuthHeader);
-        authService.assertCanUpdateLetter(serviceName);
-        letterService.updateSentToPrintAt(getLetterIdFromString(id), patch);
-
-        return noContent().build();
-    }
-
-    @PutMapping(path = "/{id}/printed-at")
-    @ApiOperation(value = "Update when letter was printed")
-    @ApiResponses({
-        @ApiResponse(code = 401, message = ControllerResponseMessage.RESPONSE_401),
-        @ApiResponse(code = 403, message = ControllerResponseMessage.RESPONSE_403)
-    })
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Void> updatePrintedAt(
-        @PathVariable("id") String id,
-        @RequestBody LetterPrintedAtPatch patch,
-        @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader
-    ) {
-        String serviceName = authService.authenticate(serviceAuthHeader);
-        authService.assertCanUpdateLetter(serviceName);
-        letterService.updatePrintedAt(getLetterIdFromString(id), patch);
-
-        return noContent().build();
-    }
-
-    @PutMapping(path = "/{id}/is-failed")
-    @ApiOperation(value = "Update failed status when letter was sent to dead letter queue")
-    @ApiResponses({
-        @ApiResponse(code = 401, message = ControllerResponseMessage.RESPONSE_401),
-        @ApiResponse(code = 403, message = ControllerResponseMessage.RESPONSE_403)
-    })
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Void> updateFailedStatus(
-        @PathVariable("id") String id,
-        @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader
-    ) {
-        String serviceName = authService.authenticate(serviceAuthHeader);
-        authService.assertCanUpdateLetter(serviceName);
-        letterService.updateIsFailed(getLetterIdFromString(id));
-
-        return noContent().build();
     }
 
     private UUID getLetterIdFromString(String letterId) {

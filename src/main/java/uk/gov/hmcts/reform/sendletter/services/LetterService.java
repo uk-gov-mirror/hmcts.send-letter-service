@@ -5,17 +5,15 @@ import org.apache.http.util.Asserts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.reform.sendletter.data.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.data.model.DbLetter;
+import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
-import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.in.Letter;
-import uk.gov.hmcts.reform.sendletter.model.in.LetterPrintedAtPatch;
-import uk.gov.hmcts.reform.sendletter.model.in.LetterSentToPrintAtPatch;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
+import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
 
-import java.time.Instant;
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.sendletter.services.LetterChecksumGenerator.generateChecksum;
@@ -26,18 +24,17 @@ public class LetterService {
     private static final Logger log = LoggerFactory.getLogger(LetterService.class);
 
     private final LetterRepository letterRepository;
+    private final PdfCreator pdfCreator;
+    private final uk.gov.hmcts.reform.sendletter.entity.LetterRepository repo;
 
-    public LetterService(LetterRepository letterRepository) {
+    public LetterService(LetterRepository letterRepository,
+                         PdfCreator pdfCreator,
+                         uk.gov.hmcts.reform.sendletter.entity.LetterRepository repo) {
         this.letterRepository = letterRepository;
+        this.pdfCreator = pdfCreator;
+        this.repo = repo;
     }
 
-    public LetterStatus getStatus(UUID id, String serviceName) {
-        return letterRepository
-            .getLetterStatus(id, serviceName)
-            .orElseThrow(() -> new LetterNotFoundException(id));
-    }
-
-    @Transactional
     public UUID send(Letter letter, String serviceName) throws JsonProcessingException {
         Asserts.notEmpty(serviceName, "serviceName");
 
@@ -49,39 +46,32 @@ public class LetterService {
             letter.type,
             id);
 
-        DbLetter dbLetter = new DbLetter(id, serviceName, letter);
+        byte[] pdf = pdfCreator.create(letter);
+        uk.gov.hmcts.reform.sendletter.entity.Letter dbLetter = new uk.gov.hmcts.reform.sendletter.entity.Letter(
+            messageId, serviceName, null, letter.type, pdf);
 
-        letterRepository.save(dbLetter, Instant.now(), messageId);
-
-        return id;
-    }
-
-    @Transactional
-    public void updateSentToPrintAt(UUID id, LetterSentToPrintAtPatch patch) {
-        int numberOfUpdatedRows = letterRepository.updateSentToPrintAt(id, patch.sentToPrintAt);
-        if (numberOfUpdatedRows == 0) {
-            throw new LetterNotFoundException(id);
-        }
-    }
-
-    @Transactional
-    public void updatePrintedAt(UUID id, LetterPrintedAtPatch patch) {
-        int numberOfUpdatedRows = letterRepository.updatePrintedAt(id, patch.printedAt);
-        if (numberOfUpdatedRows == 0) {
-            throw new LetterNotFoundException(id);
-        }
-    }
-
-    @Transactional
-    public void updateIsFailed(UUID id) {
-        int numberOfUpdatedRows = letterRepository.updateIsFailed(id);
-        if (numberOfUpdatedRows == 0) {
-            throw new LetterNotFoundException(id);
-        }
+        repo.save(dbLetter);
+        return dbLetter.getId();
     }
 
     public void checkPrintState() {
-        // TODO
-        letterRepository.getStaleLetters();
+        // TODO: does previous implementation
+        // do anything with this request?
+    }
+
+    public LetterStatus getStatus(UUID id, String serviceName) {
+        uk.gov.hmcts.reform.sendletter.entity.Letter l =
+            repo.findByIdAndService(id, serviceName)
+            .orElseThrow(() -> new LetterNotFoundException(id));
+
+        return new LetterStatus(id, l.messageId, toDateTime(l.createdAt),
+            toDateTime(l.sentToPrintAt), toDateTime(l.printedAt), l.isFailed);
+    }
+
+    public static ZonedDateTime toDateTime(Timestamp stamp) {
+        if (null == stamp) {
+            return null;
+        }
+        return stamp.toInstant().atZone(ZoneId.of("UTC"));
     }
 }

@@ -1,18 +1,22 @@
 package uk.gov.hmcts.reform.sendletter.entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import com.vladmihalcea.hibernate.type.json.JsonStringType;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "letters")
@@ -33,6 +37,9 @@ public class Letter {
     @Column(columnDefinition = "json")
     public final JsonNode additionalData;
     public final Timestamp createdAt = Timestamp.from(Instant.now());
+    public final Timestamp sentToPrintAt;
+    public final Timestamp printedAt;
+    public final boolean isFailed;
     public final String type;
     @Enumerated(EnumType.STRING)
     public final LetterState state = LetterState.Created;
@@ -45,6 +52,9 @@ public class Letter {
         additionalData = null;
         type = null;
         pdf = null;
+        isFailed = false;
+        sentToPrintAt = null;
+        printedAt = null;
     }
 
     public Letter(
@@ -59,6 +69,12 @@ public class Letter {
         this.additionalData = additionalData;
         this.type = type;
         this.pdf = pdf;
+        this.sentToPrintAt = null;
+        this.printedAt = null;
+        this.isFailed = false;
     }
 
+    public UUID getId() {
+        return id;
+    }
 }
