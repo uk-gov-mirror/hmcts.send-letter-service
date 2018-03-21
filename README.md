@@ -1,5 +1,7 @@
 # Send Letter Service
 
+[![Build Status](https://travis-ci.org/hmcts/send-letter-service.svg?branch=master)](https://travis-ci.org/hmcts/send-letter-service)
+
 ## Building and deploying the application
 
 ### Building the application
