@@ -55,13 +55,6 @@ public class UploadLetterTest {
         assertThat(uploaded).isEqualTo(0);
     }
 
-    @Test
-    public void uploads_letter() throws Exception {
-        try (MockSftpServer test = new MockSftpServer(testFolder)) {
-            getFtpClient().testConnection();
-        }
-    }
-
     private FtpClient getFtpClient() throws IOException {
         AppInsights insights = Mockito.mock(AppInsights.class);
         Supplier<SSHClient> s = () -> {
