@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.model.in.Letter;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
+import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
 import java.sql.Timestamp;
 import java.time.ZoneId;
@@ -22,15 +23,11 @@ public class LetterService {
 
     private static final Logger log = LoggerFactory.getLogger(LetterService.class);
 
+    private final PdfCreator pdfCreator = new PdfCreator(new DuplexPreparator());
     private final LetterRepository letterRepository;
-    private final PdfCreator pdfCreator;
 
-    public LetterService(
-        LetterRepository letterRepository,
-        PdfCreator pdfCreator
-    ) {
+    public LetterService(LetterRepository letterRepository) {
         this.letterRepository = letterRepository;
-        this.pdfCreator = pdfCreator;
     }
 
     public UUID send(Letter letter, String serviceName) {

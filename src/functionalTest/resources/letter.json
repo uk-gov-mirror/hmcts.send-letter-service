@@ -1,9 +1,9 @@
 {
   "documents": [
     {
-      "template": "abc",
+      "template": "<html><p>Hello {{ name }}</p></html>",
       "values": {
-        "a": "b"
+        "name": "M. Bloggs"
       }
     }
   ],

@@ -30,7 +30,7 @@ public class FtpClient {
     private static final Logger logger = LoggerFactory.getLogger(FtpClient.class);
 
     @Autowired
-    private AppInsights insights;
+    private final AppInsights insights;
 
     private final FtpConfigProperties configProperties;
 

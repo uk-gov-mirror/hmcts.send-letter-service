@@ -13,8 +13,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -36,8 +34,7 @@ public class LetterServiceTest {
 
     @Before
     public void setUp() {
-        PdfCreator creator = new PdfCreator(new DuplexPreparator());
-        service = new LetterService(letterRepository, creator);
+        service = new LetterService(letterRepository);
     }
 
     @Test
