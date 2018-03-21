@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.slc.services.steps.getpdf;
 
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
-import uk.gov.hmcts.reform.slc.services.servicebus.exceptions.PdfMergeException;
+import uk.gov.hmcts.reform.slc.services.steps.getpdf.exceptions.PdfMergeException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

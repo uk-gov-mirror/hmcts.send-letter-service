@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.slc.services.servicebus;
+package uk.gov.hmcts.reform.slc.services;
 
 public enum MessageHandlingResult {
     SUCCESS,

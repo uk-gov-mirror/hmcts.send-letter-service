@@ -1,10 +1,5 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.servicebus.IQueueClient;
-import com.microsoft.azure.servicebus.Message;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,26 +9,17 @@ import org.springframework.dao.CleanupFailureDataAccessException;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.data.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.data.model.DbLetter;
-import uk.gov.hmcts.reform.sendletter.exception.ConnectionException;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
-import uk.gov.hmcts.reform.sendletter.exception.SendMessageException;
-import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
-import uk.gov.hmcts.reform.sendletter.model.in.Letter;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterPrintedAtPatch;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterSentToPrintAtPatch;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
-import uk.gov.hmcts.reform.sendletter.model.out.NotPrintedLetter;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -41,47 +27,21 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LetterServiceTest {
 
-    private final Letter letter = SampleData.letter();
-
     private LetterService service;
-
-    @Mock
-    private ObjectMapper objectMapper;
-
-    private CompletableFuture<Void> voidCompletableFuture;
-
-    private CompletableFuture<Void> failedCompletableFuture;
-
-    @Mock
-    private Supplier<IQueueClient> queueClientSupplier;
-
-    @Mock
-    private AppInsights insights;
-
-    @Mock
-    private IQueueClient queueClient;
 
     @Mock
     private LetterRepository letterRepository;
 
     @Before
     public void setUp() {
-        service = new LetterService(queueClientSupplier, insights, objectMapper, 7, letterRepository);
-        voidCompletableFuture = CompletableFuture.completedFuture(null);
-        failedCompletableFuture = new CompletableFuture<>();
-        failedCompletableFuture.completeExceptionally(new Exception("some exception"));
+        service = new LetterService(letterRepository);
     }
 
     @Test
@@ -110,166 +70,45 @@ public class LetterServiceTest {
     @Test
     public void should_save_report_and_return_message_id_when_single_letter_is_sent() throws Exception {
         // given
-        given(queueClientSupplier.get()).willReturn(queueClient);
-        given(queueClient.sendAsync(any(Message.class))).willReturn(voidCompletableFuture);
-        given(queueClient.closeAsync()).willReturn(voidCompletableFuture);
         doNothing()
             .when(letterRepository)
             .save(any(DbLetter.class), any(Instant.class), anyString());
 
         //when
-        UUID letterUuid = service.send(letter, "service");
+        UUID letterUuid = service.send(SampleData.letter(), "service");
         String letterId = letterUuid.toString();
+
         //then
         assertThat(letterId).isNotNull();
 
-        verify(queueClientSupplier).get();
-        verify(queueClient).send(any(Message.class));
         verify(letterRepository).save(any(DbLetter.class), any(Instant.class), anyString());
-
-        voidCompletableFuture.thenRun(() -> {
-            verify(queueClient).closeAsync();
-            verify(insights).trackMessageAcknowledgement(any(Duration.class), eq(true), eq(letterId));
-            verifyNoMoreInteractions(queueClientSupplier, queueClient, insights, letterRepository);
-        });
     }
 
     @Test
     public void should_not_save_report_and_send_message_when_saving_report_fails() throws Exception {
         // given
-        given(queueClientSupplier.get()).willReturn(queueClient);
         willThrow(CleanupFailureDataAccessException.class).given(letterRepository)
             .save(any(DbLetter.class), any(Instant.class), anyString());
 
         //when
-        Throwable exception = catchThrowable(() -> service.send(letter, "service"));
+        Throwable exception = catchThrowable(() -> service.send(SampleData.letter(), "service"));
 
         //then
         assertThat(exception).isInstanceOf(CleanupFailureDataAccessException.class);
 
-        verify(queueClientSupplier, never()).get();
         verify(letterRepository).save(any(DbLetter.class), any(Instant.class), anyString());
-        verifyNoMoreInteractions(queueClientSupplier, letterRepository);
     }
 
-    @Test
-    public void should_throw_send_message_exception_when_single_letter_is_sent() throws Exception {
-        // given
-        given(queueClientSupplier.get()).willReturn(queueClient);
-        willThrow(new RuntimeException("test exception")).given(queueClient).send(any(Message.class));
-
-        //when
-        Throwable exception = catchThrowable(() -> service.send(letter, "service"));
-
-        //then
-        assertThat(exception)
-            .isInstanceOf(SendMessageException.class)
-            .hasMessageStartingWith("Could not send message to ServiceBus");
-
-        verify(queueClientSupplier).get();
-        verify(queueClient).send(any(Message.class));
-
-        failedCompletableFuture.thenRun(() ->
-            verify(insights).trackMessageAcknowledgement(any(Duration.class), eq(false), anyString())
-        );
-        voidCompletableFuture.thenRun(() -> {
-            verify(queueClient).closeAsync();
-            verifyNoMoreInteractions(queueClientSupplier, queueClient, insights);
-        });
-    }
-
-    @Test
-    public void should_throw_connection_exception_when_queue_client_fails_to_connect() {
-        // given
-        given(queueClientSupplier.get())
-            .willThrow(
-                new ConnectionException("Unable to connect to Azure service bus",
-                    new ServiceBusException(false))
-            );
-
-        // when
-        Throwable exception = catchThrowable(() -> service.send(letter, "service"));
-
-        // then
-        assertThat(exception)
-            .isInstanceOf(ConnectionException.class)
-            .hasCauseExactlyInstanceOf(ServiceBusException.class)
-            .hasMessage("Unable to connect to Azure service bus");
-
-        verify(queueClientSupplier).get();
-        verifyNoMoreInteractions(queueClientSupplier, queueClient, insights);
-    }
-
-    @Test
-    public void should_throw_json_processing_exception_letter_serialization_fails() throws Exception {
-        // given
-        willThrow(JsonProcessingException.class).given(objectMapper).writeValueAsBytes(any());
-
-        // when
-        Throwable exception = catchThrowable(() -> service.send(letter, "service"));
-
-        // then
-        assertThat(exception).isInstanceOf(JsonProcessingException.class);
-        verify(insights, never()).trackMessageAcknowledgement(any(Duration.class), anyBoolean(), anyString());
-        verifyNoMoreInteractions(insights);
-    }
-
-    @Test
-    public void should_throw_connection_exception_when_thread_is_interrupted() {
-        // given
-        given(queueClientSupplier.get())
-            .willThrow(
-                new ConnectionException("Unable to connect to Azure service bus",
-                    new InterruptedException())
-            );
-
-        // when
-        Throwable exception = catchThrowable(() -> service.send(letter, "service"));
-
-        // then
-        assertThat(exception)
-            .isInstanceOf(ConnectionException.class)
-            .hasCauseExactlyInstanceOf(InterruptedException.class)
-            .hasMessage("Unable to connect to Azure service bus");
-
-
-        verify(queueClientSupplier).get();
-        verifyNoMoreInteractions(queueClientSupplier, queueClient, insights);
-    }
-
-
-    @Test
-    public void should_rethrow_runtime_exception_if_message_sending_fails() throws Exception {
-        RuntimeException thrownException = new RuntimeException("test exception");
-
-        // given
-        given(queueClientSupplier.get()).willReturn(queueClient);
-        willThrow(thrownException).given(queueClient).send(any(Message.class));
-
-        // when
-        Throwable exception = catchThrowable(() -> service.send(letter, "service"));
-
-        // then
-        assertThat(exception)
-            .isInstanceOf(RuntimeException.class);
-
-        verify(queueClientSupplier).get();
-        verify(queueClient).send(any(Message.class));
-        verify(queueClient).close();
-        verify(insights).trackMessageAcknowledgement(any(Duration.class), eq(false), anyString());
-        verify(insights).trackException(thrownException);
-        verifyNoMoreInteractions(queueClientSupplier, queueClient, insights);
-    }
 
     @Test
     public void should_not_allow_null_service_name() {
-        assertThatThrownBy(() -> service.send(letter, null))
+        assertThatThrownBy(() -> service.send(SampleData.letter(), null))
             .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     public void should_not_allow_empty_service_name() {
-        assertThatThrownBy(() -> service.send(letter, ""))
+        assertThatThrownBy(() -> service.send(SampleData.letter(), ""))
             .isInstanceOf(IllegalStateException.class);
     }
 
@@ -345,47 +184,5 @@ public class LetterServiceTest {
 
         // then
         verify(letterRepository).updateIsFailed(id);
-    }
-
-    @Test
-    public void should_record_each_letter_in_app_insights_respectively() {
-        // given all letters are printed
-        given(letterRepository.getStaleLetters()).willReturn(Collections.emptyList());
-
-        // when
-        service.checkPrintState();
-
-        // then TODO
-        // verify(insights, never()).trackNotPrintedLetter(any(NotPrintedLetter.class));
-
-        ZonedDateTime now = ZonedDateTime.now();
-        NotPrintedLetter letter = new NotPrintedLetter(
-            UUID.randomUUID(),
-            "some-message-id",
-            "some-service",
-            "some-type",
-            now,
-            now
-        );
-
-        // given one letter is not printed
-        reset(insights);
-        given(letterRepository.getStaleLetters()).willReturn(Collections.singletonList(letter));
-
-        // when
-        service.checkPrintState();
-
-        // then TODO
-        // verify(insights).trackNotPrintedLetter(any(NotPrintedLetter.class));
-
-        // given five letters are not printed :(
-        reset(insights);
-        given(letterRepository.getStaleLetters()).willReturn(Collections.nCopies(5, letter));
-
-        // when
-        service.checkPrintState();
-
-        // then TODO
-        // verify(insights, times(5)).trackNotPrintedLetter(any(NotPrintedLetter.class));
     }
 }
