@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.entity;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
@@ -36,13 +37,19 @@ public class LetterTest {
 
     @Autowired
     private DataSource dataSource;
-
-    public static final Letter testLetter = new Letter("messageId",
-        "service", "{}", "a type", new byte[1]);
+    public static Letter getTestLetter() {
+        try {
+            JsonNode n = new ObjectMapper().readTree("{}");
+            return new Letter("messageId",
+                "service", n, "a type", new byte[1]);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Test
     public void should_successfully_save_report_in_db() {
-        repository.save(testLetter);
+        repository.save(getTestLetter());
         int count = (int) repository.count();
         List<Letter> letters = Lists.newArrayList(repository.findAll());
         assertThat(letters.size()).isEqualTo(1);
@@ -66,7 +73,7 @@ public class LetterTest {
 
         Letter loaded = letters.get(0);
         String expectedData = objectMapper.writeValueAsString(SampleData.letter().additionalData);
-        assertThat(loaded.additionalData).isEqualTo(expectedData);
+        assertThat(loaded.additionalData.toString()).isEqualTo(expectedData);
         assertThat(loaded.createdAt).isEqualTo(Timestamp.from(instant));
         assertThat(loaded.messageId).isEqualTo(messageId);
         assertThat(loaded.service).isEqualTo("cmc");

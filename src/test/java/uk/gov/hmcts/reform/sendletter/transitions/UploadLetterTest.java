@@ -41,7 +41,7 @@ public class UploadLetterTest {
 
     @Before
     public void setup() {
-        repository.save(LetterTest.testLetter);
+        repository.save(LetterTest.getTestLetter());
     }
 
     @Rule

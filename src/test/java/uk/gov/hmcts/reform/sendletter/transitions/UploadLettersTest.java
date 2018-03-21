@@ -23,8 +23,8 @@ public class UploadLettersTest {
     private LetterRepository repository;
 
     @Before
-    public void setup() {
-        repository.save(LetterTest.testLetter);
+    public void setup(){
+        repository.save(LetterTest.getTestLetter());
     }
 
     @Test
