@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.sendletter.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.servicebus.IQueueClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +21,6 @@ import uk.gov.hmcts.reform.sendletter.data.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.data.model.DbLetter;
 import uk.gov.hmcts.reform.sendletter.model.in.Letter;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
-import uk.gov.hmcts.reform.sendletter.queue.QueueClientSupplier;
 import uk.gov.hmcts.reform.sendletter.util.MessageIdProvider;
 
 import java.time.ZoneOffset;
@@ -52,12 +49,6 @@ public class GetLetterStatusTest {
     @MockBean
     private AuthTokenValidator tokenValidator;
 
-    @MockBean
-    private QueueClientSupplier queueClientSupplier;
-
-    @Mock
-    private IQueueClient queueClient;
-
     @SpyBean
     private LetterRepository letterRepository;
 
@@ -65,7 +56,6 @@ public class GetLetterStatusTest {
     public void should_return_200_after_creating_single_letter_in_db() throws Exception {
         // given
         given(tokenValidator.getServiceName("auth-header-value")).willReturn("some-service");
-        given(queueClientSupplier.get()).willReturn(queueClient);
 
         // and
         UUID letterId = UUID.randomUUID();

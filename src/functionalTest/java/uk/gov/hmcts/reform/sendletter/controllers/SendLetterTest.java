@@ -2,16 +2,11 @@ package uk.gov.hmcts.reform.sendletter.controllers;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.microsoft.azure.servicebus.IQueueClient;
-import com.microsoft.azure.servicebus.Message;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
@@ -24,15 +19,12 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.reform.sendletter.data.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.data.model.DbLetter;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
-import uk.gov.hmcts.reform.sendletter.queue.QueueClientSupplier;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -51,21 +43,14 @@ public class SendLetterTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
-    private QueueClientSupplier queueClientSupplier;
-
     @SpyBean
     private AppInsights insights;
-
-    @Mock
-    private IQueueClient queueClient;
 
     @SpyBean
     private LetterRepository letterRepository;
 
     @Test
     public void should_return_200_when_single_letter_is_sent() throws Exception {
-        given(queueClientSupplier.get()).willReturn(queueClient);
 
         MvcResult result = send(readResource("letter.json"))
             .andExpect(status().isOk())
@@ -75,17 +60,6 @@ public class SendLetterTest {
 
         verify(letterRepository).save(any(DbLetter.class), any(Instant.class), anyString());
         verify(insights).trackMessageAcknowledgement(any(Duration.class), eq(true), anyString());
-    }
-
-    @Test
-    public void should_return_500_when_sending_message_has_failed() throws Exception {
-        given(queueClientSupplier.get()).willReturn(queueClient);
-
-        willThrow(ServiceBusException.class).given(queueClient).send(any(Message.class));
-
-        send(readResource("letter.json")).andExpect(status().isInternalServerError());
-
-        verify(insights).trackMessageAcknowledgement(any(Duration.class), eq(false), anyString());
     }
 
     @Test
