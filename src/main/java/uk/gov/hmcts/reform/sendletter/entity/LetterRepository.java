@@ -1,13 +1,20 @@
 package uk.gov.hmcts.reform.sendletter.entity;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
+import javax.persistence.LockModeType;
 
-public interface LetterRepository extends CrudRepository<Letter, UUID> {
-    List<Letter> findByState(LetterState state);
+public interface LetterRepository extends JpaRepository<Letter, UUID> {
+    // This lockmode locks the returned rows
+    // for both reading and writing.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Stream<Letter> findByState(LetterState state);
+
+    Optional<Letter> findById(UUID id);
 
     Optional<Letter> findByIdAndService(UUID id, String service);
 }

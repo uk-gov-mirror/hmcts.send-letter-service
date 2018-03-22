@@ -55,7 +55,7 @@ public class LetterTest {
         repository.save(getTestLetter());
         List<Letter> letters = Lists.newArrayList(repository.findAll());
         assertThat(letters.size()).isEqualTo(1);
-        assertThat(letters.get(0).state).isEqualTo(LetterState.Created);
+        assertThat(letters.get(0).getState()).isEqualTo(LetterState.Created);
     }
 
     @Test
@@ -75,11 +75,11 @@ public class LetterTest {
 
         Letter loaded = letters.get(0);
         String expectedData = objectMapper.writeValueAsString(SampleData.letter().additionalData);
-        assertThat(loaded.additionalData.toString()).isEqualTo(expectedData);
-        assertThat(loaded.createdAt).isEqualTo(Timestamp.from(instant));
-        assertThat(loaded.messageId).isEqualTo(messageId);
-        assertThat(loaded.service).isEqualTo("cmc");
-        assertThat(loaded.type).isEqualTo(dbLetter.type);
+        assertThat(loaded.getAdditionalData().toString()).isEqualTo(expectedData);
+        assertThat(loaded.getCreatedAt()).isEqualTo(Timestamp.from(instant));
+        assertThat(loaded.getMessageId()).isEqualTo(messageId);
+        assertThat(loaded.getService()).isEqualTo("cmc");
+        assertThat(loaded.getType()).isEqualTo(dbLetter.type);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class LetterTest {
         Letter second = getTestLetter("different");
         repository.save(second);
 
-        Letter found = repository.findByIdAndService(second.getId(), second.service).get();
+        Letter found = repository.findByIdAndService(second.getId(), second.getService()).get();
         assertThat(found.getId()).isEqualTo(second.getId());
     }
 }

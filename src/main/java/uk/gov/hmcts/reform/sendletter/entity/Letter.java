@@ -28,33 +28,25 @@ public class Letter {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    public final String messageId;
-    public final String service;
+    private String messageId;
+    private String service;
     // The following Type annotation instructs jpa to JSON serialize this field.
     // The column annotation instructs jpa that this field is stored as a json column
     // in our database and should be addressed with ::json in SQL fragments.
     @Type(type = "json")
     @Column(columnDefinition = "json")
-    public final JsonNode additionalData;
-    public final Timestamp createdAt = Timestamp.from(Instant.now());
-    public final Timestamp sentToPrintAt;
-    public final Timestamp printedAt;
-    public final boolean isFailed;
-    public final String type;
+    private JsonNode additionalData;
+    private final Timestamp createdAt = Timestamp.from(Instant.now());
+    private Timestamp sentToPrintAt;
+    private Timestamp printedAt;
+    private boolean isFailed;
+    private String type;
     @Enumerated(EnumType.STRING)
-    public final LetterState state = LetterState.Created;
-    // Base64 encoded PDF.
-    public final byte[] pdf;
+    private LetterState state = LetterState.Created;
+    private byte[] pdf;
 
-    protected Letter() {
-        messageId = null;
-        service = null;
-        additionalData = null;
-        type = null;
-        pdf = null;
-        isFailed = false;
-        sentToPrintAt = null;
-        printedAt = null;
+    // For use by hibernate.
+    private Letter() {
     }
 
     public Letter(
@@ -69,12 +61,58 @@ public class Letter {
         this.additionalData = additionalData;
         this.type = type;
         this.pdf = pdf;
-        this.sentToPrintAt = null;
-        this.printedAt = null;
         this.isFailed = false;
     }
 
     public UUID getId() {
         return id;
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public LetterState getState() {
+        return state;
+    }
+
+    public void setState(LetterState state) {
+        this.state = state;
+    }
+
+    public byte[] getPdf() {
+        return pdf;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public Timestamp getSentToPrintAt() {
+        return sentToPrintAt;
+    }
+
+    public void setSentToPrintAt(Timestamp value) {
+        this.sentToPrintAt = value;
+    }
+
+    public Timestamp getPrintedAt() {
+        return printedAt;
+    }
+
+    public boolean isFailed() {
+        return isFailed;
+    }
+
+    public JsonNode getAdditionalData() {
+        return additionalData;
     }
 }

@@ -17,7 +17,7 @@ import java.util.Arrays;
 public final class LocalSftpServer implements AutoCloseable {
     private final SshServer sshd;
 
-    public final int port = 46043;
+    public static final int port = 46043;
 
     // This is the working directory of the SFTP server.
     public static final String pdfFolderName = "moj";

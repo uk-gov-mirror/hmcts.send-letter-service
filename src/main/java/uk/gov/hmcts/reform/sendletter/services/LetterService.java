@@ -62,11 +62,11 @@ public class LetterService {
 
         return new LetterStatus(
             id,
-            letter.messageId,
-            toDateTime(letter.createdAt),
-            toDateTime(letter.sentToPrintAt),
-            toDateTime(letter.printedAt),
-            letter.isFailed
+            letter.getMessageId(),
+            toDateTime(letter.getCreatedAt()),
+            toDateTime(letter.getSentToPrintAt()),
+            toDateTime(letter.getPrintedAt()),
+            letter.isFailed()
         );
     }
 
