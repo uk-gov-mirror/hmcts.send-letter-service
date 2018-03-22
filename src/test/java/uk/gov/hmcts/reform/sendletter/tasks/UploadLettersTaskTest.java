@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterState;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
+import uk.gov.hmcts.reform.slc.services.steps.zip.Zipper;
 
 import java.io.File;
 import java.util.UUID;
@@ -32,17 +33,17 @@ public class UploadLettersTaskTest {
     private EntityManager entityManager;
 
     @Test
-    public void uploads_pdfs_to_sftp_and_saves_letter_as_uploaded() throws Exception {
+    public void uploads_file_to_sftp_and_sets_letter_status_to_uploaded() throws Exception {
         LetterService s = new LetterService(repository);
         UUID id = s.send(SampleData.letter(), "service");
 
         // Invoke the upload job.
         try (LocalSftpServer server = LocalSftpServer.create()) {
-            UploadLettersTask task = new UploadLettersTask(repository, FtpHelper.getClient(server.port));
+            UploadLettersTask task = new UploadLettersTask(repository, new Zipper(), FtpHelper.getClient(server.port));
 
             task.run();
 
-            // PDF should exist in SFTP site.
+            // file should exist in SFTP site.
             File[] files = server.pdfFolder.listFiles();
             assertThat(files.length).isEqualTo(1);
 

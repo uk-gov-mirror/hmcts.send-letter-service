@@ -10,19 +10,27 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterState;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfDoc;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.FtpClient;
-import uk.gov.hmcts.reform.slc.services.steps.sftpupload.exceptions.FtpStepException;
+import uk.gov.hmcts.reform.slc.services.steps.zip.ZipFileNameHelper;
+import uk.gov.hmcts.reform.slc.services.steps.zip.ZippedDoc;
+import uk.gov.hmcts.reform.slc.services.steps.zip.Zipper;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 
+import static java.time.LocalDateTime.now;
+
 public class UploadLettersTask {
-    private final LetterRepository repo;
-    private final FtpClient ftp;
     private static final Logger logger = LoggerFactory.getLogger(UploadLettersTask.class);
 
+    private final LetterRepository repo;
+    private final Zipper zipper;
+    private final FtpClient ftp;
+
     @Autowired
-    public UploadLettersTask(LetterRepository repo, FtpClient ftp) {
+    public UploadLettersTask(LetterRepository repo, Zipper zipper, FtpClient ftp) {
         this.repo = repo;
+        this.zipper = zipper;
         this.ftp = ftp;
     }
 
@@ -39,17 +47,24 @@ public class UploadLettersTask {
                 repo.saveAndFlush(letter);
 
                 logger.debug("Marked letter {} as Uploaded", letter.getId());
-            } catch (FtpStepException e) {
+            } catch (Exception e) {
                 logger.error("Exception uploading letter {}", letter.getId(), e);
             }
         });
     }
 
-    private void upload(Letter letter) {
-        String name = FileNameHelper.generateName(letter, "pdf");
-        logger.debug("Uploading letter {}, messageId {}, filename {}",
-            letter.getId(), letter.getMessageId(), name);
+    private void upload(Letter letter) throws IOException {
+        PdfDoc pdfDoc = new PdfDoc(FileNameHelper.generateName(letter, "pdf"), letter.getPdf());
+        ZippedDoc zippedDoc = zipper.zip(ZipFileNameHelper.generateName(letter, now()), pdfDoc);
 
-        ftp.upload(new PdfDoc(name, letter.getPdf()));
+        logger.debug(
+            "Uploading letter id: {}, messageId: {}, pdf filename: {}, zip filename:",
+            letter.getId(),
+            letter.getMessageId(),
+            pdfDoc.filename,
+            zippedDoc.filename
+        );
+
+        ftp.upload(zippedDoc);
     }
 }
