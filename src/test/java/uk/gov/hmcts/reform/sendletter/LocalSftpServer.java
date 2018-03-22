@@ -10,23 +10,44 @@ import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.sftp.subsystem.SftpSubsystem;
 import org.junit.rules.TemporaryFolder;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class MockSftpServer implements AutoCloseable {
-    private SshServer sshd;
+public final class LocalSftpServer implements AutoCloseable {
+    private final SshServer sshd;
 
-    public static final int port = 8001;
+    public final int port = 46043;
 
-    public MockSftpServer(TemporaryFolder testFolder) throws IOException {
+    // This is the working directory of the SFTP server.
+    public static final String pdfFolderName = "moj";
+
+    public final File rootFolder;
+
+    // This is the folder where xerox expects pdf uploads.
+    public final File pdfFolder;
+
+    public static LocalSftpServer create() throws IOException {
+        TemporaryFolder tmp = new TemporaryFolder();
+        tmp.create();
+        File root = tmp.getRoot();
+        File workingDirectory = new File(root, pdfFolderName);
+        workingDirectory.mkdir();
+        return new LocalSftpServer(root, workingDirectory);
+    }
+
+    private LocalSftpServer(File root, File pdfFolder) throws IOException {
+        this.rootFolder = root;
+        this.pdfFolder = pdfFolder;
         sshd = SshServer.setUpDefaultServer();
+
         sshd.setFileSystemFactory(new NativeFileSystemFactory() {
             @Override
             public FileSystemView createFileSystemView(final Session session) {
                 return new NativeFileSystemView(session.getUsername(), false) {
                     @Override
                     public String getVirtualUserDir() {
-                        return testFolder.getRoot().getAbsolutePath();
+                        return LocalSftpServer.this.rootFolder.getAbsolutePath();
                     }
                 };
             }
