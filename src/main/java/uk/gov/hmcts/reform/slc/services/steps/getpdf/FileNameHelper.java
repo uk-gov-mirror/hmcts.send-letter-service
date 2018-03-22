@@ -7,8 +7,8 @@ public final class FileNameHelper {
 
     private static final String SEPARATOR = "_";
 
-    public static String generateName(Letter letter, String extension, String service, String id) {
-        return letter.getType() + SEPARATOR + service + SEPARATOR + id + "." + extension;
+    public static String generateName(Letter letter, String extension) {
+        return letter.getType() + SEPARATOR + letter.getService() + SEPARATOR + letter.getId() + "." + extension;
     }
 
     public static String extractId(String fileName) {

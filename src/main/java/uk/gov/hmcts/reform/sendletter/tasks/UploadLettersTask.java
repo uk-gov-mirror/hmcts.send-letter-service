@@ -46,7 +46,7 @@ public class UploadLettersTask {
     }
 
     private void upload(Letter letter) {
-        String name = FileNameHelper.generateName(letter, "pdf", letter.getService(), letter.getId().toString());
+        String name = FileNameHelper.generateName(letter, "pdf");
         logger.debug("Uploading letter {}, messageId {}, filename {}",
             letter.getId(), letter.getMessageId(), name);
 
