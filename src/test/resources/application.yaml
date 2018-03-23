@@ -1,11 +1,6 @@
 spring:
   application:
     name: Send Letter Provider
-  datasource:
-      driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
-      url: jdbc:tc:postgresql:9.6://localhost/letter_tracking
-      username: alex
-      password:
   jackson:
     serialization:
       write_dates_as_timestamps: false

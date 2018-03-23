@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 
 import java.io.IOException;
@@ -30,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@Transactional
 public class SendLetterTest {
 
     @Autowired
