@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
-import uk.gov.hmcts.reform.sendletter.model.in.Letter;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 
 import java.io.IOException;
 
@@ -14,8 +14,8 @@ import static java.util.Collections.singletonList;
 
 public final class SampleData {
 
-    public static Letter letter() throws IOException {
-        return new Letter(
+    public static LetterRequest letter() throws IOException {
+        return new LetterRequest(
             singletonList(
                 new Document(
                     Resources.toString(getResource("template.html"), UTF_8),

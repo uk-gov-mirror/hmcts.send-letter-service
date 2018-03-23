@@ -4,9 +4,10 @@ import org.apache.http.util.Asserts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
-import uk.gov.hmcts.reform.sendletter.model.in.Letter;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
@@ -30,20 +31,15 @@ public class LetterService {
         this.letterRepository = letterRepository;
     }
 
-    public UUID send(Letter letter, String serviceName) {
+    public UUID send(LetterRequest letter, String serviceName) {
         Asserts.notEmpty(serviceName, "serviceName");
 
         final String messageId = generateChecksum(letter);
-        final UUID id = UUID.randomUUID();
 
-        log.info("Generated message: id = {} for letter with print queue id = {} and letter id = {} ",
-            messageId,
-            letter.type,
-            id);
+        log.info("Generated message: id = {} for letter with print queue id = {}", messageId, letter.type);
 
         byte[] pdf = pdfCreator.create(letter);
-        uk.gov.hmcts.reform.sendletter.entity.Letter dbLetter = new uk.gov.hmcts.reform.sendletter.entity.Letter(
-            messageId, serviceName, null, letter.type, pdf);
+        Letter dbLetter = new Letter(messageId, serviceName, null, letter.type, pdf);
 
         letterRepository.save(dbLetter);
         return dbLetter.getId();
@@ -55,10 +51,9 @@ public class LetterService {
     }
 
     public LetterStatus getStatus(UUID id, String serviceName) {
-        uk.gov.hmcts.reform.sendletter.entity.Letter letter =
-            letterRepository
-                .findByIdAndService(id, serviceName)
-                .orElseThrow(() -> new LetterNotFoundException(id));
+        Letter letter = letterRepository
+            .findByIdAndService(id, serviceName)
+            .orElseThrow(() -> new LetterNotFoundException(id));
 
         return new LetterStatus(
             id,

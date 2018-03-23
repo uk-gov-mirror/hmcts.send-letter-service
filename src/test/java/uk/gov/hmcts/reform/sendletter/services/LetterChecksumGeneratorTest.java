@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.sendletter.services;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
-import uk.gov.hmcts.reform.sendletter.model.in.Letter;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,7 +13,7 @@ public class LetterChecksumGeneratorTest {
     @Test
     public void should_return_same_md5_checksum_hex_for_same_letter_objects() {
 
-        Letter letter1 = new Letter(
+        LetterRequest letter1 = new LetterRequest(
             singletonList(new Document(
                 "cmc-template",
                 ImmutableMap.of(
@@ -28,7 +28,7 @@ public class LetterChecksumGeneratorTest {
             )
         );
 
-        Letter letter2 = new Letter(
+        LetterRequest letter2 = new LetterRequest(
             singletonList(new Document(
                 "cmc-template",
                 ImmutableMap.of(
@@ -50,7 +50,7 @@ public class LetterChecksumGeneratorTest {
     @Test
     public void should_return_different_md5_checksum_hex_for_different_letter_objects() {
 
-        Letter letter1 = new Letter(
+        LetterRequest letter1 = new LetterRequest(
             singletonList(new Document(
                 "cmc-template",
                 ImmutableMap.of(
@@ -64,7 +64,7 @@ public class LetterChecksumGeneratorTest {
             )
         );
 
-        Letter letter2 = new Letter(
+        LetterRequest letter2 = new LetterRequest(
             singletonList(new Document(
                 "cmc-template",
                 ImmutableMap.of(

@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.sendletter.exception.ConnectionException;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
-import uk.gov.hmcts.reform.sendletter.model.in.Letter;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.services.AuthService;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
 
@@ -51,21 +51,21 @@ public class SendLetterControllerTest {
         UUID letterId = UUID.randomUUID();
 
         given(authService.authenticate("auth-header-value")).willReturn("service-name");
-        given(letterService.send(any(Letter.class), anyString())).willReturn(letterId);
+        given(letterService.send(any(LetterRequest.class), anyString())).willReturn(letterId);
 
         sendLetter(readResource("letter.json"))
             .andExpect(status().isOk())
             .andExpect(content().json("{\"letter_id\":" + letterId + "}"));
 
         verify(authService).authenticate("auth-header-value");
-        verify(letterService).send(any(Letter.class), eq("service-name"));
+        verify(letterService).send(any(LetterRequest.class), eq("service-name"));
         verifyNoMoreInteractions(authService, letterService);
     }
 
     @Test
     public void should_return_connection_exception_when_service_fails_due_to_thread_interruption() throws Exception {
         given(authService.authenticate("auth-header-value")).willReturn("service-name");
-        given(letterService.send(any(Letter.class), anyString()))
+        given(letterService.send(any(LetterRequest.class), anyString()))
             .willThrow(
                 new ConnectionException("Unable to connect to Azure service bus",
                     new InterruptedException())
@@ -81,14 +81,14 @@ public class SendLetterControllerTest {
 
 
         verify(authService).authenticate("auth-header-value");
-        verify(letterService).send(any(Letter.class), anyString());
+        verify(letterService).send(any(LetterRequest.class), anyString());
         verifyNoMoreInteractions(authService, letterService);
     }
 
     @Test
     public void should_return_400_bad_request_when_service_fails_to_serialize_letter() throws Exception {
         given(authService.authenticate("auth-header-value")).willReturn("service-name");
-        willThrow(JsonProcessingException.class).given(letterService).send(any(Letter.class), anyString());
+        willThrow(JsonProcessingException.class).given(letterService).send(any(LetterRequest.class), anyString());
 
         sendLetter(readResource("letter.json"))
             .andExpect(status().isBadRequest())
@@ -105,7 +105,7 @@ public class SendLetterControllerTest {
     public void should_return_400_client_error_when_invalid_letter_is_sent() throws Exception {
         sendLetter("").andExpect(status().isBadRequest());
 
-        verify(letterService, never()).send(any(Letter.class), anyString());
+        verify(letterService, never()).send(any(LetterRequest.class), anyString());
     }
 
     @Test
@@ -115,7 +115,7 @@ public class SendLetterControllerTest {
             .andExpect(content()
                 .json("{\"errors\":[{\"field_name\":\"documents\",\"message\":\"size must be between 1 and 10\"}]}"));
 
-        verify(letterService, never()).send(any(Letter.class), anyString());
+        verify(letterService, never()).send(any(LetterRequest.class), anyString());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class SendLetterControllerTest {
             .andExpect(content()
                 .json("{\"errors\":[{\"field_name\":\"type\",\"message\":\"may not be empty\"}]}"));
 
-        verify(letterService, never()).send(any(Letter.class), anyString());
+        verify(letterService, never()).send(any(LetterRequest.class), anyString());
     }
 
     @Test
@@ -135,7 +135,7 @@ public class SendLetterControllerTest {
             .andExpect(content()
                 .json("{\"errors\":[{\"field_name\":\"documents[0].template\",\"message\":\"may not be empty\"}]}"));
 
-        verify(letterService, never()).send(any(Letter.class), anyString());
+        verify(letterService, never()).send(any(LetterRequest.class), anyString());
     }
 
     @Test
@@ -146,7 +146,7 @@ public class SendLetterControllerTest {
             .andExpect(content()
                 .json("{\"errors\":[{\"field_name\":\"documents[0].values\",\"message\":\"may not be empty\"}]}"));
 
-        verify(letterService, never()).send(any(Letter.class), anyString());
+        verify(letterService, never()).send(any(LetterRequest.class), anyString());
     }
 
     @Test
@@ -157,7 +157,7 @@ public class SendLetterControllerTest {
             .andExpect(content()
                 .json("{\"errors\":[{\"field_name\":\"documents\",\"message\":\"size must be between 1 and 10\"}]}"));
 
-        verify(letterService, never()).send(any(Letter.class), anyString());
+        verify(letterService, never()).send(any(LetterRequest.class), anyString());
     }
 
     @Test

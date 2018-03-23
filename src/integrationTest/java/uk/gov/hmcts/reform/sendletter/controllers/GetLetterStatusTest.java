@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.authorisation.validators.AuthTokenValidator;
 import uk.gov.hmcts.reform.sendletter.data.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.data.model.DbLetter;
-import uk.gov.hmcts.reform.sendletter.model.in.Letter;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.util.MessageIdProvider;
 
@@ -61,7 +61,7 @@ public class GetLetterStatusTest {
 
         // and
         UUID letterId = UUID.randomUUID();
-        Letter letter = new Letter(Collections.emptyList(), "some-type", Collections.emptyMap());
+        LetterRequest letter = new LetterRequest(Collections.emptyList(), "some-type", Collections.emptyMap());
         DbLetter dbLetter = new DbLetter(letterId, "some-service", letter);
         ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
         String messageId = MessageIdProvider.randomMessageId();

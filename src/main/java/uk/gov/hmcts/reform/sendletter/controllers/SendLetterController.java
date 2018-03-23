@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
-import uk.gov.hmcts.reform.sendletter.model.in.Letter;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.model.out.SendLetterResponse;
 import uk.gov.hmcts.reform.sendletter.services.AuthService;
@@ -55,7 +55,7 @@ public class SendLetterController {
     public ResponseEntity<SendLetterResponse> sendLetter(
         @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
         @ApiParam(value = "Letter consisting of documents and type", required = true)
-        @Valid @RequestBody Letter letter
+        @Valid @RequestBody LetterRequest letter
     ) throws JsonProcessingException {
 
         String serviceName = authService.authenticate(serviceAuthHeader);

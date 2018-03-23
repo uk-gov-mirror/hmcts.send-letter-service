@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.data.model;
 
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
-import uk.gov.hmcts.reform.sendletter.model.in.Letter;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -29,7 +29,7 @@ public class DbLetter {
         this.additionalData = additionalData;
     }
 
-    public DbLetter(UUID id, String service, Letter letter) {
+    public DbLetter(UUID id, String service, LetterRequest letter) {
         this(id, letter.documents, letter.type, service, letter.additionalData);
     }
 }

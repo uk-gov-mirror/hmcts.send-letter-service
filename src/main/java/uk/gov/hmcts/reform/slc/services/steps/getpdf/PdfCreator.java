@@ -4,7 +4,7 @@ import org.apache.http.util.Asserts;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
-import uk.gov.hmcts.reform.sendletter.model.in.Letter;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public class PdfCreator {
         this.duplexPreparator = duplexPreparator;
     }
 
-    public byte[] create(Letter letter) {
+    public byte[] create(LetterRequest letter) {
         Asserts.notNull(letter, "letter");
 
         List<byte[]> docs =
