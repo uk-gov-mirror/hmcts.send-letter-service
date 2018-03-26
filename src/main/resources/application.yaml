@@ -13,6 +13,9 @@ idam:
   s2s-auth:
     url: ${S2S_URL}
 
+ftp:
+  smoke-test-target-folder: ${FTP_SMOKE_TEST_TARGET_FOLDER:SMOKE_TEST}
+
 spring:
   application:
     name: Send Letter Provider

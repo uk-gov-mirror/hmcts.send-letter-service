@@ -17,11 +17,14 @@ import uk.gov.hmcts.reform.slc.services.steps.zip.Zipper;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Objects;
 
 import static java.time.LocalDateTime.now;
 
 public class UploadLettersTask {
     private static final Logger logger = LoggerFactory.getLogger(UploadLettersTask.class);
+
+    public static String SMOKE_TEST_LETTER_TYPE = "smoke_test";
 
     private final LetterRepository repo;
     private final Zipper zipper;
@@ -65,6 +68,10 @@ public class UploadLettersTask {
             zippedDoc.filename
         );
 
-        ftp.upload(zippedDoc);
+        ftp.upload(zippedDoc, isSmokeTest(letter));
+    }
+
+    private boolean isSmokeTest(Letter letter) {
+        return Objects.equals(letter.getType(), SMOKE_TEST_LETTER_TYPE);
     }
 }

@@ -25,7 +25,7 @@ public class FtpUploadTest {
         PdfDoc doc = new PdfDoc("hello.txt", "world".getBytes());
         try (LocalSftpServer server = LocalSftpServer.create()) {
             FtpClient client = FtpHelper.getClient(server.port);
-            client.upload(doc);
+            client.upload(doc, false);
             File[] files = server.pdfFolder.listFiles();
             assertThat(files.length).isEqualTo(1);
             String content = new String(Files.toByteArray(files[0]));
