@@ -45,11 +45,6 @@ public class LetterService {
         return dbLetter.getId();
     }
 
-    public void checkPrintState() {
-        // TODO: does previous implementation
-        // do anything with this request?
-    }
-
     public LetterStatus getStatus(UUID id, String serviceName) {
         Letter letter = letterRepository
             .findByIdAndService(id, serviceName)
