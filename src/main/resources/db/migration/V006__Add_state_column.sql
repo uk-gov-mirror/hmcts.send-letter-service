@@ -1,2 +1,0 @@
-ALTER TABLE letters
-ADD COLUMN state VARCHAR(256);
