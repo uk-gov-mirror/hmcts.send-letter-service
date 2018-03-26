@@ -108,6 +108,10 @@ public class Letter {
         return printedAt;
     }
 
+    public void setPrintedAt(Timestamp value) {
+        this.printedAt = value;
+    }
+
     public boolean isFailed() {
         return isFailed;
     }

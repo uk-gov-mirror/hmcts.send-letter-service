@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sendletter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
@@ -25,6 +26,20 @@ public final class SampleData {
             "someType",
             Maps.newHashMap()
         );
+    }
+
+    public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(String service) {
+        try {
+            return new uk.gov.hmcts.reform.sendletter.entity.Letter(
+                "messageId",
+                service,
+                new ObjectMapper().readTree("{}"),
+                "a type",
+                new byte[1]
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private SampleData() {

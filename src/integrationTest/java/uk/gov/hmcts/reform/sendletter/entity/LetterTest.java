@@ -12,7 +12,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.data.model.DbLetter;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -32,27 +31,9 @@ public class LetterTest {
     @Autowired
     private DataSource dataSource;
 
-    public static Letter getTestLetter(String service) {
-        try {
-            return new Letter(
-                "messageId",
-                service,
-                new ObjectMapper().readTree("{}"),
-                "a type",
-                new byte[1]
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Letter getTestLetter() {
-        return getTestLetter("a_service");
-    }
-
     @Test
     public void should_successfully_save_report_in_db() {
-        repository.save(getTestLetter());
+        repository.save(SampleData.letterEntity("a.service"));
         List<Letter> letters = Lists.newArrayList(repository.findAll());
         assertThat(letters.size()).isEqualTo(1);
         assertThat(letters.get(0).getState()).isEqualTo(LetterState.Created);
@@ -84,8 +65,8 @@ public class LetterTest {
 
     @Test
     public void finds_letters_by_id_and_service() {
-        repository.save(getTestLetter());
-        Letter second = getTestLetter("different");
+        repository.save(SampleData.letterEntity("a.service"));
+        Letter second = SampleData.letterEntity("different");
         repository.save(second);
 
         Letter found = repository.findByIdAndService(second.getId(), second.getService()).get();
