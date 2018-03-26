@@ -34,6 +34,15 @@ public class AppInsights extends AbstractAppInsights {
         }
     }
 
+    public void trackFtpUpload(java.time.Duration duration, boolean success) {
+        telemetry.trackDependency(
+            AppDependency.FTP_CLIENT,
+            AppDependencyCommand.FTP_FILE_UPLOADED,
+            new Duration(duration.toMillis()),
+            success
+        );
+    }
+
     public void trackException(Exception exception) {
         telemetry.trackException(exception);
     }

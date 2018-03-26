@@ -5,9 +5,9 @@ import com.google.common.io.Resources;
 import net.schmizz.sshj.SSHClient;
 import org.mockito.Mockito;
 import uk.gov.hmcts.reform.sendletter.LocalSftpServer;
+import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
+import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.slc.config.FtpConfigProperties;
-import uk.gov.hmcts.reform.slc.logging.AppInsights;
-import uk.gov.hmcts.reform.slc.services.steps.sftpupload.FtpClient;
 
 import java.io.IOException;
 import java.util.function.Supplier;

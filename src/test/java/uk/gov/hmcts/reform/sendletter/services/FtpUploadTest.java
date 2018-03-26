@@ -5,7 +5,6 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.sendletter.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfDoc;
-import uk.gov.hmcts.reform.slc.services.steps.sftpupload.FtpClient;
 
 import java.io.File;
 
