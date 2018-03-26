@@ -47,7 +47,7 @@ public class LetterService {
 
     public LetterStatus getStatus(UUID id, String serviceName) {
         Letter letter = letterRepository
-            .findOptionalByIdAndService(id, serviceName)
+            .findByIdAndService(id, serviceName)
             .orElseThrow(() -> new LetterNotFoundException(id));
 
         return new LetterStatus(

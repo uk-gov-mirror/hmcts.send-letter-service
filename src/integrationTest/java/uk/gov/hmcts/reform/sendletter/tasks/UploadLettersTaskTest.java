@@ -50,7 +50,7 @@ public class UploadLettersTaskTest {
             // Ensure the letter is marked as uploaded in the database.
             // Clear the JPA cache to force a read.
             entityManager.clear();
-            Letter l = repository.findOptionalById(id).get();
+            Letter l = repository.findById(id).get();
             assertThat(l.getState()).isEqualTo(LetterState.Uploaded);
             assertThat(l.getSentToPrintAt()).isNotNull();
             assertThat(l.getPrintedAt()).isNull();
