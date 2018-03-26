@@ -12,9 +12,9 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
     // This lockmode locks the returned rows
     // for both reading and writing.
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Stream<Letter> findByState(LetterState state);
+    Stream<Letter> findByStatus(LetterStatus status);
 
-    Optional<Letter> findByMessageIdAndStateOrderByCreatedAtDesc(String messageId, LetterState state);
+    Optional<Letter> findByMessageIdAndStatusOrderByCreatedAtDesc(String messageId, LetterStatus status);
 
     Optional<Letter> findById(UUID id);
 

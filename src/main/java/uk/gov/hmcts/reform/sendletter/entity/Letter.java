@@ -42,7 +42,7 @@ public class Letter {
     private boolean isFailed;
     private String type;
     @Enumerated(EnumType.STRING)
-    private LetterState state = LetterState.Created;
+    private LetterStatus status = LetterStatus.Created;
     private byte[] pdf;
 
     // For use by hibernate.
@@ -80,12 +80,12 @@ public class Letter {
         return type;
     }
 
-    public LetterState getState() {
-        return state;
+    public LetterStatus getStatus() {
+        return status;
     }
 
-    public void setState(LetterState state) {
-        this.state = state;
+    public void setStatus(LetterStatus status) {
+        this.status = status;
     }
 
     public byte[] getPdf() {

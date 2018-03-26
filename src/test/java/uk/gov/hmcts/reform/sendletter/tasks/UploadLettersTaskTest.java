@@ -22,7 +22,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.sendletter.entity.LetterState.Created;
+import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
 import static uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask.SMOKE_TEST_LETTER_TYPE;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -66,7 +66,7 @@ public class UploadLettersTaskTest {
 
         task.run();
 
-        verify(repo, never()).findByState(Created);
+        verify(repo, never()).findByStatus(Created);
     }
 
     private Letter letterOfType(String type) {
@@ -74,7 +74,7 @@ public class UploadLettersTaskTest {
     }
 
     private void givenDbContains(Letter letter) {
-        given(repo.findByState(Created))
+        given(repo.findByStatus(Created))
             .willReturn(Stream.of(letter));
     }
 

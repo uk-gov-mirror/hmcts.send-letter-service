@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.entity.LetterState;
+import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.zip.ZipFileNameHelper;
@@ -54,13 +54,13 @@ public class UploadLettersTask {
             return;
         }
 
-        repo.findByState(LetterState.Created).forEach(letter -> {
+        repo.findByStatus(LetterStatus.Created).forEach(letter -> {
             try {
                 upload(letter);
                 logger.debug("Successfully uploaded letter {}", letter.getId());
 
                 // Upload succeeded, mark the letter as Uploaded.
-                letter.setState(LetterState.Uploaded);
+                letter.setStatus(LetterStatus.Uploaded);
                 letter.setSentToPrintAt(Timestamp.from(Instant.now()));
 
                 // remove pdf content, as it's no longer needed

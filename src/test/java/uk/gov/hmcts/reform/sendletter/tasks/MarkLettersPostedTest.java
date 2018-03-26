@@ -8,7 +8,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.entity.LetterState;
+import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.slc.model.LetterPrintStatus;
@@ -62,10 +62,10 @@ public class MarkLettersPostedTest {
                 )
             );
         Letter letter = SampleData.letterEntity("a.service");
-        letter.setState(LetterState.Uploaded);
+        letter.setStatus(LetterStatus.Uploaded);
         given(repo.findById(known)).willReturn(Optional.of(letter));
         given(repo.findById(unknown)).willReturn(Optional.empty());
         task.run(LocalTime.MIDNIGHT);
-        assertThat(letter.getState()).isEqualTo(LetterState.Posted);
+        assertThat(letter.getStatus()).isEqualTo(LetterStatus.Posted);
     }
 }

@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.sendletter.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.entity.LetterState;
+import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
@@ -71,7 +71,7 @@ public class UploadLettersTaskTest {
             // Clear the JPA cache to force a read.
             entityManager.clear();
             Letter l = repository.findById(id).get();
-            assertThat(l.getState()).isEqualTo(LetterState.Uploaded);
+            assertThat(l.getStatus()).isEqualTo(LetterStatus.Uploaded);
             assertThat(l.getSentToPrintAt()).isNotNull();
             assertThat(l.getPrintedAt()).isNull();
 

@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.entity.LetterState;
+import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.slc.model.LetterPrintStatus;
@@ -59,13 +59,13 @@ public class MarkLettersPostedTask {
         Optional<Letter> optional = repo.findById(letterPrintStatus.id);
         if (optional.isPresent()) {
             Letter letter = optional.get();
-            if (letter.getState() == LetterState.Uploaded) {
+            if (letter.getStatus() == LetterStatus.Uploaded) {
                 letter.setPrintedAt(Timestamp.from(letterPrintStatus.printedAt.toInstant()));
-                letter.setState(LetterState.Posted);
+                letter.setStatus(LetterStatus.Posted);
                 repo.save(letter);
                 logger.info("Marking letter {} as Posted", letter.getId());
             } else {
-                logger.info("Skipping processing of letter {} in state {}", letter.getId(), letter.getState());
+                logger.info("Skipping processing of letter {} in state {}", letter.getId(), letter.getStatus());
             }
         } else {
             logger.error("Unknown letter {}", letterPrintStatus.id);

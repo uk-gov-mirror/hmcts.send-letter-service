@@ -36,7 +36,7 @@ public class LetterTest {
         repository.save(SampleData.letterEntity("a.service"));
         List<Letter> letters = Lists.newArrayList(repository.findAll());
         assertThat(letters.size()).isEqualTo(1);
-        assertThat(letters.get(0).getState()).isEqualTo(LetterState.Created);
+        assertThat(letters.get(0).getStatus()).isEqualTo(LetterStatus.Created);
     }
 
     @Test

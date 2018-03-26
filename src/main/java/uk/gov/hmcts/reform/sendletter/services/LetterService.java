@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.entity.LetterState;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
@@ -21,6 +20,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
 import static uk.gov.hmcts.reform.sendletter.services.LetterChecksumGenerator.generateChecksum;
 
 @Service
@@ -45,9 +45,9 @@ public class LetterService {
 
         log.info("Generated message: id = {}", messageId);
 
-        Optional<Letter> duplicateLetter = letterRepository.findByMessageIdAndStateOrderByCreatedAtDesc(
+        Optional<Letter> duplicateLetter = letterRepository.findByMessageIdAndStatusOrderByCreatedAtDesc(
             messageId,
-            LetterState.Created
+            Created
         );
 
         return duplicateLetter

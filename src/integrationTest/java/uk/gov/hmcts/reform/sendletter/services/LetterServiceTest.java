@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.config.SpyOnJpaConfig;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.entity.LetterState;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 
 import java.io.ByteArrayInputStream;
@@ -31,6 +30,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
+import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Uploaded;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -76,7 +77,7 @@ public class LetterServiceTest {
         Letter letter = letterRepository.findOne(id1);
 
         // and
-        assertThat(letter.getState()).isEqualByComparingTo(LetterState.Created);
+        assertThat(letter.getStatus()).isEqualByComparingTo(Created);
 
         // when
         UUID id2 = service.send(sampleRequest, SERVICE_NAME);
@@ -96,10 +97,10 @@ public class LetterServiceTest {
         Letter letter = letterRepository.findOne(id1);
 
         // and
-        assertThat(letter.getState()).isEqualByComparingTo(LetterState.Created);
+        assertThat(letter.getStatus()).isEqualByComparingTo(Created);
 
         // when
-        letter.setState(LetterState.Uploaded);
+        letter.setStatus(Uploaded);
         letterRepository.saveAndFlush(letter);
         UUID id2 = service.send(sampleRequest, SERVICE_NAME);
 

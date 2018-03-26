@@ -10,17 +10,17 @@ import uk.gov.hmcts.reform.sendletter.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.entity.LetterState;
+import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.sendletter.util.XeroxReportWriter;
 import uk.gov.hmcts.reform.slc.services.ReportParser;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.stream.Stream;
-import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -46,7 +46,7 @@ public class MarkLettersPostedTaskTest {
     public void marks_uploaded_letters_as_posted() throws Exception {
         // Create a letter in the Uploaded state.
         Letter letter = SampleData.letterEntity("testService");
-        letter.setState(LetterState.Uploaded);
+        letter.setStatus(LetterStatus.Uploaded);
         repository.saveAndFlush(letter);
 
         when(checker.isFtpAvailable(any(LocalTime.class))).thenReturn(true);
@@ -62,7 +62,7 @@ public class MarkLettersPostedTaskTest {
         // Check that the letter has moved to the Posted state.
         entityManager.flush();
         letter = repository.findById(letter.getId()).get();
-        assertThat(letter.getState()).isEqualTo(LetterState.Posted);
+        assertThat(letter.getStatus()).isEqualTo(LetterStatus.Posted);
         // Check that printed at date has been set.
         assertThat(letter.getPrintedAt()).isNotNull();
     }

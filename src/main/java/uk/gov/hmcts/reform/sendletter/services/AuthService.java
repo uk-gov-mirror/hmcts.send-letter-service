@@ -42,7 +42,7 @@ public class AuthService {
     private void assertAccessorCondition(String serviceName, String accessType) {
         if (!Objects.equals(serviceName, statusAccessorService)) {
             throw new UnauthorizedException(
-                "Service " + serviceName + " does not have permissions to " + accessType + " letters state"
+                "Service " + serviceName + " does not have permissions to " + accessType + " letters status"
             );
         }
     }
