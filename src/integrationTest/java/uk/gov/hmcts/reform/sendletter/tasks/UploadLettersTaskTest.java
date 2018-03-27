@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterState;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
-import uk.gov.hmcts.reform.slc.services.steps.zip.Zipper;
+import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
 import java.io.File;
 import java.util.UUID;

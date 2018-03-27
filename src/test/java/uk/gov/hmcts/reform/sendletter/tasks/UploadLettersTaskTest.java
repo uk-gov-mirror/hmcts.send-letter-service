@@ -8,8 +8,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
-import uk.gov.hmcts.reform.slc.services.steps.zip.ZippedDoc;
-import uk.gov.hmcts.reform.slc.services.steps.zip.Zipper;
+import uk.gov.hmcts.reform.sendletter.services.zip.ZippedDoc;
+import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
 import java.util.stream.Stream;
 
