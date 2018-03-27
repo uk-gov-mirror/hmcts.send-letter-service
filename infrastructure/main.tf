@@ -36,15 +36,15 @@ resource "vault_generic_secret" "servicebus-listen-conn-string" {
 }
 
 module "db" {
-  source              = "git@github.com:contino/moj-module-postgres.git?ref=feature/specify-db-name"
-  product             = "${var.product}"
+  source              = "git@github.com:contino/moj-module-postgres.git?ref=master"
+  product             = "${var.product}-db"
   location            = "${var.location_db}"
   env                 = "${var.env}"
-  postgresql_database = "letter_tracking"
+  postgresql_database = "postgres"
   postgresql_user     = "letter_tracking"
 }
 
-module "send-letter-producer-service" {
+module "send-letter-service" {
   source              = "git@github.com:contino/moj-module-webapp?ref=master"
   product             = "${var.product}-${var.microservice}"
   location            = "${var.location_app}"

@@ -8,8 +8,8 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: docker.artifactory.reform.hmcts.net/reform/send-letter-producer-service
-    container_name: send-letter-producer-service
+    image: docker.artifactory.reform.hmcts.net/reform/send-letter-service
+    container_name: send-letter-service
     environment:
       - APPLICATION_INSIGHTS_IKEY
       - FLYWAY_ENABLED=false
@@ -29,8 +29,8 @@ services:
   database:
     build:
       context: docker/database
-    image: docker.artifactory.reform.hmcts.net/reform/send-letter-producer-database
-    container_name: send-letter-producer-database
+    image: docker.artifactory.reform.hmcts.net/reform/send-letter-database
+    container_name: send-letter-database
     environment:
       - LETTER_TRACKING_DB_PASSWORD
     ports:

@@ -1,19 +1,19 @@
 version: '2.1'
 
 services:
-  send-letter-producer-service:
+  send-letter-service:
     extends:
       file: docker-compose-core.yml
       service: service
     depends_on:
-      send-letter-producer-database:
+      send-letter-database:
         condition: service_healthy
-  send-letter-producer-database:
+  send-letter-database:
     extends:
       file: docker-compose-core.yml
       service: database
     volumes:
-      - send-letter-producer-database-data:/var/lib/postgresql/data
+      - send-letter-database-data:/var/lib/postgresql/data
 
 volumes:
-  send-letter-producer-database-data:
+  send-letter-database-data:

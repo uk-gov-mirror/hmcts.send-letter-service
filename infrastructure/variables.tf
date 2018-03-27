@@ -1,11 +1,11 @@
 variable "product" {
   type    = "string"
-  default = "send-letter"
+  default = "send-letter-2"
 }
 
 variable "microservice" {
   type = "string"
-  default = "producer"
+  default = "service"
 }
 
 variable "location_app" {

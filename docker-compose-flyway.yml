@@ -1,33 +1,33 @@
 version: '2.1'
 
 services:
-  send-letter-producer-service:
+  send-letter-service:
     extends:
       file: docker-compose-core.yml
       service: service
     environment:
       - FLYWAY_ENABLED=true
     depends_on:
-      - send-letter-producer-flyway
-  send-letter-producer-database:
+      - send-letter-flyway
+  send-letter-database:
     extends:
       file: docker-compose-core.yml
       service: database
     volumes:
-      - send-letter-producer-database-data:/var/lib/postgresql/data
-  send-letter-producer-flyway:
+      - send-letter-database-data:/var/lib/postgresql/data
+  send-letter-flyway:
     build:
       context: docker/flyway
     image: docker.artifactory.reform.hmcts.net/reform/flyway
-    container_name: send-letter-producer-flyway
+    container_name: send-letter-flyway
     environment:
       - LETTER_TRACKING_DB_PASSWORD
     volumes:
       - ./src/main/resources/db/migration:/flyway/sql
     depends_on:
-      send-letter-producer-database:
+      send-letter-database:
         condition: service_healthy
-    command: send-letter-producer-database 5432 letterproducer $LETTER_TRACKING_DB_PASSWORD letter_tracking public
+    command: send-letter-database 5432 letterservice $LETTER_TRACKING_DB_PASSWORD letter_tracking public
 
 volumes:
-  send-letter-producer-database-data:
+  send-letter-database-data:
