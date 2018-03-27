@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sendletter.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.junit.Test;
@@ -23,9 +22,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -83,22 +80,6 @@ public class SendLetterControllerTest {
         verify(authService).authenticate("auth-header-value");
         verify(letterService).send(any(LetterRequest.class), anyString());
         verifyNoMoreInteractions(authService, letterService);
-    }
-
-    @Test
-    public void should_return_400_bad_request_when_service_fails_to_serialize_letter() throws Exception {
-        given(authService.authenticate("auth-header-value")).willReturn("service-name");
-        willThrow(JsonProcessingException.class).given(letterService).send(any(LetterRequest.class), anyString());
-
-        sendLetter(readResource("letter.json"))
-            .andExpect(status().isBadRequest())
-            .andExpect(content().string(
-                containsString("Exception occurred while parsing letter contents")));
-
-
-        verify(authService).authenticate("auth-header-value");
-        verifyNoMoreInteractions(authService);
-
     }
 
     @Test

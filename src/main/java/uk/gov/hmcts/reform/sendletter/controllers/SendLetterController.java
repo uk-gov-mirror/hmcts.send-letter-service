@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sendletter.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -56,8 +55,7 @@ public class SendLetterController {
         @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
         @ApiParam(value = "Letter consisting of documents and type", required = true)
         @Valid @RequestBody LetterRequest letter
-    ) throws JsonProcessingException {
-
+    ) {
         String serviceName = authService.authenticate(serviceAuthHeader);
         UUID letterId = letterService.send(letter, serviceName);
 

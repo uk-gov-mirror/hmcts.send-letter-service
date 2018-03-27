@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +30,14 @@ public class UploadLettersTaskTest {
     @Autowired
     LetterRepository repository;
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
     @Autowired
     private EntityManager entityManager;
 
     @Test
     public void uploads_file_to_sftp_and_sets_letter_status_to_uploaded() throws Exception {
-        LetterService s = new LetterService(repository);
+        LetterService s = new LetterService(repository, mapper);
         UUID id = s.send(SampleData.letter(), "service");
 
         // Invoke the upload job.
