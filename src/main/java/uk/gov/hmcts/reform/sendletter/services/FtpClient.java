@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -84,7 +85,7 @@ public class FtpClient {
 
                 return sftp.ls(configProperties.getReportsFolder())
                     .stream()
-                    .filter(RemoteResourceInfo::isRegularFile)
+                    .filter(this::isReportFile)
                     .map(file -> {
                         InMemoryDownloadedFile inMemoryFile = new InMemoryDownloadedFile();
                         try {
@@ -151,5 +152,10 @@ public class FtpClient {
                 logger.warn("Error closing ssh connection.");
             }
         }
+    }
+
+    private boolean isReportFile(RemoteResourceInfo resourceInfo) {
+        return resourceInfo.isRegularFile()
+            && resourceInfo.getName().toLowerCase(Locale.getDefault()).endsWith(".csv");
     }
 }

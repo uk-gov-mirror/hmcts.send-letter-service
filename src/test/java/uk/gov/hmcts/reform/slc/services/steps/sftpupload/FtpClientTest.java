@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.slc.services.steps.sftpupload;
 
 import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.sftp.RemoteResourceInfo;
 import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.sftp.SFTPFileTransfer;
 import net.schmizz.sshj.xfer.LocalSourceFile;
@@ -14,9 +15,15 @@ import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.slc.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfDoc;
 
+import java.util.List;
+
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.contains;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,6 +47,23 @@ public class FtpClientTest {
             ftpProps,
             insights
         );
+    }
+
+    @Test
+    public void download_should_not_include_non_csv_files() throws Exception {
+        // given
+        RemoteResourceInfo nonCsvFile = mock(RemoteResourceInfo.class);
+        given(nonCsvFile.isRegularFile()).willReturn(true);
+        given(nonCsvFile.getName()).willReturn("test-report.pdf");
+
+        given(sftpClient.ls(anyString()))
+            .willReturn(singletonList(nonCsvFile));
+
+        // when
+        List<Report> reports = client.downloadReports();
+
+        // then
+        assertThat(reports).isEmpty();
     }
 
     @Test
