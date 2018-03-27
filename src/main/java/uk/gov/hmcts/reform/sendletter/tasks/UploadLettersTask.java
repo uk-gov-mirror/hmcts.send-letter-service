@@ -47,6 +47,10 @@ public class UploadLettersTask {
                 // Upload succeeded, mark the letter as Uploaded.
                 letter.setState(LetterState.Uploaded);
                 letter.setSentToPrintAt(Timestamp.from(Instant.now()));
+
+                // remove pdf content, as it's no longer needed
+                letter.setPdf(null);
+
                 repo.saveAndFlush(letter);
 
                 logger.debug("Marked letter {} as Uploaded", letter.getId());

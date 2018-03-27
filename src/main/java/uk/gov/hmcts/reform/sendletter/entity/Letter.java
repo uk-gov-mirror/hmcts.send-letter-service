@@ -92,6 +92,10 @@ public class Letter {
         return pdf;
     }
 
+    public void setPdf(byte[] pdf) {
+        this.pdf = pdf;
+    }
+
     public Timestamp getCreatedAt() {
         return createdAt;
     }

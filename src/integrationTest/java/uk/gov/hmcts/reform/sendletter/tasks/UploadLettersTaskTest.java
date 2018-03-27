@@ -57,6 +57,9 @@ public class UploadLettersTaskTest {
             assertThat(l.getState()).isEqualTo(LetterState.Uploaded);
             assertThat(l.getSentToPrintAt()).isNotNull();
             assertThat(l.getPrintedAt()).isNull();
+
+            // pdf content should be removed now
+            assertThat(l.getPdf()).isNull();
         }
     }
 }
