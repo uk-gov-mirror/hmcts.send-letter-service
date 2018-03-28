@@ -10,8 +10,12 @@ public final class FileNameHelper {
     private static final String SEPARATOR = "_";
 
     public static String generateName(Letter letter, String extension) {
-        String serviceName = letter.getService().replace(SEPARATOR, "");
-        return letter.getType() + SEPARATOR + serviceName + SEPARATOR + letter.getId() + "." + extension;
+        return generateName(letter.getType(), letter.getService(), letter.getId(), extension);
+    }
+
+    public static String generateName(String type, String serviceName, UUID id, String extension) {
+        String strippedService = serviceName.replace(SEPARATOR, "");
+        return type + SEPARATOR + strippedService + SEPARATOR + id + "." + extension;
     }
 
     public static UUID extractId(String fileName) {

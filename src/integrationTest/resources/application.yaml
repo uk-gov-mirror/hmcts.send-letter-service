@@ -1,0 +1,40 @@
+status-update-service-name: send-letter
+
+spring:
+  application:
+    name: Send Letter Service
+  datasource:
+      url: jdbc:tc:postgresql:9.6://localhost/letter_tracking
+      driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
+      properties:
+        charSet: UTF-8
+      maxWaitForConnection: 1
+      minSize: 8
+      maxSize: 32
+      evictionInterval: 10
+      minIdleTime: 1 minute
+      checkConnectionWhileIdle: true
+      checkConnectionOnReturn: true
+      removeAbandoned: true
+      removeAbandonedTimeout: 60
+      abandonWhenPercentageFull: 0
+      testOnBorrow: true
+      validationQuery: SELECT 1
+  jackson:
+    serialization:
+      write_dates_as_timestamps: false
+
+ftp:
+  hostname: localhost
+  port: 46043
+  target-folder: pdfs
+  smoke-test-target-folder: ${FTP_SMOKE_TEST_TARGET_FOLDER:SMOKE_TEST}
+  reports-folder: reports
+  reports-cron: ${FTP_REPORTS_CRON:0 30 0 * * *}
+  fingerprint: SHA1:2Fo8c/96zv32xc8GZWbOGYOlRak=
+  username: irrelevant
+  privateKey: ${FTP_PRIVATE_KEY}
+  publicKey: ${FTP_PUBLIC_KEY}
+  downtime:
+    from: ${FTP_DOWNTIME_FROM:17:00}
+    to: ${FTP_DOWNTIME_TO:18:00}

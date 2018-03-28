@@ -64,5 +64,4 @@ public class ReportParser {
             return null;
         }
     }
-
 }

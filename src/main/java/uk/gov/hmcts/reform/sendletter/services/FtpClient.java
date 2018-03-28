@@ -40,6 +40,7 @@ public class FtpClient {
     private final Supplier<SSHClient> sshClientSupplier;
 
     // region constructor
+    @Autowired
     public FtpClient(
         Supplier<SSHClient> sshClientSupplier,
         FtpConfigProperties configProperties,

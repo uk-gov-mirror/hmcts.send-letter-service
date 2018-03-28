@@ -43,3 +43,18 @@ spring:
   jackson:
     serialization:
       write_dates_as_timestamps: false
+
+ftp:
+  hostname: ${FTP_HOSTNAME}
+  port: ${FTP_PORT}
+  target-folder: ${FTP_TARGET_FOLDER}
+  smoke-test-target-folder: ${FTP_SMOKE_TEST_TARGET_FOLDER:SMOKE_TEST}
+  reports-folder: ${FTP_REPORTS_FOLDER}
+  reports-cron: ${FTP_REPORTS_CRON:0 30 0 * * *}
+  fingerprint: ${FTP_FINGERPRINT}
+  username: ${FTP_USER}
+  privateKey: ${FTP_PRIVATE_KEY}
+  publicKey: ${FTP_PUBLIC_KEY}
+  downtime:
+    from: ${FTP_DOWNTIME_FROM:17:00}
+    to: ${FTP_DOWNTIME_TO:18:00}

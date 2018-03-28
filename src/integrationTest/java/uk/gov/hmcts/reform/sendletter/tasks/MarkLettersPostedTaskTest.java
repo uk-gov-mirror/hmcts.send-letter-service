@@ -14,14 +14,12 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterState;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
+import uk.gov.hmcts.reform.sendletter.util.XeroxReportWriter;
 import uk.gov.hmcts.reform.slc.services.ReportParser;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,29 +55,15 @@ public class MarkLettersPostedTaskTest {
             MarkLettersPostedTask task = new MarkLettersPostedTask(repository, client, checker, parser);
 
             // Prepare the response CSV from Xerox and run the task.
-            writeXeroxCsvForLetter(letter, server.reportFolder);
-            task.run();
+            XeroxReportWriter.writeReport(Stream.of(letter.getId()), server.reportFolder);
+            task.run(LocalTime.MIDNIGHT);
         }
 
         // Check that the letter has moved to the Posted state.
         entityManager.flush();
         letter = repository.findById(letter.getId()).get();
         assertThat(letter.getState()).isEqualTo(LetterState.Posted);
-        // Check that the printedAt date has been set.
-        assertThat(letter.getPrintedAt().toLocalDateTime()).isEqualTo(printedAt);
-    }
-
-    // Prepare a CSV in the format provided by Xerox for a given letter
-    // and put it in the reports sftp folder.
-    private void writeXeroxCsvForLetter(Letter l, File reportFolder) throws IOException {
-        String content =
-            "\"Date\",\"Time\",\"Filename\"\n"
-                + String.format("%s,%s,first_second_%s\n",
-                DateTimeFormatter.ofPattern("yyyy-MM-dd").format(printedAt),
-                DateTimeFormatter.ofPattern("hh:mm:ss").format(printedAt),
-                l.getId());
-        File report = new File(reportFolder, l.getMessageId() + ".csv");
-        report.createNewFile();
-        Files.write(report.toPath(), content.getBytes());
+        // Check that printed at date has been set.
+        assertThat(letter.getPrintedAt()).isNotNull();
     }
 }

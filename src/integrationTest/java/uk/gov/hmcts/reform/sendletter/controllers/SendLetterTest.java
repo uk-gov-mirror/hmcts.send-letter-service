@@ -17,9 +17,25 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.reform.sendletter.LocalSftpServer;
+import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
+import uk.gov.hmcts.reform.sendletter.entity.LetterState;
+import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
+import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
+import uk.gov.hmcts.reform.sendletter.services.FtpClient;
+import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
+import uk.gov.hmcts.reform.sendletter.tasks.MarkLettersPostedTask;
+import uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask;
+import uk.gov.hmcts.reform.sendletter.util.XeroxReportWriter;
+import uk.gov.hmcts.reform.slc.services.ReportParser;
+import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
 
 import java.io.IOException;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -40,6 +56,12 @@ public class SendLetterTest {
     @SpyBean
     private AppInsights insights;
 
+    @Autowired
+    private LetterRepository repository;
+
+    @Autowired
+    private FtpAvailabilityChecker checker;
+
     @Test
     public void should_return_200_when_single_letter_is_sent() throws Exception {
         MvcResult result = send(readResource("letter.json"))
@@ -47,6 +69,31 @@ public class SendLetterTest {
             .andReturn();
 
         assertThat(result.getResponse().getContentAsString()).isNotNull();
+    }
+
+    @Test
+    public void should_upload_letter_and_mark_posted() throws Exception {
+        send(readResource("letter.json"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        try (LocalSftpServer server = LocalSftpServer.create()) {
+            FtpClient client = FtpHelper.getClient(LocalSftpServer.port);
+
+            // Run the upload letters task
+            new UploadLettersTask(repository, new Zipper(), client, checker).run();
+
+            // Mimic Xerox and prepare a CSV report based on the PDFs that have been uploaded.
+            Stream<UUID> letterIds = Arrays.stream(server.pdfFolder.list()).map(FileNameHelper::extractId);
+            XeroxReportWriter.writeReport(letterIds, server.reportFolder);
+
+            // Run the task that processes the Xerox report
+            new MarkLettersPostedTask(repository, client, checker, new ReportParser()).run(LocalTime.MIDNIGHT);
+        }
+
+        // We should have a single Posted letter.
+        assertThat(repository.count()).isEqualTo(1);
+        assertThat(repository.findAll().get(0).getState()).isEqualTo(LetterState.Posted);
     }
 
     @Test
