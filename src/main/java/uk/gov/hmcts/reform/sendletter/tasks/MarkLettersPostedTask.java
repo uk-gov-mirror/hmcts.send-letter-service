@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterState;
+import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.slc.model.LetterPrintStatus;
-import uk.gov.hmcts.reform.slc.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.slc.services.ReportParser;
 
 import java.sql.Timestamp;

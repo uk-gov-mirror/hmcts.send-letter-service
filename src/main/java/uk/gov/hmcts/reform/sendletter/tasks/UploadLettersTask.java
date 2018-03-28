@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterState;
+import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.zip.ZipFileNameHelper;
 import uk.gov.hmcts.reform.sendletter.services.zip.ZippedDoc;
@@ -29,16 +30,28 @@ public class UploadLettersTask {
     private final LetterRepository repo;
     private final Zipper zipper;
     private final FtpClient ftp;
+    private final FtpAvailabilityChecker availabilityChecker;
 
     @Autowired
-    public UploadLettersTask(LetterRepository repo, Zipper zipper, FtpClient ftp) {
+    public UploadLettersTask(
+        LetterRepository repo,
+        Zipper zipper,
+        FtpClient ftp,
+        FtpAvailabilityChecker availabilityChecker
+    ) {
         this.repo = repo;
         this.zipper = zipper;
         this.ftp = ftp;
+        this.availabilityChecker = availabilityChecker;
     }
 
     @Transactional
     public void run() {
+        if (!availabilityChecker.isFtpAvailable(now().toLocalTime())) {
+            logger.trace("FTP server not available, job cancelled");
+            return;
+        }
+
         repo.findByState(LetterState.Created).forEach(letter -> {
             try {
                 upload(letter);

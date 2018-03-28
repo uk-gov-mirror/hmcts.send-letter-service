@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -13,14 +15,18 @@ import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterState;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
+import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
 import java.io.File;
+import java.time.LocalTime;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -30,19 +36,30 @@ public class UploadLettersTaskTest {
     @Autowired
     LetterRepository repository;
 
-    private final ObjectMapper mapper = new ObjectMapper();
-
     @Autowired
     private EntityManager entityManager;
 
+    @Mock
+    private FtpAvailabilityChecker availabilityChecker;
+
+    @Before
+    public void setUp() {
+        when(availabilityChecker.isFtpAvailable(any(LocalTime.class))).thenReturn(true);
+    }
+
     @Test
     public void uploads_file_to_sftp_and_sets_letter_status_to_uploaded() throws Exception {
-        LetterService s = new LetterService(repository, mapper);
+        LetterService s = new LetterService(repository, new ObjectMapper());
         UUID id = s.send(SampleData.letter(), "service");
 
         // Invoke the upload job.
         try (LocalSftpServer server = LocalSftpServer.create()) {
-            UploadLettersTask task = new UploadLettersTask(repository, new Zipper(), FtpHelper.getClient(server.port));
+            UploadLettersTask task = new UploadLettersTask(
+                repository,
+                new Zipper(),
+                FtpHelper.getClient(server.port),
+                availabilityChecker
+            );
 
             task.run();
 
