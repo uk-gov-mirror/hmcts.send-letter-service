@@ -8,10 +8,12 @@ import org.apache.sshd.common.file.nativefs.NativeFileSystemView;
 import org.apache.sshd.server.command.ScpCommandFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.sftp.subsystem.SftpSubsystem;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.Security;
 import java.util.Arrays;
 
 public final class LocalSftpServer implements AutoCloseable {
@@ -32,6 +34,14 @@ public final class LocalSftpServer implements AutoCloseable {
     public final File reportFolder;
 
     public static LocalSftpServer create() throws IOException {
+        // Fix for intermittent TransportException: Unable to reach a settlement: [] and []
+        // I believe this to be caused by TestContainers, on which I raised a bug:
+        // https://github.com/testcontainers/testcontainers-java/issues/626
+        // We can work around it by removing the problematic shaded SecurityProvider that
+        // TestContainers adds and adding one that is not shaded and is in a signed jar.
+        BouncyCastleProvider bouncyCastleProvider = new BouncyCastleProvider();
+        Security.removeProvider(bouncyCastleProvider.getName());
+        Security.addProvider(bouncyCastleProvider);
         TemporaryFolder tmp = new TemporaryFolder();
         tmp.create();
         File root = tmp.getRoot();
