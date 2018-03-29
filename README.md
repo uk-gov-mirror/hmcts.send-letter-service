@@ -1,6 +1,7 @@
 # Send Letter Service
 
 [![Build Status](https://travis-ci.org/hmcts/send-letter-service.svg?branch=master)](https://travis-ci.org/hmcts/send-letter-service)
+[![codecov](https://codecov.io/gh/hmcts/send-letter-service/branch/master/graph/badge.svg)](https://codecov.io/gh/hmcts/send-letter-service)
 
 ## Building and deploying the application
 
