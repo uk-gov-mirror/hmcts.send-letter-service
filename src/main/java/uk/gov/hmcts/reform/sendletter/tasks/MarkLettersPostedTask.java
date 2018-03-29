@@ -39,7 +39,7 @@ public class MarkLettersPostedTask {
     }
 
     public void run(LocalTime now) {
-        logger.trace("Running job");
+        logger.info("Started report processing job");
 
         if (ftpAvailabilityChecker.isFtpAvailable(now)) {
             ftpClient
@@ -57,8 +57,10 @@ public class MarkLettersPostedTask {
                     }
                 });
         } else {
-            logger.trace("FTP server not available, job cancelled");
+            logger.info("Not processing due to FTP downtime window");
         }
+
+        logger.info("Completed report processing job");
     }
 
     private void updatePrintedAt(LetterPrintStatus letterPrintStatus) {
@@ -71,10 +73,17 @@ public class MarkLettersPostedTask {
                 repo.save(letter);
                 logger.info("Marking letter {} as Posted", letter.getId());
             } else {
-                logger.info("Skipping processing of letter {} in state {}", letter.getId(), letter.getStatus());
+                logger.info(
+                    "Skipping processing of letter {} with status {}",
+                    letter.getId(),
+                    letter.getStatus()
+                );
             }
         } else {
-            logger.error("Unknown letter {}", letterPrintStatus.id);
+            logger.error(
+                "Failed to update printing date for letter {} - unknown letter",
+                letterPrintStatus.id
+            );
         }
     }
 }

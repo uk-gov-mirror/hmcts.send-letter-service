@@ -51,8 +51,10 @@ public class UploadLettersTask {
 
     @Transactional
     public void run() {
+        logger.info("Started letter upload job");
+
         if (!availabilityChecker.isFtpAvailable(now().toLocalTime())) {
-            logger.trace("FTP server not available, job cancelled");
+            logger.info("Not processing due to FTP downtime window");
             return;
         }
 
@@ -62,19 +64,7 @@ public class UploadLettersTask {
             Letter letter = iterator.next();
 
             try {
-                upload(letter);
-                logger.debug("Successfully uploaded letter {}", letter.getId());
-
-                // Upload succeeded, mark the letter as Uploaded.
-                letter.setStatus(LetterStatus.Uploaded);
-                letter.setSentToPrintAt(Timestamp.from(Instant.now()));
-
-                // remove pdf content, as it's no longer needed
-                letter.setPdf(null);
-
-                repo.saveAndFlush(letter);
-
-                logger.debug("Marked letter {} as {}", letter.getId(), letter.getStatus());
+                uploadLetter(letter);
             } catch (FtpException exception) {
                 logger.error(String.format("Exception uploading letter %s", letter.getId()), exception);
 
@@ -83,9 +73,32 @@ public class UploadLettersTask {
                 logger.error(String.format("Failed to zip document for letter %s", letter.getId()), exception);
             }
         }
+
+        logger.info("Completed letter upload job");
     }
 
-    private void upload(Letter letter) {
+    private void uploadLetter(Letter letter) {
+        String uploadedFilename = uploadToFtp(letter);
+
+        logger.info(
+            "Successfully uploaded letter {}. File name: {}",
+            letter.getId(),
+            uploadedFilename
+        );
+
+        // Upload succeeded, mark the letter as Uploaded.
+        letter.setStatus(LetterStatus.Uploaded);
+        letter.setSentToPrintAt(Timestamp.from(Instant.now()));
+
+        // remove pdf content, as it's no longer needed
+        letter.setPdf(null);
+
+        repo.saveAndFlush(letter);
+
+        logger.info("Marked letter {} as {}", letter.getId(), letter.getStatus());
+    }
+
+    private String uploadToFtp(Letter letter) {
         PdfDoc pdfDoc = new PdfDoc(FileNameHelper.generateName(letter, "pdf"), letter.getPdf());
         ZippedDoc zippedDoc = zipper.zip(ZipFileNameHelper.generateName(letter, now()), pdfDoc);
 
@@ -98,6 +111,7 @@ public class UploadLettersTask {
         );
 
         ftp.upload(zippedDoc, isSmokeTest(letter));
+        return zippedDoc.filename;
     }
 
     private boolean isSmokeTest(Letter letter) {
