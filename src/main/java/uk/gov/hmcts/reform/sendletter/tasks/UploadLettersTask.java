@@ -27,7 +27,7 @@ import static java.time.LocalDateTime.now;
 public class UploadLettersTask {
     private static final Logger logger = LoggerFactory.getLogger(UploadLettersTask.class);
 
-    public static String SMOKE_TEST_LETTER_TYPE = "smoke_test";
+    public static final String SMOKE_TEST_LETTER_TYPE = "smoke_test";
 
     private final LetterRepository repo;
     private final Zipper zipper;
