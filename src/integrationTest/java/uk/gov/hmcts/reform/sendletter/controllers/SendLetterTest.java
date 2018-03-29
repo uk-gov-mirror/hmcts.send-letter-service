@@ -23,11 +23,11 @@ import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
+import uk.gov.hmcts.reform.sendletter.services.ReportParser;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 import uk.gov.hmcts.reform.sendletter.tasks.MarkLettersPostedTask;
 import uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask;
 import uk.gov.hmcts.reform.sendletter.util.XeroxReportWriter;
-import uk.gov.hmcts.reform.slc.services.ReportParser;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
 
 import java.io.IOException;

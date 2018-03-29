@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
-import uk.gov.hmcts.reform.slc.services.ReportParser;
+import uk.gov.hmcts.reform.sendletter.services.ReportParser;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.Report;
 
 import java.io.IOException;

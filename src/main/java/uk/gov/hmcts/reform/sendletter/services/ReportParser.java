@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.slc.services;
+package uk.gov.hmcts.reform.sendletter.services;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;

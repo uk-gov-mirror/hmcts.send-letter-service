@@ -14,13 +14,13 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
+import uk.gov.hmcts.reform.sendletter.services.ReportParser;
 import uk.gov.hmcts.reform.sendletter.util.XeroxReportWriter;
-import uk.gov.hmcts.reform.slc.services.ReportParser;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.stream.Stream;
+import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
