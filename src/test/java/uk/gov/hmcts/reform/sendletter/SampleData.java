@@ -27,7 +27,10 @@ public final class SampleData {
             singletonList(
                 new Document(
                     Resources.toString(getResource("template.html"), UTF_8),
-                    ImmutableMap.of("name", "John")
+                    ImmutableMap.of(
+                        "name", "John",
+                        "reference", UUID.randomUUID()
+                    )
                 )
             ),
             "someType",

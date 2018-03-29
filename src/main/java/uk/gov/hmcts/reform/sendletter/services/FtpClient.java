@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.slc.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.InMemoryDownloadedFile;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.Report;
-import uk.gov.hmcts.reform.slc.services.steps.sftpupload.exceptions.FtpStepException;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -71,7 +71,7 @@ public class FtpClient {
                 insights.trackFtpUpload(Duration.between(start, Instant.now()), false);
                 insights.trackException(exc);
 
-                throw new FtpStepException("Unable to upload file.", exc);
+                throw new FtpException("Unable to upload file.", exc);
             }
         });
     }
@@ -93,13 +93,13 @@ public class FtpClient {
                             transfer.download(file.getPath(), inMemoryFile);
                             return new Report(file.getPath(), inMemoryFile.getBytes());
                         } catch (IOException exc) {
-                            throw new FtpStepException("Unable to download file " + file.getName(), exc);
+                            throw new FtpException("Unable to download file " + file.getName(), exc);
                         }
                     })
                     .collect(toList());
 
             } catch (IOException exc) {
-                throw new FtpStepException("Error while downloading reports", exc);
+                throw new FtpException("Error while downloading reports", exc);
             }
         });
     }
@@ -110,7 +110,7 @@ public class FtpClient {
                 sftp.rm(reportPath);
                 return null;
             } catch (Exception exc) {
-                throw new FtpStepException("Error while deleting report: " + reportPath, exc);
+                throw new FtpException("Error while deleting report: " + reportPath, exc);
             }
         });
     }
@@ -143,7 +143,7 @@ public class FtpClient {
         } catch (IOException exc) {
             insights.trackException(exc);
 
-            throw new FtpStepException("Unable to upload file.", exc);
+            throw new FtpException("Unable to upload file.", exc);
         } finally {
             try {
                 if (ssh != null) {

@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.exception.DocumentZipException;
+import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.zip.ZipFileNameHelper;
@@ -16,9 +18,9 @@ import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfDoc;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.Objects;
 
 import static java.time.LocalDateTime.now;
@@ -54,7 +56,11 @@ public class UploadLettersTask {
             return;
         }
 
-        repo.findByStatus(LetterStatus.Created).forEach(letter -> {
+        Iterator<Letter> iterator = repo.findByStatus(LetterStatus.Created).iterator();
+
+        while (iterator.hasNext()) {
+            Letter letter = iterator.next();
+
             try {
                 upload(letter);
                 logger.debug("Successfully uploaded letter {}", letter.getId());
@@ -68,14 +74,18 @@ public class UploadLettersTask {
 
                 repo.saveAndFlush(letter);
 
-                logger.debug("Marked letter {} as Uploaded", letter.getId());
-            } catch (Exception e) {
-                logger.error("Exception uploading letter {}", letter.getId(), e);
+                logger.debug("Marked letter {} as {}", letter.getId(), letter.getStatus());
+            } catch (FtpException exception) {
+                logger.error(String.format("Exception uploading letter %s", letter.getId()), exception);
+
+                break;
+            } catch (DocumentZipException exception) {
+                logger.error(String.format("Failed to zip document for letter %s", letter.getId()), exception);
             }
-        });
+        }
     }
 
-    private void upload(Letter letter) throws IOException {
+    private void upload(Letter letter) {
         PdfDoc pdfDoc = new PdfDoc(FileNameHelper.generateName(letter, "pdf"), letter.getPdf());
         ZippedDoc zippedDoc = zipper.zip(ZipFileNameHelper.generateName(letter, now()), pdfDoc);
 

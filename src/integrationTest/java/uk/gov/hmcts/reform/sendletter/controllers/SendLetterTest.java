@@ -78,7 +78,7 @@ public class SendLetterTest {
             .andReturn();
 
         try (LocalSftpServer server = LocalSftpServer.create()) {
-            FtpClient client = FtpHelper.getClient(LocalSftpServer.port);
+            FtpClient client = FtpHelper.getSuccessfulClient(LocalSftpServer.port);
 
             // Run the upload letters task
             new UploadLettersTask(repository, new Zipper(), client, checker).run();

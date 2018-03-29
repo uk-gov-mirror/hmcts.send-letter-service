@@ -51,7 +51,7 @@ public class MarkLettersPostedTaskTest {
 
         when(checker.isFtpAvailable(any(LocalTime.class))).thenReturn(true);
         try (LocalSftpServer server = LocalSftpServer.create()) {
-            FtpClient client = FtpHelper.getClient(LocalSftpServer.port);
+            FtpClient client = FtpHelper.getSuccessfulClient(LocalSftpServer.port);
             MarkLettersPostedTask task = new MarkLettersPostedTask(repository, client, checker, parser);
 
             // Prepare the response CSV from Xerox and run the task.
