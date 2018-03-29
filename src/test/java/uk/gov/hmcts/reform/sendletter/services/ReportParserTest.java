@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.slc.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.ParsedReport;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.Report;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -17,6 +18,9 @@ public class ReportParserTest {
 
     private static final UUID UUID_1 = UUID.fromString("edcc9e2d-eddb-4d87-9a16-61f4499f524c");
     private static final UUID UUID_2 = UUID.fromString("edcc9e2d-eddb-4d87-9a16-61f4499f524d");
+    private static final ZonedDateTime expectedZonedDateTime = ZonedDateTime.of(
+        2018, 3, 27, 16, 38, 0, 0,
+        ZoneId.of("Z"));
 
     @Test
     public void should_parse_valid_csv_report() {
@@ -26,8 +30,8 @@ public class ReportParserTest {
         assertThat(result.statuses)
             .usingFieldByFieldElementComparator()
             .containsExactlyInAnyOrder(
-                new LetterPrintStatus(UUID_1, ZonedDateTime.parse("2018-01-01T10:30:53Z")),
-                new LetterPrintStatus(UUID_2, ZonedDateTime.parse("2018-01-01T10:30:53Z"))
+                new LetterPrintStatus(UUID_1, expectedZonedDateTime),
+                new LetterPrintStatus(UUID_2, expectedZonedDateTime)
             );
         assertThat(result.allRowsParsed).isTrue();
     }
@@ -39,7 +43,7 @@ public class ReportParserTest {
 
         assertThat(result.statuses)
             .usingFieldByFieldElementComparator()
-            .containsExactly(new LetterPrintStatus(UUID_1, ZonedDateTime.parse("2018-01-01T10:30:53Z")));
+            .containsExactly(new LetterPrintStatus(UUID_1, expectedZonedDateTime));
 
         assertThat(result.allRowsParsed).isFalse();
     }
@@ -47,15 +51,15 @@ public class ReportParserTest {
     @Test
     public void should_filter_out_rows_with_invalid_date() {
         String report =
-            "\"Date\",\"Time\",\"Filename\"\n"
-                + "20180101,10:30:53,TE5A_TE5B_9364001\n"
-                + String.format("2018-01-01,10:30:53,TE5A_TE5B_%s\n", UUID_1);
+            "\"StartDate\",\"StartTime\",\"InputFileName\"\n"
+                + "20180101,16:38,CMC001_cmcclaimstore_ff99f8ad-7ab8-43f8-9671-5397cbfa96a6.pdf\n"
+                + String.format("27-03-2018,16:38,CMC001_cmcclaimstore_%s\n", UUID_1);
 
         ParsedReport result = new ReportParser().parse(new Report("a.csv", report.getBytes()));
 
         assertThat(result.statuses)
             .usingFieldByFieldElementComparator()
-            .containsExactly(new LetterPrintStatus(UUID_1, ZonedDateTime.parse("2018-01-01T10:30:53Z")));
+            .containsExactly(new LetterPrintStatus(UUID_1, expectedZonedDateTime));
 
         assertThat(result.allRowsParsed).isFalse();
     }
@@ -66,16 +70,16 @@ public class ReportParserTest {
 
         ParsedReport result = new ReportParser().parse(new Report("a.csv", report));
 
-        assertThat(result.statuses).hasSize(11);
+        assertThat(result.statuses).hasSize(3);
         assertThat(result.allRowsParsed).isTrue();
     }
 
     @Test
     public void should_throw_report_parsing_exception_when_csv_contains_semicolon_delimiter() {
         String report =
-            "\"Date\";\"Time\";\"Filename\"\n"
-                + "20180101;10:30:53;TE5A_TE5B_9364001\n"
-                + "2018-01-01;10:30:53;TE5A_TE5B_9364002\n";
+            "\"StartDate\";\"StartTime\";\"InputFileName\"\n"
+                + "27-03-2018;16:38;CMC001_cmcclaimstore_ff99f8ad-7ab8-43f8-9671-5397cbfa96a6.pdf\n"
+                + "27-03-2018;16:38;CMC001_cmcclaimstore_ff88f8ad-8ab8-44f8-9672-5398cbfa96a7.pdf\n";
 
         Throwable exc = catchThrowable(() ->
             new ReportParser().parse(new Report("a.csv", report.getBytes())));
@@ -86,7 +90,7 @@ public class ReportParserTest {
 
     private String formatReport(Object... ids) {
         StringBuffer report = new StringBuffer(
-            "\"Date\",\"Time\",\"Filename\"\n");
+            "\"StartDate\",\"StartTime\",\"InputFileName\"\n");
         for (Object id : ids) {
             report.append(formatRecord(id));
         }
@@ -94,6 +98,6 @@ public class ReportParserTest {
     }
 
     private String formatRecord(Object id) {
-        return String.format("2018-01-01,10:30:53,TE5A_TE5B_%s\n", id);
+        return String.format("27-03-2018,16:38,CMC001_claimstore_%s.pdf\n", id);
     }
 }

@@ -17,15 +17,15 @@ public final class XeroxReportWriter {
     public static void writeReport(Stream<UUID> letterIds, File reportFolder) throws IOException {
         // We expect these fields in Xerox reports
         CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(
-            "Date",
-            "Time",
-            "Filename"
+            "StartDate",
+            "StartTime",
+            "InputFileName"
         );
 
         // Prepare a record for each of our letters.
         List<List<String>> records = letterIds.map(x -> Lists.newArrayList(
-            "2018-01-01",
-            "10:30:53",
+            "01-01-2018",
+            "10:30",
             FileNameHelper.generateName("aType", "aService", x, "pdf")
         )).collect(Collectors.toList());
 
