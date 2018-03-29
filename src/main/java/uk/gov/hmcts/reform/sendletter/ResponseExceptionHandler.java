@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
-import uk.gov.hmcts.reform.sendletter.exception.ConnectionException;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthorizedException;
@@ -70,12 +69,6 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Void> handleLetterNotFoundException(LetterNotFoundException exc) {
         log.warn(exc.getMessage(), exc);
         return status(NOT_FOUND).build();
-    }
-
-    @ExceptionHandler(ConnectionException.class)
-    protected ResponseEntity<String> handleServiceBusException(ConnectionException exc) {
-        log.error(exc.getMessage(), exc);
-        return status(INTERNAL_SERVER_ERROR).body("Exception occurred while communicating with service bus");
     }
 
     @ExceptionHandler(JsonProcessingException.class)

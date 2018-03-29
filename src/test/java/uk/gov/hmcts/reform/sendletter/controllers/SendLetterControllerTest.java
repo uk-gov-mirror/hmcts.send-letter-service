@@ -12,7 +12,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import uk.gov.hmcts.reform.sendletter.exception.ConnectionException;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.services.AuthService;
@@ -56,29 +55,6 @@ public class SendLetterControllerTest {
 
         verify(authService).authenticate("auth-header-value");
         verify(letterService).send(any(LetterRequest.class), eq("service-name"));
-        verifyNoMoreInteractions(authService, letterService);
-    }
-
-    @Test
-    public void should_return_connection_exception_when_service_fails_due_to_thread_interruption() throws Exception {
-        given(authService.authenticate("auth-header-value")).willReturn("service-name");
-        given(letterService.send(any(LetterRequest.class), anyString()))
-            .willThrow(
-                new ConnectionException("Unable to connect to Azure service bus",
-                    new InterruptedException())
-            );
-
-        MvcResult mvcResult = sendLetter(readResource("letter.json"))
-            .andExpect(status().is5xxServerError())
-            .andReturn();
-
-        assertThat(mvcResult.getResolvedException()).isInstanceOf(ConnectionException.class);
-        assertThat(mvcResult.getResolvedException().getMessage()).isEqualTo("Unable to connect to Azure service bus");
-        assertThat(mvcResult.getResolvedException().getCause()).isInstanceOf(InterruptedException.class);
-
-
-        verify(authService).authenticate("auth-header-value");
-        verify(letterService).send(any(LetterRequest.class), anyString());
         verifyNoMoreInteractions(authService, letterService);
     }
 
