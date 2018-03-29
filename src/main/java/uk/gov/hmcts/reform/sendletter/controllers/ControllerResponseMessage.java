@@ -4,5 +4,4 @@ package uk.gov.hmcts.reform.sendletter.controllers;
 final class ControllerResponseMessage {
 
     static final String RESPONSE_401 = "Invalid service authorisation header";
-    static final String RESPONSE_403 = "Forbidden access to the service";
 }
