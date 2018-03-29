@@ -11,9 +11,7 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
-import uk.gov.hmcts.reform.slc.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.slc.services.ReportParser;
-import uk.gov.hmcts.reform.slc.services.steps.sftpupload.ParsedReport;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.Report;
 
 import java.io.IOException;
@@ -21,12 +19,14 @@ import java.time.LocalTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @RunWith(value = MockitoJUnitRunner.class)
 public class MarkLettersPostedTest {
@@ -52,20 +52,54 @@ public class MarkLettersPostedTest {
         given(ftpClient.downloadReports())
             .willReturn(singletonList(new Report(filePath, null)));
         given(parser.parse(any()))
-            .willReturn(
-                new ParsedReport(
-                    filePath,
-                    asList(
-                        new LetterPrintStatus(unknown, now()),
-                        new LetterPrintStatus(known, now())
-                    )
-                )
-            );
+            .willReturn(SampleData.parsedReport(filePath, asList(known, unknown), true));
         Letter letter = SampleData.letterEntity("a.service");
         letter.setStatus(LetterStatus.Uploaded);
         given(repo.findById(known)).willReturn(Optional.of(letter));
         given(repo.findById(unknown)).willReturn(Optional.empty());
+
+        // when
         task.run(LocalTime.MIDNIGHT);
+
+        // then
         assertThat(letter.getStatus()).isEqualTo(LetterStatus.Posted);
+    }
+
+    @Test
+    public void should_delete_report_if_all_records_were_successfully_parsed() {
+        final String reportName = "report.csv";
+        final boolean allParsed = true;
+
+        given(ftpClient.downloadReports())
+            .willReturn(singletonList(new Report(reportName, null)));
+
+        given(parser.parse(any())).willReturn(SampleData.parsedReport(reportName, allParsed));
+
+        given(repo.findById(any())).willReturn(Optional.of(SampleData.letterEntity("cmc")));
+
+        // when
+        task.run(LocalTime.now());
+
+        // then
+        verify(ftpClient).deleteReport(reportName);
+    }
+
+    @Test
+    public void should_not_delete_report_if_some_records_were_not_successfully_parsed() {
+        final String reportName = "report.csv";
+        final boolean allParsed = false;
+
+        given(ftpClient.downloadReports())
+            .willReturn(singletonList(new Report(reportName, null)));
+
+        given(parser.parse(any())).willReturn(SampleData.parsedReport(reportName, allParsed));
+
+        given(repo.findById(any())).willReturn(Optional.of(SampleData.letterEntity("cmc")));
+
+        // when
+        task.run(LocalTime.now());
+
+        // then
+        verify(ftpClient, never()).deleteReport(anyString());
     }
 }

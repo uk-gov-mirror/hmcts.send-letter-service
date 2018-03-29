@@ -6,12 +6,19 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
+import uk.gov.hmcts.reform.slc.model.LetterPrintStatus;
+import uk.gov.hmcts.reform.slc.services.steps.sftpupload.ParsedReport;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 
 public final class SampleData {
 
@@ -40,6 +47,21 @@ public final class SampleData {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static ParsedReport parsedReport(String filename, List<UUID> letterIds, boolean allParsed) {
+        return new ParsedReport(
+            filename,
+            letterIds
+                .stream()
+                .map(id -> new LetterPrintStatus(id, ZonedDateTime.now()))
+                .collect(toList()),
+            allParsed
+        );
+    }
+
+    public static ParsedReport parsedReport(String filename, boolean allParsed) {
+        return parsedReport(filename, Arrays.asList(UUID.randomUUID(), UUID.randomUUID()), allParsed);
     }
 
     private SampleData() {

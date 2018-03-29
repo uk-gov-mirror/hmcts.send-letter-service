@@ -48,7 +48,13 @@ public class MarkLettersPostedTask {
                 .map(parser::parse)
                 .forEach(parsedReport -> {
                     parsedReport.statuses.forEach(this::updatePrintedAt);
-                    ftpClient.deleteReport(parsedReport.path);
+
+                    if (parsedReport.allRowsParsed) {
+                        logger.info("Report {} successfully parsed, deleting", parsedReport.path);
+                        ftpClient.deleteReport(parsedReport.path);
+                    } else {
+                        logger.warn("Report {} contained invalid rows, file not removed.", parsedReport.path);
+                    }
                 });
         } else {
             logger.trace("FTP server not available, job cancelled");
