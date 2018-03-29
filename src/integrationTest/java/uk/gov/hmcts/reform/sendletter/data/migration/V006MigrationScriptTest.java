@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sendletter.data.migration;
 
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationVersion;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +39,13 @@ public class V006MigrationScriptTest {
     public void setUp() {
         flyway.clean();
         migrateToVersion(BASE_VERSION);
+    }
+
+    // This test must commit to the DB since it reads and writes
+    // on different DB connections, so we must clean up afterwards.
+    @After
+    public void cleanUp() {
+        flyway.clean();
     }
 
     @Test
