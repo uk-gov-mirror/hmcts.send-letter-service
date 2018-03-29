@@ -12,8 +12,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
+import uk.gov.hmcts.reform.sendletter.services.zip.ZippedDoc;
 import uk.gov.hmcts.reform.slc.config.FtpConfigProperties;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfDoc;
 
 import java.util.List;
 
@@ -72,7 +72,7 @@ public class FtpClientTest {
         given(ftpProps.getTargetFolder()).willReturn("regular");
 
         // when
-        client.upload(new PdfDoc("hello.pdf", "hello".getBytes()), true);
+        client.upload(new ZippedDoc("hello.zip", "hello".getBytes()), true);
 
         // then
         verify(sftpFileTransfer)
@@ -82,7 +82,7 @@ public class FtpClientTest {
             );
 
         // when
-        client.upload(new PdfDoc("hello.pdf", "hello".getBytes()), false);
+        client.upload(new ZippedDoc("hello.zip", "hello".getBytes()), false);
 
         // then
         verify(sftpFileTransfer)

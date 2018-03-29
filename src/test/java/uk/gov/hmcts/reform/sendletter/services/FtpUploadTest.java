@@ -4,7 +4,7 @@ import com.google.common.io.Files;
 import org.junit.Test;
 import uk.gov.hmcts.reform.sendletter.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfDoc;
+import uk.gov.hmcts.reform.sendletter.services.zip.ZippedDoc;
 
 import java.io.File;
 
@@ -22,7 +22,7 @@ public class FtpUploadTest {
 
     @Test
     public void uploads_file() throws Exception {
-        PdfDoc doc = new PdfDoc("hello.txt", "world".getBytes());
+        ZippedDoc doc = new ZippedDoc("hello.zip", "world".getBytes());
         try (LocalSftpServer server = LocalSftpServer.create()) {
             FtpClient client = FtpHelper.getSuccessfulClient(port);
             client.upload(doc, false);
