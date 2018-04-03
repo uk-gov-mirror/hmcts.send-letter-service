@@ -12,6 +12,3 @@ SET
         'Posted'
     END
   );
-
-ALTER TABLE letters
-ALTER COLUMN status SET NOT NULL;
