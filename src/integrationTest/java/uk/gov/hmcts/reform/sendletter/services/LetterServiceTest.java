@@ -60,7 +60,7 @@ public class LetterServiceTest {
     public void generates_and_saves_pdf() throws IOException {
         UUID id = service.send(SampleData.letter(), SERVICE_NAME);
         Letter result = letterRepository.findOne(id);
-        DataSource dataSource = new ByteArrayDataSource(new ByteArrayInputStream(result.getPdf()));
+        DataSource dataSource = new ByteArrayDataSource(new ByteArrayInputStream(result.getFileContent()));
         PreflightParser pdfParser = new PreflightParser(dataSource);
         pdfParser.parse();
         PreflightDocument document = pdfParser.getPreflightDocument();

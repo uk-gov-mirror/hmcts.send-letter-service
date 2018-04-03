@@ -43,7 +43,7 @@ public class Letter {
     private String type;
     @Enumerated(EnumType.STRING)
     private LetterStatus status = LetterStatus.Created;
-    private byte[] pdf;
+    private byte[] fileContent;
 
     // For use by hibernate.
     private Letter() {
@@ -54,13 +54,13 @@ public class Letter {
         String service,
         JsonNode additionalData,
         String type,
-        byte[] pdf
+        byte[] fileContent
     ) {
         this.messageId = messageId;
         this.service = service;
         this.additionalData = additionalData;
         this.type = type;
-        this.pdf = pdf;
+        this.fileContent = fileContent;
         this.isFailed = false;
     }
 
@@ -88,12 +88,12 @@ public class Letter {
         this.status = status;
     }
 
-    public byte[] getPdf() {
-        return pdf;
+    public byte[] getFileContent() {
+        return fileContent;
     }
 
-    public void setPdf(byte[] pdf) {
-        this.pdf = pdf;
+    public void setFileContent(byte[] fileContent) {
+        this.fileContent = fileContent;
     }
 
     public Timestamp getCreatedAt() {

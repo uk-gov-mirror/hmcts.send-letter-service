@@ -95,7 +95,7 @@ public class UploadLettersTask {
         letter.setSentToPrintAt(Timestamp.from(Instant.now()));
 
         // remove pdf content, as it's no longer needed
-        letter.setPdf(null);
+        letter.setFileContent(null);
 
         repo.saveAndFlush(letter);
 
@@ -103,7 +103,7 @@ public class UploadLettersTask {
     }
 
     private String uploadToFtp(Letter letter) {
-        PdfDoc pdfDoc = new PdfDoc(FileNameHelper.generateName(letter, "pdf"), letter.getPdf());
+        PdfDoc pdfDoc = new PdfDoc(FileNameHelper.generateName(letter, "pdf"), letter.getFileContent());
         ZippedDoc zippedDoc = zipper.zip(ZipFileNameHelper.generateName(letter, now()), pdfDoc);
 
         logger.debug(

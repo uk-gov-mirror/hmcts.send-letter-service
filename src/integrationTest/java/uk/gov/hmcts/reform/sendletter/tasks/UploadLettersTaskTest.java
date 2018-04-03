@@ -86,7 +86,7 @@ public class UploadLettersTaskTest {
             assertThat(l.getPrintedAt()).isNull();
 
             // pdf content should be removed now
-            assertThat(l.getPdf()).isNull();
+            assertThat(l.getFileContent()).isNull();
         }
     }
 
@@ -129,7 +129,7 @@ public class UploadLettersTaskTest {
             Letter l = repository.findById(id).get();
             assertThat(l.getStatus()).isEqualTo(LetterStatus.Created);
             assertThat(l.getSentToPrintAt()).isNull();
-            assertThat(l.getPdf()).isNotNull();
+            assertThat(l.getFileContent()).isNotNull();
         }
     }
 
@@ -157,7 +157,7 @@ public class UploadLettersTaskTest {
         Letter l = repository.findById(id).get();
         assertThat(l.getStatus()).isEqualTo(LetterStatus.Created);
         assertThat(l.getSentToPrintAt()).isNull();
-        assertThat(l.getPdf()).isNotNull();
+        assertThat(l.getFileContent()).isNotNull();
         verify(ftpClient, never()).upload(any(LocalSourceFile.class), anyBoolean());
     }
 }
