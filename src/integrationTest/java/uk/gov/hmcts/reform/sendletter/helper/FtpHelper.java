@@ -47,7 +47,7 @@ public final class FtpHelper {
         p.setPrivateKey(Resources.toString(Resources.getResource("keypair"), Charsets.UTF_8));
         p.setUsername("irrelevant");
         p.setFingerprint("SHA1:2Fo8c/96zv32xc8GZWbOGYOlRak=");
-        p.setTargetFolder(LocalSftpServer.PDF_FOLDER_NAME);
+        p.setTargetFolder(LocalSftpServer.LETTERS_FOLDER_NAME);
         p.setReportsFolder(LocalSftpServer.REPORT_FOLDER_NAME);
         return p;
     }

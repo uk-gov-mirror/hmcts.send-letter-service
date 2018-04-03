@@ -67,7 +67,7 @@ public class EndToEndTest {
 
             // Wait for pdfs to be uploaded.
             await().atMost(60, SECONDS).untilAsserted(
-                () -> assertThat(server.pdfFolder.listFiles()).as("No PDFs uploaded!").isNotEmpty());
+                () -> assertThat(server.lettersFolder.listFiles()).as("No letters uploaded!").isNotEmpty());
 
             // Generate Xerox report.
             createXeroxReport(server);
@@ -84,7 +84,7 @@ public class EndToEndTest {
     }
 
     private void createXeroxReport(LocalSftpServer server) throws IOException {
-        Stream<UUID> letterIds = Arrays.stream(server.pdfFolder.list()).map(FileNameHelper::extractId);
+        Stream<UUID> letterIds = Arrays.stream(server.lettersFolder.list()).map(FileNameHelper::extractId);
         XeroxReportWriter.writeReport(letterIds, server.reportFolder);
     }
 

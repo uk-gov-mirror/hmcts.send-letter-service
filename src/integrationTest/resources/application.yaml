@@ -25,7 +25,7 @@ spring:
 ftp:
   hostname: localhost
   port: 46043
-  target-folder: pdfs
+  target-folder: letters
   smoke-test-target-folder: ${FTP_SMOKE_TEST_TARGET_FOLDER:SMOKE_TEST}
   reports-folder: reports
   fingerprint: SHA1:2Fo8c/96zv32xc8GZWbOGYOlRak=

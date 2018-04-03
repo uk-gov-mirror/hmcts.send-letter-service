@@ -74,7 +74,7 @@ public class UploadLettersTaskTest {
             task.run();
 
             // file should exist in SFTP site.
-            File[] files = server.pdfFolder.listFiles();
+            File[] files = server.lettersFolder.listFiles();
             assertThat(files.length).isEqualTo(1);
 
             // Ensure the letter is marked as uploaded in the database.
@@ -121,7 +121,7 @@ public class UploadLettersTaskTest {
             verify(fakeZipper).zip(anyString(), any(PdfDoc.class));
 
             // file does not exist in SFTP site.
-            File[] files = server.pdfFolder.listFiles();
+            File[] files = server.lettersFolder.listFiles();
             assertThat(files.length).isEqualTo(0);
 
             // Clear the JPA cache to force a read.

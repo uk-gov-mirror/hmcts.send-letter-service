@@ -22,13 +22,13 @@ public final class LocalSftpServer implements AutoCloseable {
     public static final int port = 46043;
 
     // These determine where our pdfs and xerox reports are stored.
-    public static final String PDF_FOLDER_NAME = "pdfs";
+    public static final String LETTERS_FOLDER_NAME = "letters";
     public static final String REPORT_FOLDER_NAME = "reports";
 
     public final File rootFolder;
 
     // This is the folder where xerox expects pdf uploads.
-    public final File pdfFolder;
+    public final File lettersFolder;
 
     // Xerox CSV reports are put here.
     public final File reportFolder;
@@ -45,16 +45,16 @@ public final class LocalSftpServer implements AutoCloseable {
         TemporaryFolder tmp = new TemporaryFolder();
         tmp.create();
         File root = tmp.getRoot();
-        File workingDirectory = new File(root, PDF_FOLDER_NAME);
+        File workingDirectory = new File(root, LETTERS_FOLDER_NAME);
         workingDirectory.mkdir();
         File reportDirectory = new File(root, "reports");
         reportDirectory.mkdir();
         return new LocalSftpServer(root, workingDirectory, reportDirectory);
     }
 
-    private LocalSftpServer(File root, File pdfFolder, File reportFolder) throws IOException {
+    private LocalSftpServer(File root, File lettersFolder, File reportFolder) throws IOException {
         this.rootFolder = root;
-        this.pdfFolder = pdfFolder;
+        this.lettersFolder = lettersFolder;
         this.reportFolder = reportFolder;
         sshd = SshServer.setUpDefaultServer();
 
