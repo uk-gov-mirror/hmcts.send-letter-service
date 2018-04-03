@@ -85,6 +85,9 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   classpath = sourceSets.integrationTest.runtimeClasspath
 
   environment("APPINSIGHTS_INSTRUMENTATIONKEY", "test-key")
+  environment("FTP_PRIVATE_KEY", file('src/integrationTest/resources/keypair').text)
+  environment("FTP_PUBLIC_KEY", file('src/integrationTest/resources/keypair.pub').text)
+
 }
 
 task smoke(type: Test) {
@@ -223,6 +226,7 @@ dependencies {
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
   integrationTestCompile group: 'org.testcontainers', name: 'postgresql', version: '1.6.0'
+  integrationTestCompile group: 'org.awaitility', name: 'awaitility', version: '3.1.0'
 
   smokeTestCompile sourceSets.main.runtimeClasspath
   smokeTestCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.7'

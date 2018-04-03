@@ -28,7 +28,6 @@ ftp:
   target-folder: pdfs
   smoke-test-target-folder: ${FTP_SMOKE_TEST_TARGET_FOLDER:SMOKE_TEST}
   reports-folder: reports
-  reports-cron: ${FTP_REPORTS_CRON:0 30 0 * * *}
   fingerprint: SHA1:2Fo8c/96zv32xc8GZWbOGYOlRak=
   username: irrelevant
   privateKey: ${FTP_PRIVATE_KEY}
@@ -36,3 +35,12 @@ ftp:
   downtime:
     from: ${FTP_DOWNTIME_FROM:17:00}
     to: ${FTP_DOWNTIME_TO:18:00}
+
+# Don't run scheduled tasks unless
+# explicitly turned on by tests.
+scheduling.enabled: false
+
+tasks:
+  upload-letters: ${UPLOAD_LETTERS_INTERVAL:1}
+  # Run every second.
+  mark-letters-posted: ${FTP_REPORTS_CRON:*/1 * * * * *}

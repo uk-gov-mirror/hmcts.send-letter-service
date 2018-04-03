@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.sendletter.tasks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
@@ -26,6 +28,7 @@ import java.util.Objects;
 import static java.time.LocalDateTime.now;
 
 @Component
+@ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
 public class UploadLettersTask {
     private static final Logger logger = LoggerFactory.getLogger(UploadLettersTask.class);
 
@@ -49,6 +52,7 @@ public class UploadLettersTask {
         this.availabilityChecker = availabilityChecker;
     }
 
+    @Scheduled(fixedDelayString = "${tasks.upload-letters}")
     @Transactional
     public void run() {
         logger.info("Started letter upload job");
