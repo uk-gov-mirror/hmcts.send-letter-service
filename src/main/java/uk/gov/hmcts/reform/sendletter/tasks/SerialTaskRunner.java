@@ -15,6 +15,9 @@ import javax.sql.DataSource;
 public final class SerialTaskRunner {
 
     private static final Logger log = LoggerFactory.getLogger(SerialTaskRunner.class);
+    // Namespace our application locks to avoid potential collisions
+    // with other uses of Advisory locks.
+    private static final int LOCK_NAMESPACE = 10250;
     private final DataSource source;
 
     public static SerialTaskRunner get(DataSource source) {
@@ -31,7 +34,7 @@ public final class SerialTaskRunner {
      * No error is thrown if such a task is already running, the
      * supplied Runnable is simply not executed.
      */
-    public void tryRun(long id, Runnable runnable) throws SQLException {
+    public void tryRun(int id, Runnable runnable) throws SQLException {
         log.info("Trying to lock {}", id);
         try (Connection connection = source.getConnection()) {
             boolean locked = false;
@@ -64,13 +67,13 @@ public final class SerialTaskRunner {
      * <p>https://www.postgresql.org/docs/9.4/static/explicit-locking.html#ADVISORY-LOCKS
      * @return true if lock is acquired, false otherwise
      */
-    private boolean tryLock(long id, Connection connection) throws SQLException {
-        String sql = String.format("SELECT pg_try_advisory_lock(%d);", id);
+    private boolean tryLock(int id, Connection connection) throws SQLException {
+        String sql = String.format("SELECT pg_try_advisory_lock(%d, %d);", LOCK_NAMESPACE, id);
         return executeReturningBool(connection, sql);
     }
 
-    private boolean unlock(long id, Connection connection) throws SQLException {
-        String sql = String.format("SELECT pg_advisory_unlock(%d);", id);
+    private boolean unlock(int id, Connection connection) throws SQLException {
+        String sql = String.format("SELECT pg_advisory_unlock(%d, %d);", LOCK_NAMESPACE, id);
         return executeReturningBool(connection, sql);
     }
 

@@ -4,7 +4,7 @@ public enum Task {
     UploadLetters,
     MarkLettersPosted;
 
-    long getLockId() {
+    int getLockId() {
         return ordinal();
     }
 }
