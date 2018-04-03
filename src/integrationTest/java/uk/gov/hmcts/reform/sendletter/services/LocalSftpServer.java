@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter;
+package uk.gov.hmcts.reform.sendletter.services;
 
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.Session;
