@@ -33,8 +33,8 @@ ftp:
   privateKey: ${FTP_PRIVATE_KEY}
   publicKey: ${FTP_PUBLIC_KEY}
   downtime:
-    from: ${FTP_DOWNTIME_FROM:17:00}
-    to: ${FTP_DOWNTIME_TO:18:00}
+    from: ${FTP_DOWNTIME_FROM:23:58}
+    to: ${FTP_DOWNTIME_TO:23:59}
 
 # Don't run scheduled tasks unless
 # explicitly turned on by tests.

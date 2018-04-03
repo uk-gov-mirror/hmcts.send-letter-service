@@ -41,6 +41,7 @@ public final class SampleData {
     public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(String service) {
         try {
             return new uk.gov.hmcts.reform.sendletter.entity.Letter(
+                UUID.randomUUID(),
                 "messageId",
                 service,
                 new ObjectMapper().readTree("{}"),

@@ -60,9 +60,12 @@ public class LetterService {
     }
 
     private UUID saveNewLetterAndReturnId(LetterRequest letterRequest, String messageId, String serviceName) {
+        UUID id = UUID.randomUUID();
+
         byte[] pdf = pdfCreator.create(letterRequest);
 
         Letter letter = new Letter(
+            id,
             messageId,
             serviceName,
             mapper.valueToTree(letterRequest.additionalData),
@@ -70,11 +73,11 @@ public class LetterService {
             pdf
         );
 
-        UUID letterId = letterRepository.save(letter).getId();
+        letterRepository.save(letter);
 
-        log.info("Created new letter {}", letterId);
+        log.info("Created new letter {}", id);
 
-        return letterId;
+        return id;
     }
 
     public LetterStatus getStatus(UUID id, String serviceName) {

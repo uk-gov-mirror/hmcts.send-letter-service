@@ -13,8 +13,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -25,7 +23,6 @@ import javax.persistence.Table;
 })
 public class Letter {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     private String messageId;
@@ -50,12 +47,14 @@ public class Letter {
     }
 
     public Letter(
+        UUID id,
         String messageId,
         String service,
         JsonNode additionalData,
         String type,
         byte[] fileContent
     ) {
+        this.id = id;
         this.messageId = messageId;
         this.service = service;
         this.additionalData = additionalData;
