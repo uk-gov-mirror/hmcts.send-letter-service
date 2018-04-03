@@ -46,6 +46,8 @@ public class V006MigrationScriptTest {
     @After
     public void cleanUp() {
         flyway.clean();
+        flyway.setTarget(MigrationVersion.LATEST);
+        flyway.migrate();
     }
 
     @Test
