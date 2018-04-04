@@ -87,7 +87,6 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   environment("APPINSIGHTS_INSTRUMENTATIONKEY", "test-key")
   environment("FTP_PRIVATE_KEY", file('src/integrationTest/resources/keypair').text)
   environment("FTP_PUBLIC_KEY", file('src/integrationTest/resources/keypair.pub').text)
-
 }
 
 task smoke(type: Test) {
