@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.sendletter.data.model.DbLetter;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -79,48 +78,6 @@ public class LetterRepository {
         } catch (EmptyResultDataAccessException ex) {
             return Optional.empty();
         }
-    }
-
-    /**
-     * Updates the `sent_to_print_at` column on letter(s) with given id.
-     *
-     * @return number of updated rows.
-     */
-    public int updateSentToPrintAt(UUID id, LocalDateTime dateTime) {
-        return jdbcTemplate.update(
-            "UPDATE letters SET sent_to_print_at = :sentToPrintAt WHERE id = :id",
-            new MapSqlParameterSource()
-                .addValue("id", id)
-                .addValue("sentToPrintAt", dateTime)
-        );
-    }
-
-    /**
-     * Updates the `printed_at` column on letter(s) with given id.
-     *
-     * @return number of updated rows.
-     */
-    public int updatePrintedAt(UUID id, LocalDateTime dateTime) {
-        return jdbcTemplate.update(
-            "UPDATE letters SET printed_at = :printedAt WHERE id = :id",
-            new MapSqlParameterSource()
-                .addValue("id", id)
-                .addValue("printedAt", dateTime)
-        );
-    }
-
-    /**
-     * Updates the `is_failed` column to `true`  on letter with given id.
-     *
-     * @return number of updated rows.
-     */
-    public int updateIsFailed(UUID id) {
-        return jdbcTemplate.update(
-            "UPDATE letters SET is_failed = :isFailed WHERE id = :id",
-            new MapSqlParameterSource()
-                .addValue("id", id)
-                .addValue("isFailed", true)
-        );
     }
 
     private String convertToJson(Map<String, Object> additionalData) throws JsonProcessingException {
