@@ -26,4 +26,8 @@ public class FtpAvailabilityChecker {
             return time.isBefore(downtimeStart) && time.isAfter(downtimeEnd);
         }
     }
+
+    public LocalTime getDowntimeStart() {
+        return downtimeStart;
+    }
 }
