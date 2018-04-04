@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
@@ -33,7 +34,7 @@ public class LetterService {
 
     private static final Logger log = LoggerFactory.getLogger(LetterService.class);
 
-    private final PdfCreator pdfCreator = new PdfCreator(new DuplexPreparator());
+    private final PdfCreator pdfCreator = new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert);
     private final LetterRepository letterRepository;
     private final Zipper zipper;
     private final ObjectMapper mapper;
