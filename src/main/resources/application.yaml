@@ -18,18 +18,23 @@ spring:
       password: ${LETTER_TRACKING_DB_PASSWORD:}
       properties:
         charSet: UTF-8
-      maxWaitForConnection: 1
-      minSize: 8
-      maxSize: 32
-      evictionInterval: 10
-      minIdleTime: 1 minute
-      checkConnectionWhileIdle: true
-      checkConnectionOnReturn: true
-      removeAbandoned: true
-      removeAbandonedTimeout: 60
-      abandonWhenPercentageFull: 0
-      testOnBorrow: true
-      validationQuery: SELECT 1
+      tomcat:
+        max-active: 10
+        max-idle: 10
+        min-idle: 2
+        max-wait: 10000
+        test-on-borrow: true
+        test-on-connect: true
+        test-on-idle: true
+        validation-query: "SELECT 1"
+        time-between-eviction-runs-millis: 10000
+        test-while-idle: true
+        test-on-return: true
+        remove-abandoned: true
+        remove-abandoned-timeout: 60
+        log-abandoned: true
+        abandon-when-percentage-full: 0
+
   jackson:
     serialization:
       write_dates_as_timestamps: false
