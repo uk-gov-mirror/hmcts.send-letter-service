@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.slc.services.steps.getpdf;
 
+import com.google.common.io.ByteStreams;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.sendletter.model.in.Document;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import static com.google.common.io.Resources.getResource;
@@ -82,7 +84,10 @@ public class PdfCreatorTest {
     }
 
     private InputStream getPdfPageContents(byte[] pdf, int pageNumber) throws Exception {
-        return PDDocument.load(pdf).getPage(pageNumber).getContents();
+        try (PDDocument doc = PDDocument.load(pdf)) {
+            byte[] data = ByteStreams.toByteArray(doc.getPage(pageNumber).getContents());
+            return new ByteArrayInputStream(data);
+        }
     }
 
 }
