@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.http.util.Asserts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
@@ -57,6 +59,11 @@ public class LetterService {
                 return id;
             })
             .orElseGet(() -> saveNewLetterAndReturnId(letter, messageId, serviceName));
+    }
+
+    @Transactional
+    public UUID send(LetterWithPdfsRequest letter, String serviceName) {
+        throw new NotImplementedException();
     }
 
     private UUID saveNewLetterAndReturnId(LetterRequest letterRequest, String messageId, String serviceName) {

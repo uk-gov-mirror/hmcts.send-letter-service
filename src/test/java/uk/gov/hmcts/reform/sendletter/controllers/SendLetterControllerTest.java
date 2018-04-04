@@ -18,14 +18,17 @@ import uk.gov.hmcts.reform.sendletter.services.AuthService;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,7 +52,7 @@ public class SendLetterControllerTest {
         given(authService.authenticate("auth-header-value")).willReturn("service-name");
         given(letterService.send(any(LetterRequest.class), anyString())).willReturn(letterId);
 
-        sendLetter(readResource("letter.json"))
+        sendLetter(readResource("controller/letter/v1/letter.json"))
             .andExpect(status().isOk())
             .andExpect(content().json("{\"letter_id\":" + letterId + "}"));
 
@@ -67,7 +70,7 @@ public class SendLetterControllerTest {
 
     @Test
     public void should_return_400_client_error_when_letter_is_sent_without_documents() throws Exception {
-        sendLetter(readResource("letter-without-doc.json"))
+        sendLetter(readResource("controller/letter/v1/letter-without-doc.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
                 .json("{\"errors\":[{\"field_name\":\"documents\",\"message\":\"size must be between 1 and 10\"}]}"));
@@ -77,7 +80,7 @@ public class SendLetterControllerTest {
 
     @Test
     public void should_return_400_client_error_when_letter_is_sent_without_type() throws Exception {
-        sendLetter(readResource("letter-without-type.json"))
+        sendLetter(readResource("controller/letter/v1/letter-without-type.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
                 .json("{\"errors\":[{\"field_name\":\"type\",\"message\":\"may not be empty\"}]}"));
@@ -87,7 +90,7 @@ public class SendLetterControllerTest {
 
     @Test
     public void should_return_400_client_error_when_letter_is_sent_without_template_in_document() throws Exception {
-        sendLetter(readResource("letter-without-template.json"))
+        sendLetter(readResource("controller/letter/v1/letter-without-template.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
                 .json("{\"errors\":[{\"field_name\":\"documents[0].template\",\"message\":\"may not be empty\"}]}"));
@@ -98,7 +101,7 @@ public class SendLetterControllerTest {
     @Test
     public void should_return_400_client_error_when_letter_is_sent_without_template_values_in_document()
         throws Exception {
-        sendLetter(readResource("letter-without-template-values.json"))
+        sendLetter(readResource("controller/letter/v1/letter-without-template-values.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
                 .json("{\"errors\":[{\"field_name\":\"documents[0].values\",\"message\":\"may not be empty\"}]}"));
@@ -109,7 +112,7 @@ public class SendLetterControllerTest {
     @Test
     public void should_return_400_client_error_when_letter_is_with_more_than_10_documents()
         throws Exception {
-        sendLetter(readResource("letter-with-multiple-docs.json"))
+        sendLetter(readResource("controller/letter/v1/letter-with-multiple-docs.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
                 .json("{\"errors\":[{\"field_name\":\"documents\",\"message\":\"size must be between 1 and 10\"}]}"));
@@ -121,9 +124,33 @@ public class SendLetterControllerTest {
     public void should_return_401_if_service_auth_header_is_missing() throws Exception {
         given(authService.authenticate(null)).willThrow(new UnauthenticatedException("Hello"));
 
-        MvcResult result = sendLetterWithoutAuthHeader(readResource("letter.json")).andReturn();
+        MvcResult result = sendLetterWithoutAuthHeader(readResource("controller/letter/v1/letter.json")).andReturn();
 
         assertThat(result.getResponse().getStatus()).isEqualTo(401);
+    }
+
+    @Test
+    public void should_support_two_content_types() throws Exception {
+        given(authService.authenticate(anyString())).willReturn("my_service");
+
+        List<String> supportedContentTypes = asList(
+            MediaTypes.LETTER_V1,
+            MediaType.APPLICATION_JSON_UTF8_VALUE
+        );
+
+        for (String type : supportedContentTypes) {
+            mockMvc
+                .perform(
+                    post("/letters")
+                        .contentType(type)
+                        .header("ServiceAuthorization", "auth-header-value")
+                        .content(readResource("controller/letter/v1/letter.json"))
+                )
+                .andExpect(status().isOk());
+        }
+
+        verify(letterService, times(supportedContentTypes.size()))
+            .send(any(LetterRequest.class), anyString());
     }
 
     private ResultActions sendLetter(String json) throws Exception {

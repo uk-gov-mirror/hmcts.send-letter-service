@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.model.out.SendLetterResponse;
 import uk.gov.hmcts.reform.sendletter.services.AuthService;
@@ -45,7 +46,10 @@ public class SendLetterController {
         this.authService = authService;
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(
+        consumes = {MediaType.APPLICATION_JSON_VALUE, MediaTypes.LETTER_V1},
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
     @ApiOperation(value = "Send letter to print and post service")
     @ApiResponses({
         @ApiResponse(code = 200, response = SendLetterResponse.class, message = "Successfully sent letter"),
@@ -55,6 +59,23 @@ public class SendLetterController {
         @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
         @ApiParam(value = "Letter consisting of documents and type", required = true)
         @Valid @RequestBody LetterRequest letter
+    ) {
+        String serviceName = authService.authenticate(serviceAuthHeader);
+        UUID letterId = letterService.send(letter, serviceName);
+
+        return ok().body(new SendLetterResponse(letterId));
+    }
+
+    @PostMapping(consumes = MediaTypes.LETTER_V2, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Send letter to print and post service")
+    @ApiResponses({
+        @ApiResponse(code = 200, response = SendLetterResponse.class, message = "Successfully sent letter"),
+        @ApiResponse(code = 401, message = ControllerResponseMessage.RESPONSE_401)
+    })
+    public ResponseEntity<SendLetterResponse> sendLetter(
+        @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
+        @ApiParam(value = "Letter consisting of documents and type", required = true)
+        @Valid @RequestBody LetterWithPdfsRequest letter
     ) {
         String serviceName = authService.authenticate(serviceAuthHeader);
         UUID letterId = letterService.send(letter, serviceName);
