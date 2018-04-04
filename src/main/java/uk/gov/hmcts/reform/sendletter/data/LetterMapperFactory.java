@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sendletter.data;
 
 import org.springframework.jdbc.core.RowMapper;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
-import uk.gov.hmcts.reform.sendletter.model.out.NotPrintedLetter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,7 +14,6 @@ import java.util.UUID;
 final class LetterMapperFactory {
 
     public static final RowMapper<LetterStatus> LETTER_STATUS_MAPPER = new LetterStatusMapper();
-    public static final RowMapper<NotPrintedLetter> NOT_PRINTED_LETTER_MAPPER = new NotPrintedMapper();
 
     static ZonedDateTime getDateTime(ResultSet rs, String columnLabel) throws SQLException {
         Timestamp timestamp = rs.getTimestamp(columnLabel);
@@ -38,21 +36,6 @@ final class LetterMapperFactory {
                 getDateTime(rs, "sent_to_print_at"),
                 getDateTime(rs, "printed_at"),
                 rs.getBoolean("is_failed")
-            );
-        }
-    }
-
-    private static final class NotPrintedMapper implements RowMapper<NotPrintedLetter> {
-
-        @Override
-        public NotPrintedLetter mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new NotPrintedLetter(
-                rs.getObject("id", UUID.class),
-                rs.getString("message_id"),
-                rs.getString("service"),
-                rs.getString("type"),
-                getDateTime(rs, "created_at"),
-                getDateTime(rs, "sent_to_print_at")
             );
         }
     }

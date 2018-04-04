@@ -10,11 +10,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.sendletter.data.model.DbLetter;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
-import uk.gov.hmcts.reform.sendletter.model.out.NotPrintedLetter;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -122,23 +120,6 @@ public class LetterRepository {
             new MapSqlParameterSource()
                 .addValue("id", id)
                 .addValue("isFailed", true)
-        );
-    }
-
-    /**
-     * Retrieve a list of letters which are not failed but still not printed.
-     *
-     * @return a list of unprinted letters which were sent before yesterdays 5pm deadline
-     */
-    public List<NotPrintedLetter> getStaleLetters() {
-        return jdbcTemplate.query(
-            "SELECT id, message_id, service, type, created_at, sent_to_print_at "
-                + "FROM letters "
-                + "WHERE NOT is_failed"
-                + "  AND printed_at IS NULL"
-                + "  AND sent_to_print_at IS NOT NULL"
-                + "  AND sent_to_print_at < (CURRENT_DATE - integer '1' + time '17:00')",
-            LetterMapperFactory.NOT_PRINTED_LETTER_MAPPER
         );
     }
 
