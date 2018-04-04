@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.slc.services.steps.getpdf;
 import org.apache.http.util.Asserts;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
-import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
 import java.util.List;
@@ -21,11 +20,11 @@ public class PdfCreator {
         this.converter = converter;
     }
 
-    public byte[] create(LetterRequest letter) {
-        Asserts.notNull(letter, "letter");
+    public byte[] create(List<Document> documents) {
+        Asserts.notNull(documents, "documents");
 
         List<byte[]> docs =
-            letter.documents
+            documents
                 .stream()
                 .map(this::generatePdf)
                 .map(duplexPreparator::prepare)

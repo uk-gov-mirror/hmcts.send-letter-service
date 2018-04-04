@@ -8,11 +8,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
-import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import static com.google.common.io.Resources.getResource;
 import static com.google.common.io.Resources.toByteArray;
@@ -40,14 +40,14 @@ public class PdfCreatorTest {
     }
 
     @Test
-    public void should_require_letter_to_not_be_null() {
+    public void should_require_documents_to_not_be_null() {
         assertThatThrownBy(() -> pdfCreator.create(null))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("letter");
+            .hasMessageContaining("documents");
     }
 
     @Test
-    public void should_return_a_merged_pdf_when_letter_consists_of_multiple_documents() throws Exception {
+    public void should_return_a_merged_pdf_when_multiple_documents_are_passed() throws Exception {
         byte[] test1Pdf = toByteArray(getResource("test1.pdf"));
         byte[] test2Pdf = toByteArray(getResource("test2.pdf"));
         byte[] expectedMergedPdf = toByteArray(getResource("merged.pdf"));
@@ -58,17 +58,13 @@ public class PdfCreatorTest {
         given(converter.apply(eq("t1".getBytes()), any())).willReturn(test1Pdf);
         given(converter.apply(eq("t2".getBytes()), any())).willReturn(test2Pdf);
 
-        LetterRequest letter = new LetterRequest(
-            asList(
-                new Document("t1", emptyMap()),
-                new Document("t2", emptyMap())
-            ),
-            "type",
-            null
+        List<Document> docs = asList(
+            new Document("t1", emptyMap()),
+            new Document("t2", emptyMap())
         );
 
         // when
-        byte[] pdfContent = pdfCreator.create(letter);
+        byte[] pdfContent = pdfCreator.create(docs);
 
         // then
         InputStream actualPdfPage1 = getPdfPageContents(pdfContent, 0);
