@@ -41,7 +41,7 @@ public class PdfCreatorTest {
 
     @Test
     public void should_require_documents_to_not_be_null() {
-        assertThatThrownBy(() -> pdfCreator.create(null))
+        assertThatThrownBy(() -> pdfCreator.createFromTemplates(null))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("documents");
     }
@@ -64,7 +64,7 @@ public class PdfCreatorTest {
         );
 
         // when
-        byte[] pdfContent = pdfCreator.create(docs);
+        byte[] pdfContent = pdfCreator.createFromTemplates(docs);
 
         // then
         InputStream actualPdfPage1 = getPdfPageContents(pdfContent, 0);
