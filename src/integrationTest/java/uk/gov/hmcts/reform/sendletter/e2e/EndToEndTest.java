@@ -65,7 +65,7 @@ public class EndToEndTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-            // Wait for pdfs to be uploaded.
+            // Wait for letter to be uploaded.
             await().atMost(60, SECONDS).untilAsserted(
                 () -> assertThat(server.lettersFolder.listFiles()).as("No letters uploaded!").isNotEmpty());
 

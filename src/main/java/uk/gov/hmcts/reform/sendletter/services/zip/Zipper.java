@@ -29,13 +29,12 @@ public class Zipper {
     }
 
     public ZippedDoc zip(String zipFileName, PdfDoc pdfDoc) {
-        try {
-            byte[] zipContent = zipBytes(pdfDoc.filename, pdfDoc.content);
+        return new ZippedDoc(zipFileName, zip(pdfDoc));
+    }
 
-            return new ZippedDoc(
-                zipFileName,
-                zipContent
-            );
+    public byte[] zip(PdfDoc pdfDoc) {
+        try {
+            return zipBytes(pdfDoc.filename, pdfDoc.content);
         } catch (IOException exception) {
             throw new DocumentZipException(exception);
         }

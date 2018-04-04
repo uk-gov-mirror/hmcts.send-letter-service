@@ -14,9 +14,6 @@ import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.zip.ZipFileNameHelper;
 import uk.gov.hmcts.reform.sendletter.services.zip.ZippedDoc;
-import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfDoc;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -32,19 +29,16 @@ public class UploadLettersTask {
     public static final String SMOKE_TEST_LETTER_TYPE = "smoke_test";
 
     private final LetterRepository repo;
-    private final Zipper zipper;
     private final FtpClient ftp;
     private final FtpAvailabilityChecker availabilityChecker;
 
     @Autowired
     public UploadLettersTask(
         LetterRepository repo,
-        Zipper zipper,
         FtpClient ftp,
         FtpAvailabilityChecker availabilityChecker
     ) {
         this.repo = repo;
-        this.zipper = zipper;
         this.ftp = ftp;
         this.availabilityChecker = availabilityChecker;
     }
@@ -99,18 +93,21 @@ public class UploadLettersTask {
     }
 
     private String uploadToFtp(Letter letter) {
-        PdfDoc pdfDoc = new PdfDoc(FileNameHelper.generateName(letter, "pdf"), letter.getFileContent());
-        ZippedDoc zippedDoc = zipper.zip(ZipFileNameHelper.generateName(letter, now()), pdfDoc);
+
+        ZippedDoc zippedDoc = new ZippedDoc(
+            ZipFileNameHelper.generateName(letter, now()),
+            letter.getFileContent()
+        );
 
         logger.debug(
-            "Uploading letter id: {}, messageId: {}, pdf filename: {}, zip filename:",
+            "Uploading letter id: {}, messageId: {}, zip filename: {}",
             letter.getId(),
             letter.getMessageId(),
-            pdfDoc.filename,
             zippedDoc.filename
         );
 
         ftp.upload(zippedDoc, isSmokeTest(letter));
+
         return zippedDoc.filename;
     }
 

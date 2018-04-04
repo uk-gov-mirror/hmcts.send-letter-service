@@ -18,11 +18,12 @@ import uk.gov.hmcts.reform.sendletter.config.SpyOnJpaConfig;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
+import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.UUID;
-import javax.activation.DataSource;
+import java.util.zip.ZipInputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -48,7 +49,7 @@ public class LetterServiceTest {
 
     @Before
     public void setUp() {
-        service = new LetterService(letterRepository, new ObjectMapper());
+        service = new LetterService(letterRepository, new Zipper(), new ObjectMapper());
     }
 
     @After
@@ -57,11 +58,15 @@ public class LetterServiceTest {
     }
 
     @Test
-    public void generates_and_saves_pdf() throws IOException {
+    public void generates_and_saves_zipped_pdf() throws IOException {
         UUID id = service.send(SampleData.letter(), SERVICE_NAME);
+
         Letter result = letterRepository.findOne(id);
-        DataSource dataSource = new ByteArrayDataSource(new ByteArrayInputStream(result.getFileContent()));
-        PreflightParser pdfParser = new PreflightParser(dataSource);
+
+        ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(result.getFileContent()));
+        zip.getNextEntry(); //positions the stream at the beginning of the entry data
+
+        PreflightParser pdfParser = new PreflightParser(new ByteArrayDataSource(zip));
         pdfParser.parse();
         PreflightDocument document = pdfParser.getPreflightDocument();
         // This will throw an exception if the file format is invalid,
@@ -70,7 +75,7 @@ public class LetterServiceTest {
     }
 
     @Test
-    public void generate_and_save_pdf_and_return_same_id_on_resubmit() throws IOException {
+    public void returns_same_id_on_resubmit() throws IOException {
         // given
         LetterRequest sampleRequest = SampleData.letter();
         UUID id1 = service.send(sampleRequest, SERVICE_NAME);
@@ -90,7 +95,7 @@ public class LetterServiceTest {
     }
 
     @Test
-    public void generate_and_save_pdf_twice_if_previous_letter_has_been_sent_to_print() throws IOException {
+    public void saves_an_new_letter_if_previous_one_has_been_sent_to_print() throws IOException {
         // given
         LetterRequest sampleRequest = SampleData.letter();
         UUID id1 = service.send(sampleRequest, SERVICE_NAME);

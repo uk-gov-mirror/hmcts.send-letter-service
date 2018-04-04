@@ -13,7 +13,10 @@ import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
+import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
+import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfDoc;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
 import java.sql.Timestamp;
@@ -32,10 +35,12 @@ public class LetterService {
 
     private final PdfCreator pdfCreator = new PdfCreator(new DuplexPreparator());
     private final LetterRepository letterRepository;
+    private final Zipper zipper;
     private final ObjectMapper mapper;
 
-    public LetterService(LetterRepository letterRepository, ObjectMapper mapper) {
+    public LetterService(LetterRepository letterRepository, Zipper zipper, ObjectMapper mapper) {
         this.letterRepository = letterRepository;
+        this.zipper = zipper;
         this.mapper = mapper;
     }
 
@@ -69,7 +74,14 @@ public class LetterService {
     private UUID saveNewLetterAndReturnId(LetterRequest letterRequest, String messageId, String serviceName) {
         UUID id = UUID.randomUUID();
 
-        byte[] pdf = pdfCreator.create(letterRequest);
+        byte[] zipContent = zipper.zip(
+            new PdfDoc(
+                FileNameHelper.generateName(letterRequest.type, serviceName, id, "pdf"),
+                pdfCreator.create(letterRequest)
+            )
+        );
+
+        // TODO: encrypt zip content
 
         Letter letter = new Letter(
             id,
@@ -77,7 +89,7 @@ public class LetterService {
             serviceName,
             mapper.valueToTree(letterRequest.additionalData),
             letterRequest.type,
-            pdf
+            zipContent
         );
 
         letterRepository.save(letter);

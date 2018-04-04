@@ -10,8 +10,6 @@ import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
-import uk.gov.hmcts.reform.sendletter.services.zip.ZippedDoc;
-import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
 import java.time.LocalTime;
 import java.util.UUID;
@@ -30,7 +28,6 @@ import static uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask.SMOKE_TEST_
 public class UploadLettersTaskTest {
 
     @Mock private LetterRepository repo;
-    @Mock private Zipper zipper;
     @Mock private FtpClient ftpClient;
     @Mock private FtpAvailabilityChecker availabilityChecker;
 
@@ -39,7 +36,7 @@ public class UploadLettersTaskTest {
     @Before
     public void setUp() throws Exception {
         given(availabilityChecker.isFtpAvailable(any(LocalTime.class))).willReturn(true);
-        this.task = new UploadLettersTask(repo, zipper, ftpClient, availabilityChecker);
+        this.task = new UploadLettersTask(repo, ftpClient, availabilityChecker);
     }
 
     @After
@@ -49,7 +46,6 @@ public class UploadLettersTaskTest {
 
     @Test
     public void should_handle_smoke_test_letters() throws Exception {
-        given(zipper.zip(any(), any())).willReturn(new ZippedDoc("hello.zip", "hello".getBytes()));
 
         givenDbContains(letterOfType(SMOKE_TEST_LETTER_TYPE));
         task.run();
