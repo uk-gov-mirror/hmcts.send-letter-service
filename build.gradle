@@ -176,7 +176,7 @@ distributions {
 
 def versions = [
   springfoxSwagger: '2.7.0',
-  reformLogging: '1.6.1',
+  reformLogging: '2.0.2',
   jackson: dependencyManagement.importedProperties['jackson.version'],
   logback: '1.2.3'
 ]
@@ -195,6 +195,7 @@ dependencies {
   compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
 
+  compile group: 'uk.gov.hmcts.reform', name: 'java-logging', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-appinsights', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'http-proxy-spring-boot-autoconfigure', version: '1.1.0'
   compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '0.4.2'
@@ -235,6 +236,10 @@ dependencies {
 
 jar {
   archiveName 'send-letter-service.jar'
+
+  manifest {
+    attributes('Implementation-Version': project.version.toString())
+  }
 }
 
 task migratePostgresDatabase(type: org.flywaydb.gradle.task.FlywayMigrateTask) {

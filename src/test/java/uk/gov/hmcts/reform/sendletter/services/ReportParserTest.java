@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
 import org.junit.Test;
+import uk.gov.hmcts.reform.sendletter.exception.ReportParsingException;
 import uk.gov.hmcts.reform.slc.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.ParsedReport;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.Report;

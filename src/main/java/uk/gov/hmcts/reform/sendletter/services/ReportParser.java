@@ -6,6 +6,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.sendletter.exception.ReportParsingException;
 import uk.gov.hmcts.reform.slc.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.ParsedReport;
