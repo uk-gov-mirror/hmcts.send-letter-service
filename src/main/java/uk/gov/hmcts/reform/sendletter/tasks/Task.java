@@ -2,7 +2,8 @@ package uk.gov.hmcts.reform.sendletter.tasks;
 
 public enum Task {
     UploadLetters,
-    MarkLettersPosted;
+    MarkLettersPosted,
+    StaleLetters;
 
     int getLockId() {
         return ordinal();

@@ -44,3 +44,4 @@ tasks:
   upload-letters: ${UPLOAD_LETTERS_INTERVAL:1}
   # Run every second.
   mark-letters-posted: ${FTP_REPORTS_CRON:*/1 * * * * *}
+  stale-letters-report: ${FTP_REPORTS_CRON:*/1 * * * * *}

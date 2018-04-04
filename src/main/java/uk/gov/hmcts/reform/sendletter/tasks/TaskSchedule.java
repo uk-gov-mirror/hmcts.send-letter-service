@@ -13,11 +13,18 @@ import javax.sql.DataSource;
 public class TaskSchedule {
     private final MarkLettersPostedTask markPosted;
     private final UploadLettersTask upload;
+    private final StaleLettersTask staleReport;
     private final DataSource dataSource;
 
-    public TaskSchedule(UploadLettersTask upload, MarkLettersPostedTask post, DataSource source) {
+    public TaskSchedule(
+        UploadLettersTask upload,
+        MarkLettersPostedTask post,
+        StaleLettersTask staleReport,
+        DataSource source
+    ) {
         this.upload = upload;
         this.markPosted = post;
+        this.staleReport = staleReport;
         this.dataSource = source;
     }
 
@@ -29,6 +36,11 @@ public class TaskSchedule {
     @Scheduled(cron = "${tasks.mark-letters-posted}")
     public void markPosted() throws SQLException {
         tryRun(Task.MarkLettersPosted, () -> markPosted.run(LocalTime.now()));
+    }
+
+    @Scheduled(cron = "${tasks.stale-letters-report}")
+    public void staleLetters() throws SQLException {
+        tryRun(Task.StaleLetters, staleReport::run);
     }
 
     private void tryRun(Task task, Runnable runnable) throws SQLException {

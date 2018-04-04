@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sendletter.tasks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
@@ -15,6 +16,7 @@ import java.time.LocalTime;
 /**
  * Task to run report on unprinted letters and report them to AppInsights.
  */
+@Component
 public class StaleLettersTask {
     private static final Logger logger = LoggerFactory.getLogger(StaleLettersTask.class);
 

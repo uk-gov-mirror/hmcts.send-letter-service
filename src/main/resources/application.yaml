@@ -62,4 +62,5 @@ tasks:
   # Interval is in milliseconds.
   upload-letters: ${UPLOAD_LETTERS_INTERVAL:30000}
   mark-letters-posted: ${FTP_REPORTS_CRON:0 30 0 * * *}
+  stale-letters-report: ${STALE_LETTERS_REPORT_CRON:0 30 1 * * *}
 
