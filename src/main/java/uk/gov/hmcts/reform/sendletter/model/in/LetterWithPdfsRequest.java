@@ -4,11 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.Size;
 
-public class LetterWithPdfsRequest {
+public class LetterWithPdfsRequest implements Serializable {
+
+    private static final long serialVersionUID = 5528476697055795883L;
 
     // TODO: validate pdfs are base64 encoded.
     /**
