@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sendletter.tasks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.hmcts.reform.sendletter.exception.TaskRunnerException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -34,27 +35,32 @@ public final class SerialTaskRunner {
      * No error is thrown if such a task is already running, the
      * supplied Runnable is simply not executed.
      */
-    public void tryRun(int id, Runnable runnable) throws SQLException {
-        log.info("Trying to lock {}", id);
+    void tryRun(Task task, Runnable runnable) {
+        int id = task.getLockId();
+        String name = task.name();
+        log.info("Trying to lock {}", name);
+
         try (Connection connection = source.getConnection()) {
             boolean locked = false;
             try {
                 if (tryLock(id, connection)) {
-                    log.info("Acquired lock {}", id);
+                    log.info("Acquired lock {}", name);
                     locked = true;
                     runnable.run();
                 } else {
-                    log.info("Failed to acquire lock {}", id);
+                    log.info("Failed to acquire lock {}", name);
                 }
             } finally {
                 if (locked) {
                     if (unlock(id, connection)) {
-                        log.info("Released lock {}", id);
+                        log.info("Released lock {}", name);
                     } else {
-                        log.warn("Failed to release lock {}", id);
+                        log.warn("Failed to release lock {}", name);
                     }
                 }
             }
+        } catch (SQLException exc) {
+            throw new TaskRunnerException(exc);
         }
     }
 
