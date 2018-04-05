@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
+import uk.gov.hmcts.reform.logging.exception.AbstractLoggingException;
+import uk.gov.hmcts.reform.sendletter.exception.InternalServerException;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
 import uk.gov.hmcts.reform.sendletter.model.out.errors.FieldError;
@@ -88,7 +90,13 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Void> handleInternalException(Exception exc) {
-        log.error(exc.getMessage(), exc);
+        Throwable exception = exc;
+
+        if (!(exc instanceof AbstractLoggingException)) {
+            exception = new InternalServerException(exc);
+        }
+
+        log.error(exc.getMessage(), exception);
         return status(INTERNAL_SERVER_ERROR).build();
     }
 }
