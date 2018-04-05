@@ -23,8 +23,9 @@ import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
 import static uk.gov.hmcts.reform.sendletter.services.LetterChecksumGenerator.generateChecksum;
@@ -47,24 +48,10 @@ public class LetterService {
 
     @Transactional
     public UUID send(LetterRequest letter, String serviceName) {
-        Asserts.notEmpty(serviceName, "serviceName");
-
-        final String messageId = generateChecksum(letter);
-
-        log.info("Generated message: id = {}", messageId);
-
-        Optional<Letter> duplicateLetter = letterRepository.findByMessageIdAndStatusOrderByCreatedAtDesc(
-            messageId,
-            Created
+        return send(
+            new LetterInfo(generateChecksum(letter), serviceName, letter.type, letter.additionalData),
+            () -> pdfCreator.createFromTemplates(letter.documents)
         );
-
-        return duplicateLetter
-            .map(l -> {
-                UUID id = l.getId();
-                log.info("Same message found already created. Returning letter id {} instead", id);
-                return id;
-            })
-            .orElseGet(() -> saveNewLetterAndReturnId(letter, messageId, serviceName));
     }
 
     @Transactional
@@ -72,13 +59,26 @@ public class LetterService {
         throw new NotImplementedException();
     }
 
-    private UUID saveNewLetterAndReturnId(LetterRequest letterRequest, String messageId, String serviceName) {
+    private UUID send(LetterInfo letterInfo, Supplier<byte[]> pdfContentSupplier) {
+        Asserts.notEmpty(letterInfo.serviceName, "serviceName");
+
+        return letterRepository
+            .findByMessageIdAndStatusOrderByCreatedAtDesc(letterInfo.messageId, Created)
+            .map(duplicate -> {
+                UUID id = duplicate.getId();
+                log.info("Same message found already created. Returning letter id {} instead", id);
+                return id;
+            })
+            .orElseGet(() -> saveNewLetter(letterInfo, pdfContentSupplier.get()));
+    }
+
+    private UUID saveNewLetter(LetterInfo letterInfo, byte[] pdfContent) {
         UUID id = UUID.randomUUID();
 
         byte[] zipContent = zipper.zip(
             new PdfDoc(
-                FileNameHelper.generateName(letterRequest.type, serviceName, id, "pdf"),
-                pdfCreator.createFromTemplates(letterRequest.documents)
+                FileNameHelper.generateName(letterInfo.type, letterInfo.serviceName, id, "pdf"),
+                pdfContent
             )
         );
 
@@ -86,10 +86,10 @@ public class LetterService {
 
         Letter letter = new Letter(
             id,
-            messageId,
-            serviceName,
-            mapper.valueToTree(letterRequest.additionalData),
-            letterRequest.type,
+            letterInfo.messageId,
+            letterInfo.serviceName,
+            mapper.valueToTree(letterInfo.additionalData),
+            letterInfo.type,
             zipContent
         );
 
@@ -120,5 +120,19 @@ public class LetterService {
             return null;
         }
         return stamp.toInstant().atZone(ZoneId.of("UTC"));
+    }
+
+    static class LetterInfo {
+        public final String messageId;
+        public final String serviceName;
+        public final String type;
+        public final Map<String, Object> additionalData;
+
+        public LetterInfo(String messageId, String serviceName, String type, Map<String, Object> additionalData) {
+            this.messageId = messageId;
+            this.serviceName = serviceName;
+            this.type = type;
+            this.additionalData = additionalData;
+        }
     }
 }
