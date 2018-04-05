@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.controllers;
+package uk.gov.hmcts.reform.sendletter.controllers.sendlettercontroller;
 
 import org.junit.Before;
 import org.junit.Test;

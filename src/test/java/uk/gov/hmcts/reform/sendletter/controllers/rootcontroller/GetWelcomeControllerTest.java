@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.controllers;
+package uk.gov.hmcts.reform.sendletter.controllers.rootcontroller;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

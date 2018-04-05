@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.controllers;
+package uk.gov.hmcts.reform.sendletter.controllers.sendlettercontroller;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.services.AuthService;

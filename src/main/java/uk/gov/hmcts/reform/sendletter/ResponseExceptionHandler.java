@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
 import uk.gov.hmcts.reform.sendletter.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.sendletter.model.out.errors.ModelValidationError;
+import uk.gov.hmcts.reform.slc.services.steps.getpdf.exceptions.InvalidPdfException;
 
 import java.util.List;
 
@@ -72,6 +73,11 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(JsonProcessingException.class)
     protected ResponseEntity<String> handleJsonProcessingException() {
         return status(BAD_REQUEST).body("Exception occurred while parsing letter contents");
+    }
+
+    @ExceptionHandler(InvalidPdfException.class)
+    protected ResponseEntity<String> handleInvalidPdfException() {
+        return status(BAD_REQUEST).body("Invalid pdf");
     }
 
     @ExceptionHandler(UnauthenticatedException.class)
