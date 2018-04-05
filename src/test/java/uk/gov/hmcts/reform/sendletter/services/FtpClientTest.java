@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.slc.services.steps.sftpupload;
+package uk.gov.hmcts.reform.sendletter.services;
 
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.sftp.RemoteResourceInfo;
@@ -10,20 +10,28 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
-import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.zip.ZippedDoc;
 import uk.gov.hmcts.reform.slc.config.FtpConfigProperties;
+import uk.gov.hmcts.reform.slc.services.steps.sftpupload.Report;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.BDDMockito.doNothing;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.contains;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -64,6 +72,20 @@ public class FtpClientTest {
 
         // then
         assertThat(reports).isEmpty();
+        verify(insights).trackFtpReportsDownload(any(Duration.class), eq(true));
+    }
+
+    @Test
+    public void should_track_failure_when_trying_to_download_report() throws IOException {
+        // given
+        willThrow(IOException.class).given(sftpClient).ls(anyString());
+
+        // when
+        Throwable exception = catchThrowable(() -> client.downloadReports());
+
+        // then
+        assertThat(exception).isInstanceOf(FtpException.class);
+        verify(insights).trackFtpReportsDownload(any(Duration.class), eq(false));
     }
 
     @Test
@@ -90,5 +112,48 @@ public class FtpClientTest {
                 any(LocalSourceFile.class),
                 contains("regular") //path
             );
+
+        // and
+        verify(insights, times(2)).trackFtpUpload(any(Duration.class), eq(true));
+    }
+
+    @Test
+    public void should_track_failure_when_trying_to_upload_new_file() throws IOException {
+        // given
+        willThrow(IOException.class).given(sftpFileTransfer).upload(any(LocalSourceFile.class), anyString());
+
+        // when
+        Throwable exception = catchThrowable(() ->
+            client.upload(new ZippedDoc("goodbye.zip", "goodbye".getBytes()), false)
+        );
+
+        // then
+        assertThat(exception).isInstanceOf(FtpException.class);
+        verify(insights).trackFtpUpload(any(Duration.class), eq(false));
+    }
+
+    @Test
+    public void should_delete_report_from_ftp() throws IOException {
+        // given
+        doNothing().when(sftpClient).rm(anyString());
+
+        // when
+        client.deleteReport("some/report");
+
+        // then
+        verify(insights).trackFtpReportDelete(any(Duration.class), eq(true));
+    }
+
+    @Test
+    public void should_track_failure_when_trying_to_delete_report_from_ftp() throws IOException {
+        // given
+        willThrow(IOException.class).given(sftpClient).rm(anyString());
+
+        // when
+        Throwable exception = catchThrowable(() -> client.deleteReport("some/report"));
+
+        // then
+        assertThat(exception).isInstanceOf(FtpException.class);
+        verify(insights).trackFtpReportDelete(any(Duration.class), eq(false));
     }
 }

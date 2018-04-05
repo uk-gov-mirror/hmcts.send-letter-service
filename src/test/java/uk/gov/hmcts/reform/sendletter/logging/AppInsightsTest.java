@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.logging;
 
 import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.applicationinsights.telemetry.Duration;
 import com.microsoft.applicationinsights.telemetry.TelemetryContext;
 import org.junit.After;
 import org.junit.Before;
@@ -21,16 +22,22 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AppInsightsTest {
 
+    private static final java.time.Duration TIME_TOOK = java.time.Duration.ofMinutes(1);
+
     private static final String MESSAGE_ID = "some-message-id";
+
     private static final String SERVICE_NAME = "some-service-name";
+
     private static final String TYPE = "some-type";
 
     @Captor
@@ -54,6 +61,49 @@ public class AppInsightsTest {
     public void tearDown() {
         reset(telemetry);
     }
+
+    // dependencies
+
+    @Test
+    public void should_track_ftp_upload() {
+        insights.trackFtpUpload(TIME_TOOK, true);
+        insights.trackFtpUpload(TIME_TOOK, false);
+
+        verify(telemetry, times(2)).trackDependency(
+            eq(AppDependency.FTP_CLIENT),
+            eq(AppDependencyCommand.FTP_FILE_UPLOADED),
+            any(Duration.class),
+            anyBoolean()
+        );
+    }
+
+    @Test
+    public void should_track_ftp_download() {
+        insights.trackFtpReportsDownload(TIME_TOOK, true);
+        insights.trackFtpReportsDownload(TIME_TOOK, false);
+
+        verify(telemetry, times(2)).trackDependency(
+            eq(AppDependency.FTP_CLIENT),
+            eq(AppDependencyCommand.FTP_DOWNLOAD_REPORTS),
+            any(Duration.class),
+            anyBoolean()
+        );
+    }
+
+    @Test
+    public void should_track_ftp_delete() {
+        insights.trackFtpReportDelete(TIME_TOOK, true);
+        insights.trackFtpReportDelete(TIME_TOOK, false);
+
+        verify(telemetry, times(2)).trackDependency(
+            eq(AppDependency.FTP_CLIENT),
+            eq(AppDependencyCommand.FTP_REPORT_DELETE),
+            any(Duration.class),
+            anyBoolean()
+        );
+    }
+
+    // events
 
     @Test
     public void should_track_event_of_not_printed_letter() {

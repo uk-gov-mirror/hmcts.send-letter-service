@@ -7,7 +7,6 @@ import net.schmizz.sshj.sftp.SFTPFileTransfer;
 import net.schmizz.sshj.xfer.LocalSourceFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
@@ -32,7 +31,6 @@ public class FtpClient {
 
     private static final Logger logger = LoggerFactory.getLogger(FtpClient.class);
 
-    @Autowired
     private final AppInsights insights;
 
     private final FtpConfigProperties configProperties;
@@ -40,7 +38,6 @@ public class FtpClient {
     private final Supplier<SSHClient> sshClientSupplier;
 
     // region constructor
-    @Autowired
     public FtpClient(
         Supplier<SSHClient> sshClientSupplier,
         FtpConfigProperties configProperties,
@@ -80,11 +77,13 @@ public class FtpClient {
      * Downloads ALL files from reports directory.
      */
     public List<Report> downloadReports() {
+        Instant start = Instant.now();
+
         return runWith(sftp -> {
             try {
                 SFTPFileTransfer transfer = sftp.getFileTransfer();
 
-                return sftp.ls(configProperties.getReportsFolder())
+                List<Report> reports = sftp.ls(configProperties.getReportsFolder())
                     .stream()
                     .filter(this::isReportFile)
                     .map(file -> {
@@ -98,18 +97,29 @@ public class FtpClient {
                     })
                     .collect(toList());
 
+                insights.trackFtpReportsDownload(Duration.between(start, Instant.now()), true);
+
+                return reports;
             } catch (IOException exc) {
+                insights.trackFtpReportsDownload(Duration.between(start, Instant.now()), false);
+
                 throw new FtpException("Error while downloading reports", exc);
             }
         });
     }
 
     public void deleteReport(String reportPath) {
+        Instant start = Instant.now();
+
         runWith(sftp -> {
             try {
                 sftp.rm(reportPath);
+                insights.trackFtpReportDelete(Duration.between(start, Instant.now()), true);
+
                 return null;
             } catch (Exception exc) {
+                insights.trackFtpReportDelete(Duration.between(start, Instant.now()), false);
+
                 throw new FtpException("Error while deleting report: " + reportPath, exc);
             }
         });

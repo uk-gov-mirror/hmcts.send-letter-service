@@ -23,6 +23,8 @@ public class AppInsights extends AbstractAppInsights {
         super(telemetry);
     }
 
+    // dependencies
+
     public void trackFtpUpload(java.time.Duration duration, boolean success) {
         telemetry.trackDependency(
             AppDependency.FTP_CLIENT,
@@ -31,6 +33,26 @@ public class AppInsights extends AbstractAppInsights {
             success
         );
     }
+
+    public void trackFtpReportsDownload(java.time.Duration duration, boolean success) {
+        telemetry.trackDependency(
+            AppDependency.FTP_CLIENT,
+            AppDependencyCommand.FTP_DOWNLOAD_REPORTS,
+            new Duration(duration.toMillis()),
+            success
+        );
+    }
+
+    public void trackFtpReportDelete(java.time.Duration duration, boolean success) {
+        telemetry.trackDependency(
+            AppDependency.FTP_CLIENT,
+            AppDependencyCommand.FTP_REPORT_DELETE,
+            new Duration(duration.toMillis()),
+            success
+        );
+    }
+
+    // events
 
     public void trackStaleLetter(Letter staleLetter) {
         LocalDateTime sentToPrint = LocalDateTime.ofInstant(staleLetter.getSentToPrintAt().toInstant(), ZoneOffset.UTC);
