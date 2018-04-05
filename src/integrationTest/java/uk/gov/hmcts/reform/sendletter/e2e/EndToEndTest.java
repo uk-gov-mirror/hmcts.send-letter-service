@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.reform.sendletter.PdfHelper;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
@@ -24,7 +25,9 @@ import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.util.XeroxReportWriter;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -84,8 +87,19 @@ public class EndToEndTest {
     }
 
     private void createXeroxReport(LocalSftpServer server) throws IOException {
-        Stream<UUID> letterIds = Arrays.stream(server.lettersFolder.list()).map(FileNameHelper::extractId);
+        Stream<UUID> letterIds = Arrays.stream(server.lettersFolder.listFiles()).map(this::validateGettingLetterId);
         XeroxReportWriter.writeReport(letterIds, server.reportFolder);
+    }
+
+    // Validate that the file is a zipped PDF,
+    // returning the Letter's ID from the filename.
+    private UUID validateGettingLetterId(File file) {
+        try {
+            PdfHelper.validateZippedPdf(Files.readAllBytes(file.toPath()));
+            return FileNameHelper.extractId(file.getName());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private ResultActions send(String content) throws Exception {

@@ -1,9 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.pdfbox.preflight.PreflightDocument;
-import org.apache.pdfbox.preflight.parser.PreflightParser;
-import org.apache.pdfbox.preflight.utils.ByteArrayDataSource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +10,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.sendletter.PdfHelper;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.config.SpyOnJpaConfig;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
@@ -20,10 +18,8 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.UUID;
-import java.util.zip.ZipInputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -62,16 +58,7 @@ public class LetterServiceTest {
         UUID id = service.send(SampleData.letter(), SERVICE_NAME);
 
         Letter result = letterRepository.findOne(id);
-
-        ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(result.getFileContent()));
-        zip.getNextEntry(); //positions the stream at the beginning of the entry data
-
-        PreflightParser pdfParser = new PreflightParser(new ByteArrayDataSource(zip));
-        pdfParser.parse();
-        PreflightDocument document = pdfParser.getPreflightDocument();
-        // This will throw an exception if the file format is invalid,
-        // but ignores more minor errors such as missing metadata.
-        document.validate();
+        PdfHelper.validateZippedPdf(result.getFileContent());
     }
 
     @Test
