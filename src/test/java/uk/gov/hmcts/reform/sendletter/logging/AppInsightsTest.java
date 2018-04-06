@@ -65,6 +65,19 @@ public class AppInsightsTest {
     // dependencies
 
     @Test
+    public void should_track_service_authentication() {
+        insights.trackServiceAuthentication(TIME_TOOK, true);
+        insights.trackServiceAuthentication(TIME_TOOK, false);
+
+        verify(telemetry, times(2)).trackDependency(
+            eq(AppDependency.AUTH_SERVICE),
+            eq(AppDependencyCommand.AUTH_SERVICE_HEADER),
+            any(Duration.class),
+            anyBoolean()
+        );
+    }
+
+    @Test
     public void should_track_ftp_upload() {
         insights.trackFtpUpload(TIME_TOOK, true);
         insights.trackFtpUpload(TIME_TOOK, false);

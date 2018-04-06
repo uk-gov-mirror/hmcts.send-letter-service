@@ -6,6 +6,11 @@ package uk.gov.hmcts.reform.sendletter.logging;
 final class AppDependency {
 
     /**
+     * Service auth provider.
+     */
+    static final String AUTH_SERVICE = "AuthService";
+
+    /**
      * Ftp client.
      */
     static final String FTP_CLIENT = "FtpClient";

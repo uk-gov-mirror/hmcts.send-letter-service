@@ -25,6 +25,15 @@ public class AppInsights extends AbstractAppInsights {
 
     // dependencies
 
+    public void trackServiceAuthentication(java.time.Duration duration, boolean success) {
+        telemetry.trackDependency(
+            AppDependency.AUTH_SERVICE,
+            AppDependencyCommand.AUTH_SERVICE_HEADER,
+            new Duration(duration.toMillis()),
+            success
+        );
+    }
+
     public void trackFtpUpload(java.time.Duration duration, boolean success) {
         telemetry.trackDependency(
             AppDependency.FTP_CLIENT,
