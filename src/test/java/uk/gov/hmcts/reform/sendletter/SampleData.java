@@ -6,12 +6,14 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.slc.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.ParsedReport;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +24,7 @@ import static java.util.stream.Collectors.toList;
 
 public final class SampleData {
 
-    public static LetterRequest letter() throws IOException {
+    public static LetterRequest letterRequest() throws IOException {
         return new LetterRequest(
             singletonList(
                 new Document(
@@ -32,6 +34,16 @@ public final class SampleData {
                         "reference", UUID.randomUUID()
                     )
                 )
+            ),
+            "someType",
+            Maps.newHashMap()
+        );
+    }
+
+    public static LetterWithPdfsRequest letterWithPdfsRequest() throws IOException {
+        return new LetterWithPdfsRequest(
+            singletonList(
+                Base64.getEncoder().encodeToString("hello world".getBytes())
             ),
             "someType",
             Maps.newHashMap()

@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.PdfHelper;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.config.SpyOnJpaConfig;
@@ -17,6 +18,8 @@ import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
+import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
+import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -45,7 +48,12 @@ public class LetterServiceTest {
 
     @Before
     public void setUp() {
-        service = new LetterService(letterRepository, new Zipper(), new ObjectMapper());
+        service = new LetterService(
+            new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert),
+            letterRepository,
+            new Zipper(),
+            new ObjectMapper()
+        );
     }
 
     @After
@@ -55,7 +63,7 @@ public class LetterServiceTest {
 
     @Test
     public void generates_and_saves_zipped_pdf() throws IOException {
-        UUID id = service.send(SampleData.letter(), SERVICE_NAME);
+        UUID id = service.send(SampleData.letterRequest(), SERVICE_NAME);
 
         Letter result = letterRepository.findOne(id);
         PdfHelper.validateZippedPdf(result.getFileContent());
@@ -64,7 +72,7 @@ public class LetterServiceTest {
     @Test
     public void returns_same_id_on_resubmit() throws IOException {
         // given
-        LetterRequest sampleRequest = SampleData.letter();
+        LetterRequest sampleRequest = SampleData.letterRequest();
         UUID id1 = service.send(sampleRequest, SERVICE_NAME);
         Letter letter = letterRepository.findOne(id1);
 
@@ -84,7 +92,7 @@ public class LetterServiceTest {
     @Test
     public void saves_an_new_letter_if_previous_one_has_been_sent_to_print() throws IOException {
         // given
-        LetterRequest sampleRequest = SampleData.letter();
+        LetterRequest sampleRequest = SampleData.letterRequest();
         UUID id1 = service.send(sampleRequest, SERVICE_NAME);
         Letter letter = letterRepository.findOne(id1);
 
@@ -105,13 +113,13 @@ public class LetterServiceTest {
 
     @Test
     public void should_not_allow_null_service_name() {
-        assertThatThrownBy(() -> service.send(SampleData.letter(), null))
+        assertThatThrownBy(() -> service.send(SampleData.letterRequest(), null))
             .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     public void should_not_allow_empty_service_name() {
-        assertThatThrownBy(() -> service.send(SampleData.letter(), ""))
+        assertThatThrownBy(() -> service.send(SampleData.letterRequest(), ""))
             .isInstanceOf(IllegalStateException.class);
     }
 

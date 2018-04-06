@@ -10,7 +10,7 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
-public class LetterRequest implements Serializable {
+public class LetterRequest implements Serializable, ILetterRequest {
 
     private static final long serialVersionUID = -7737087336283080072L;
 
@@ -34,5 +34,16 @@ public class LetterRequest implements Serializable {
         this.documents = documents;
         this.type = type;
         this.additionalData = additionalData;
+    }
+
+
+    @Override
+    public String getType() {
+        return this.type;
+    }
+
+    @Override
+    public Map<String, Object> getAdditionalData() {
+        return this.additionalData;
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
@@ -18,6 +19,8 @@ import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
+import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
+import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
 import java.io.File;
 import java.time.LocalTime;
@@ -42,15 +45,22 @@ public class UploadLettersTaskTest {
     @Mock
     private FtpAvailabilityChecker availabilityChecker;
 
+    private LetterService letterService;
+
     @Before
     public void setUp() {
         when(availabilityChecker.isFtpAvailable(any(LocalTime.class))).thenReturn(true);
+        this.letterService = new LetterService(
+            new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert),
+            repository,
+            new Zipper(),
+            new ObjectMapper()
+        );
     }
 
     @Test
     public void uploads_file_to_sftp_and_sets_letter_status_to_uploaded() throws Exception {
-        LetterService s = new LetterService(repository, new Zipper(), new ObjectMapper());
-        UUID id = s.send(SampleData.letter(), "service");
+        UUID id = letterService.send(SampleData.letterRequest(), "service");
         UploadLettersTask task = new UploadLettersTask(
             repository,
             FtpHelper.getSuccessfulClient(LocalSftpServer.port),
@@ -81,10 +91,9 @@ public class UploadLettersTaskTest {
     @Test
     public void should_fail_to_upload_to_sftp_and_stop_from_uploading_any_other_letters() throws Exception {
         // given
-        LetterService s = new LetterService(repository, new Zipper(), new ObjectMapper());
-        UUID id = s.send(SampleData.letter(), "service");
+        UUID id = letterService.send(SampleData.letterRequest(), "service");
         // additional letter to verify upload loop broke and zipper was never called again
-        s.send(SampleData.letter(), "service");
+        letterService.send(SampleData.letterRequest(), "service");
 
         // and
         UploadLettersTask task = new UploadLettersTask(

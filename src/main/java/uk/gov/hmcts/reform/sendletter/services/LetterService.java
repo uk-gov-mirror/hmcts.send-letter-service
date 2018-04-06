@@ -1,16 +1,18 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.http.util.Asserts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
+import uk.gov.hmcts.reform.sendletter.exception.UnsupportedLetterRequestTypeException;
+import uk.gov.hmcts.reform.sendletter.model.in.ILetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
@@ -23,9 +25,7 @@ import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Map;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
 import static uk.gov.hmcts.reform.sendletter.services.LetterChecksumGenerator.generateChecksum;
@@ -35,69 +35,89 @@ public class LetterService {
 
     private static final Logger log = LoggerFactory.getLogger(LetterService.class);
 
-    private final PdfCreator pdfCreator = new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert);
+    private final PdfCreator pdfCreator;
     private final LetterRepository letterRepository;
     private final Zipper zipper;
     private final ObjectMapper mapper;
 
-    public LetterService(LetterRepository letterRepository, Zipper zipper, ObjectMapper mapper) {
+    public LetterService(
+        PdfCreator pdfCreator,
+        LetterRepository letterRepository,
+        Zipper zipper,
+        ObjectMapper mapper
+    ) {
+        this.pdfCreator = pdfCreator;
         this.letterRepository = letterRepository;
         this.zipper = zipper;
         this.mapper = mapper;
     }
 
-    @Transactional
-    public UUID send(LetterRequest letter, String serviceName) {
-        return send(
-            new LetterInfo(generateChecksum(letter), serviceName, letter.type, letter.additionalData),
-            () -> pdfCreator.createFromTemplates(letter.documents)
+    // TODO: remove
+    @Autowired
+    public LetterService(
+        LetterRepository letterRepository,
+        Zipper zipper,
+        ObjectMapper mapper
+    ) {
+        this(
+            new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert),
+            letterRepository,
+            zipper,
+            mapper
         );
     }
 
     @Transactional
-    public UUID send(LetterWithPdfsRequest letter, String serviceName) {
-        throw new NotImplementedException();
-    }
-
-    private UUID send(LetterInfo letterInfo, Supplier<byte[]> pdfContentSupplier) {
-        Asserts.notEmpty(letterInfo.serviceName, "serviceName");
+    public UUID send(ILetterRequest letter, String serviceName) {
+        String messageId = generateChecksum(letter);
+        Asserts.notEmpty(serviceName, "serviceName");
 
         return letterRepository
-            .findByMessageIdAndStatusOrderByCreatedAtDesc(letterInfo.messageId, Created)
+            .findByMessageIdAndStatusOrderByCreatedAtDesc(messageId, Created)
             .map(duplicate -> {
                 UUID id = duplicate.getId();
                 log.info("Same message found already created. Returning letter id {} instead", id);
                 return id;
             })
-            .orElseGet(() -> saveNewLetter(letterInfo, pdfContentSupplier.get()));
+            .orElseGet(() -> saveNewLetter(letter, messageId, serviceName));
     }
 
-    private UUID saveNewLetter(LetterInfo letterInfo, byte[] pdfContent) {
+    private UUID saveNewLetter(ILetterRequest letter, String messageId, String serviceName) {
         UUID id = UUID.randomUUID();
 
         byte[] zipContent = zipper.zip(
             new PdfDoc(
-                FileNameHelper.generateName(letterInfo.type, letterInfo.serviceName, id, "pdf"),
-                pdfContent
+                FileNameHelper.generateName(letter.getType(), serviceName, id, "pdf"),
+                getPdfContent(letter)
             )
         );
 
         // TODO: encrypt zip content
 
-        Letter letter = new Letter(
+        Letter dbLetter = new Letter(
             id,
-            letterInfo.messageId,
-            letterInfo.serviceName,
-            mapper.valueToTree(letterInfo.additionalData),
-            letterInfo.type,
+            messageId,
+            serviceName,
+            mapper.valueToTree(letter.getAdditionalData()),
+            letter.getType(),
             zipContent
         );
 
-        letterRepository.save(letter);
+        letterRepository.save(dbLetter);
 
         log.info("Created new letter {}", id);
 
         return id;
+    }
+
+    private byte[] getPdfContent(ILetterRequest letter) {
+        if (letter instanceof LetterRequest) {
+            return pdfCreator.createFromTemplates(((LetterRequest) letter).documents);
+        } else if (letter instanceof LetterWithPdfsRequest) {
+            return pdfCreator.createFromBase64Pdfs(((LetterWithPdfsRequest) letter).documents);
+        } else {
+            throw new UnsupportedLetterRequestTypeException();
+        }
     }
 
     public LetterStatus getStatus(UUID id, String serviceName) {
@@ -120,19 +140,5 @@ public class LetterService {
             return null;
         }
         return stamp.toInstant().atZone(ZoneId.of("UTC"));
-    }
-
-    static class LetterInfo {
-        public final String messageId;
-        public final String serviceName;
-        public final String type;
-        public final Map<String, Object> additionalData;
-
-        public LetterInfo(String messageId, String serviceName, String type, Map<String, Object> additionalData) {
-            this.messageId = messageId;
-            this.serviceName = serviceName;
-            this.type = type;
-            this.additionalData = additionalData;
-        }
     }
 }

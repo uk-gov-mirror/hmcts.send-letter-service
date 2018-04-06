@@ -42,7 +42,7 @@ public class LetterRepositoryTest {
     @Test
     public void should_successfully_save_report_in_db() throws Exception {
         //given
-        DbLetter dbLetter = new DbLetter(UUID.randomUUID(), "cmc", SampleData.letter());
+        DbLetter dbLetter = new DbLetter(UUID.randomUUID(), "cmc", SampleData.letterRequest());
 
         //when
         letterRepository.save(dbLetter, Instant.now(), UUID.randomUUID().toString());

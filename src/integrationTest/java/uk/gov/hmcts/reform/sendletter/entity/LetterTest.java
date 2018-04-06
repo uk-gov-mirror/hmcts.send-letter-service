@@ -46,7 +46,7 @@ public class LetterTest {
         ObjectMapper objectMapper = new ObjectMapper();
         uk.gov.hmcts.reform.sendletter.data.LetterRepository repo =
             new uk.gov.hmcts.reform.sendletter.data.LetterRepository(jdbcTemplate, objectMapper);
-        DbLetter dbLetter = new DbLetter(UUID.randomUUID(), "cmc", SampleData.letter());
+        DbLetter dbLetter = new DbLetter(UUID.randomUUID(), "cmc", SampleData.letterRequest());
         Instant instant = Instant.now();
         String messageId = UUID.randomUUID().toString();
         repo.save(dbLetter, instant, messageId);
@@ -55,7 +55,7 @@ public class LetterTest {
         assertThat(letters.size()).isEqualTo(1);
 
         Letter loaded = letters.get(0);
-        String expectedData = objectMapper.writeValueAsString(SampleData.letter().additionalData);
+        String expectedData = objectMapper.writeValueAsString(SampleData.letterRequest().additionalData);
         assertThat(loaded.getAdditionalData().toString()).isEqualTo(expectedData);
         assertThat(loaded.getCreatedAt()).isEqualTo(Timestamp.from(instant));
         assertThat(loaded.getMessageId()).isEqualTo(messageId);

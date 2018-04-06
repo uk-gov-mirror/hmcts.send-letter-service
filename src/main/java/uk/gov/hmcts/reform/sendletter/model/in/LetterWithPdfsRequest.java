@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.Size;
 
-public class LetterWithPdfsRequest implements Serializable {
+public class LetterWithPdfsRequest implements Serializable, ILetterRequest {
 
     private static final long serialVersionUID = 5528476697055795883L;
 
@@ -36,5 +36,15 @@ public class LetterWithPdfsRequest implements Serializable {
         this.documents = documents;
         this.type = type;
         this.additionalData = additionalData;
+    }
+
+    @Override
+    public String getType() {
+        return this.type;
+    }
+
+    @Override
+    public Map<String, Object> getAdditionalData() {
+        return this.additionalData;
     }
 }
