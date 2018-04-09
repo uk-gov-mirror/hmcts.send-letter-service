@@ -18,8 +18,6 @@ print_help() {
     APPINSIGHTS_INSTRUMENTATIONKEY      Defaults to '00000000-0000-0000-0000-000000000000'
     LETTER_TRACKING_DB_PASSWORD         Defaults to 'password'
     S2S_URL                             Defaults to 'false' - disables health check
-    SERVICE_BUS_CONNECTION_STRING       Defaults to 'sb://namespace.servicebus.windows.net'
-    SERVICE_QUEUE_MESSAGE_TTL_IN_DAYS   Default to '7'
   "
 }
 
@@ -32,8 +30,6 @@ FLYWAY_ENABLED=false
 APPINSIGHTS_INSTRUMENTATIONKEY="00000000-0000-0000-0000-000000000000"
 LETTER_TRACKING_DB_PASSWORD="password"
 S2S_URL=false
-SERVICE_BUS_CONNECTION_STRING="sb://namespace.servicebus.windows.net"
-SERVICE_QUEUE_MESSAGE_TTL_IN_DAYS=7
 
 execute_script() {
   cd $(dirname "$0")/..
@@ -55,8 +51,6 @@ execute_script() {
   export APPINSIGHTS_INSTRUMENTATIONKEY=${APPINSIGHTS_INSTRUMENTATIONKEY}
   export LETTER_TRACKING_DB_PASSWORD=${LETTER_TRACKING_DB_PASSWORD}
   export S2S_URL=${S2S_URL}
-  export SERVICE_BUS_CONNECTION_STRING=${SERVICE_BUS_CONNECTION_STRING}
-  export SERVICE_QUEUE_MESSAGE_TTL_IN_DAYS=${SERVICE_QUEUE_MESSAGE_TTL_IN_DAYS}
 
   echo "Bringing up docker containers.."
 
@@ -79,8 +73,6 @@ while true ; do
         APPINSIGHTS_INSTRUMENTATIONKEY=*) APPINSIGHTS_INSTRUMENTATIONKEY="${2#*=}" ; shift 2 ;;
         LETTER_TRACKING_DB_PASSWORD=*) LETTER_TRACKING_DB_PASSWORD="${2#*=}" ; shift 2 ;;
         S2S_URL=*) S2S_URL="${2#*=}" ; shift 2 ;;
-        SERVICE_BUS_CONNECTION_STRING=*) SERVICE_BUS_CONNECTION_STRING="${2#*=}" ; shift 2 ;;
-        SERVICE_QUEUE_MESSAGE_TTL_IN_DAYS=*) SERVICE_QUEUE_MESSAGE_TTL_IN_DAYS="${2#*=}" ; shift 2 ;;
         *) shift 2 ;;
       esac ;;
     *) execute_script ; break ;;

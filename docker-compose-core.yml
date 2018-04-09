@@ -14,8 +14,6 @@ services:
       - APPINSIGHTS_INSTRUMENTATIONKEY
       - FLYWAY_ENABLED=false
       - LETTER_TRACKING_DB_PASSWORD
-      - SERVICE_BUS_CONNECTION_STRING
-      - SERVICE_QUEUE_MESSAGE_TTL_IN_DAYS
       - S2S_URL
       # these environment variables are used by java-logging library
       - ROOT_APPENDER

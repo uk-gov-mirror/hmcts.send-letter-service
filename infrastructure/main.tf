@@ -10,31 +10,6 @@ resource "azurerm_resource_group" "rg" {
   location = "${var.location_app}"
 }
 
-module "servicebus-namespace" {
-  source                = "git@github.com:hmcts/terraform-module-servicebus-namespace.git"
-  name                  = "${var.product}-servicebus-${var.env}"
-  location              = "${var.location_app}"
-  resource_group_name   = "${azurerm_resource_group.rg.name}"
-}
-
-module "servicebus-queue" {
-  source = "git@github.com:hmcts/terraform-module-servicebus-queue.git"
-  name = "${var.product}-servicebus-queue-${var.env}"
-  namespace_name = "${module.servicebus-namespace.name}"
-  resource_group_name = "${azurerm_resource_group.rg.name}"
-}
-
-# save the queue's "listen" connection string to vault
-resource "vault_generic_secret" "servicebus-listen-conn-string" {
-  path = "secret/${var.vault_section}/cc/send-letter/servicebus-listen-conn-string"
-
-  data_json = <<EOT
-    {
-      "value": "${module.servicebus-queue.primary_listen_connection_string}"
-    }
-    EOT
-}
-
 module "db" {
   source              = "git@github.com:contino/moj-module-postgres.git?ref=master"
   product             = "${var.product}-db"
@@ -55,7 +30,6 @@ module "send-letter-service" {
 
   app_settings = {
     S2S_URL                       = "${var.s2s_url}"
-    SERVICE_BUS_CONNECTION_STRING = "${module.servicebus-queue.primary_send_connection_string}"
     LETTER_TRACKING_DB_HOST       = "${module.db.host_name}"
     LETTER_TRACKING_DB_PORT       = "${module.db.postgresql_listen_port}"
     LETTER_TRACKING_DB_USER_NAME  = "${module.db.user_name}"
