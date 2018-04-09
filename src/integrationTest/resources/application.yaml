@@ -41,7 +41,7 @@ ftp:
 scheduling.enabled: false
 
 tasks:
-  upload-letters: ${UPLOAD_LETTERS_INTERVAL:1}
+  upload-letters-interval-ms: ${UPLOAD_LETTERS_INTERVAL:1000}
   # Run every second.
   mark-letters-posted: ${FTP_REPORTS_CRON:*/1 * * * * *}
   stale-letters-report: ${FTP_REPORTS_CRON:*/1 * * * * *}

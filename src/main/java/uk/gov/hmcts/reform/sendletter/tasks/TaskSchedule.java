@@ -33,7 +33,7 @@ public class TaskSchedule {
         this.dataSource = source;
     }
 
-    @Scheduled(fixedDelayString = "${tasks.upload-letters}")
+    @Scheduled(fixedDelayString = "${tasks.upload-letters-interval-ms}")
     public void uploadLetters() {
         tryRun(Task.UploadLetters, upload::run);
     }
