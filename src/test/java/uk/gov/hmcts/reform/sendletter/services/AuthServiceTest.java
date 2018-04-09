@@ -9,18 +9,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.authorisation.validators.AuthTokenValidator;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
-import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
-
-import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -33,19 +27,16 @@ public class AuthServiceTest {
     @Mock
     private AuthTokenValidator validator;
 
-    @Mock
-    private AppInsights insights;
-
     private AuthService service;
 
     @Before
     public void setUp() {
-        service = new AuthService(validator, insights);
+        service = new AuthService(validator);
     }
 
     @After
     public void tearDown() {
-        reset(validator, insights);
+        reset(validator);
     }
 
     @Test
@@ -60,7 +51,6 @@ public class AuthServiceTest {
 
         // and
         verify(validator, never()).getServiceName(anyString());
-        verify(insights, never()).trackServiceAuthentication(any(Duration.class), anyBoolean());
     }
 
     @Test
@@ -73,9 +63,6 @@ public class AuthServiceTest {
 
         // then
         assertThat(exception).isInstanceOf(InvalidTokenException.class);
-
-        // and
-        verify(insights).trackServiceAuthentication(any(Duration.class), eq(false));
     }
 
     @Test
@@ -88,8 +75,5 @@ public class AuthServiceTest {
 
         // then
         assertThat(serviceName).isEqualTo("some-service");
-
-        // and
-        verify(insights).trackServiceAuthentication(any(Duration.class), eq(true));
     }
 }

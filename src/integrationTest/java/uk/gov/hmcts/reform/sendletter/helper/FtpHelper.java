@@ -3,8 +3,6 @@ package uk.gov.hmcts.reform.sendletter.helper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import net.schmizz.sshj.SSHClient;
-import org.mockito.Mockito;
-import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.slc.config.FtpConfigProperties;
@@ -22,13 +20,12 @@ public final class FtpHelper {
     // so it will connect to a local ftp server without verifying the
     // server's public key.
     private static FtpClient getClient(int port, boolean verified) throws IOException {
-        AppInsights insights = Mockito.mock(AppInsights.class);
         Supplier<SSHClient> s = () -> {
             SSHClient client = new SSHClient();
             client.addHostKeyVerifier((a, b, c) -> verified);
             return client;
         };
-        return new FtpClient(s, getFtpConfig(port), insights);
+        return new FtpClient(s, getFtpConfig(port));
     }
 
     public static FtpClient getFailingClient(int port) throws IOException {

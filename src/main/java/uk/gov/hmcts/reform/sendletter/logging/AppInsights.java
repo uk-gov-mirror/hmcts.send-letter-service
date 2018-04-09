@@ -2,16 +2,24 @@ package uk.gov.hmcts.reform.sendletter.logging;
 
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.telemetry.Duration;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.logging.appinsights.AbstractAppInsights;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
+
+@Aspect
 @Component
 public class AppInsights extends AbstractAppInsights {
 
@@ -25,40 +33,37 @@ public class AppInsights extends AbstractAppInsights {
 
     // dependencies
 
-    public void trackServiceAuthentication(java.time.Duration duration, boolean success) {
-        telemetry.trackDependency(
-            AppDependency.AUTH_SERVICE,
-            AppDependencyCommand.AUTH_SERVICE_HEADER,
-            new Duration(duration.toMillis()),
-            success
-        );
+    @Pointcut("@annotation(dependency)")
+    public void dependencyPointCut(Dependency dependency) {
+        // point cut definition
     }
 
-    public void trackFtpUpload(java.time.Duration duration, boolean success) {
-        telemetry.trackDependency(
-            AppDependency.FTP_CLIENT,
-            AppDependencyCommand.FTP_FILE_UPLOADED,
-            new Duration(duration.toMillis()),
-            success
-        );
-    }
+    @Around("dependencyPointCut(dependency)")
+    public Object trackDependency(ProceedingJoinPoint joinPoint, Dependency dependency) throws Throwable {
+        Instant start = Instant.now();
 
-    public void trackFtpReportsDownload(java.time.Duration duration, boolean success) {
-        telemetry.trackDependency(
-            AppDependency.FTP_CLIENT,
-            AppDependencyCommand.FTP_DOWNLOAD_REPORTS,
-            new Duration(duration.toMillis()),
-            success
-        );
-    }
+        try {
+            Object proceed = joinPoint.proceed();
 
-    public void trackFtpReportDelete(java.time.Duration duration, boolean success) {
-        telemetry.trackDependency(
-            AppDependency.FTP_CLIENT,
-            AppDependencyCommand.FTP_REPORT_DELETE,
-            new Duration(duration.toMillis()),
-            success
-        );
+            telemetry.trackDependency(
+                dependency.value(),
+                dependency.command(),
+                new Duration(MILLIS.between(start, Instant.now())),
+                true
+            );
+
+            return proceed;
+        } catch (Throwable exception) {
+            telemetry.trackDependency(
+                dependency.value(),
+                dependency.command(),
+                new Duration(MILLIS.between(start, Instant.now())),
+                false
+            );
+            telemetry.trackException((Exception) exception);
+
+            throw exception;
+        }
     }
 
     // events

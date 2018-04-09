@@ -11,13 +11,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
-import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.zip.ZippedDoc;
 import uk.gov.hmcts.reform.slc.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.slc.services.steps.sftpupload.Report;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -29,9 +27,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.contains;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -42,7 +38,6 @@ public class FtpClientTest {
     @Mock private SSHClient sshClient;
     @Mock private SFTPClient sftpClient;
     @Mock private SFTPFileTransfer sftpFileTransfer;
-    @Mock private AppInsights insights;
     @Mock private FtpConfigProperties ftpProps;
 
     @Before
@@ -50,11 +45,7 @@ public class FtpClientTest {
         given(sshClient.newSFTPClient()).willReturn(sftpClient);
         given(sftpClient.getFileTransfer()).willReturn(sftpFileTransfer);
 
-        client = new FtpClient(
-            () -> sshClient,
-            ftpProps,
-            insights
-        );
+        client = new FtpClient(() -> sshClient, ftpProps);
     }
 
     @Test
@@ -72,7 +63,6 @@ public class FtpClientTest {
 
         // then
         assertThat(reports).isEmpty();
-        verify(insights).trackFtpReportsDownload(any(Duration.class), eq(true));
     }
 
     @Test
@@ -85,7 +75,6 @@ public class FtpClientTest {
 
         // then
         assertThat(exception).isInstanceOf(FtpException.class);
-        verify(insights).trackFtpReportsDownload(any(Duration.class), eq(false));
     }
 
     @Test
@@ -112,9 +101,6 @@ public class FtpClientTest {
                 any(LocalSourceFile.class),
                 contains("regular") //path
             );
-
-        // and
-        verify(insights, times(2)).trackFtpUpload(any(Duration.class), eq(true));
     }
 
     @Test
@@ -129,7 +115,6 @@ public class FtpClientTest {
 
         // then
         assertThat(exception).isInstanceOf(FtpException.class);
-        verify(insights).trackFtpUpload(any(Duration.class), eq(false));
     }
 
     @Test
@@ -138,10 +123,10 @@ public class FtpClientTest {
         doNothing().when(sftpClient).rm(anyString());
 
         // when
-        client.deleteReport("some/report");
+        Throwable exception = catchThrowable(() -> client.deleteReport("some/report"));
 
         // then
-        verify(insights).trackFtpReportDelete(any(Duration.class), eq(true));
+        assertThat(exception).isNull();
     }
 
     @Test
@@ -154,6 +139,5 @@ public class FtpClientTest {
 
         // then
         assertThat(exception).isInstanceOf(FtpException.class);
-        verify(insights).trackFtpReportDelete(any(Duration.class), eq(false));
     }
 }
