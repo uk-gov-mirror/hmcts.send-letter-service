@@ -17,9 +17,8 @@ import uk.gov.hmcts.reform.sendletter.config.SpyOnJpaConfig;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
+import uk.gov.hmcts.reform.sendletter.services.util.DuplexPreparator;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
 import java.io.IOException;
 import java.util.UUID;

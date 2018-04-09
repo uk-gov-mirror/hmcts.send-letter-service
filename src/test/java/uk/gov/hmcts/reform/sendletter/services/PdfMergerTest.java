@@ -2,8 +2,7 @@ package uk.gov.hmcts.reform.sendletter.services;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.Test;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfMerger;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.exceptions.PdfMergeException;
+import uk.gov.hmcts.reform.sendletter.exception.PdfMergeException;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.slc.services.steps.getpdf;
+package uk.gov.hmcts.reform.sendletter.services;
 
 import com.google.common.io.ByteStreams;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -8,7 +8,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
+import uk.gov.hmcts.reform.sendletter.services.util.DuplexPreparator;
+import uk.gov.hmcts.reform.sendletter.services.util.IHtmlToPdfConverter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
 
 import java.util.Optional;
 

@@ -12,10 +12,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
+import uk.gov.hmcts.reform.sendletter.exception.InvalidPdfException;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.services.AuthService;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.exceptions.InvalidPdfException;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Resources.getResource;

@@ -1,10 +1,11 @@
-package uk.gov.hmcts.reform.slc.services.steps.getpdf;
+package uk.gov.hmcts.reform.sendletter.services;
 
 import org.apache.http.util.Asserts;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.sendletter.exception.InvalidPdfException;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.exceptions.InvalidPdfException;
+import uk.gov.hmcts.reform.sendletter.services.util.DuplexPreparator;
+import uk.gov.hmcts.reform.sendletter.services.util.IHtmlToPdfConverter;
 
 import java.util.Base64;
 import java.util.List;

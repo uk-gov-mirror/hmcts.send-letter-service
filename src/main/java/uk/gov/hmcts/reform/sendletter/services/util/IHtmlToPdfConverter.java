@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.slc.services.steps.getpdf;
+package uk.gov.hmcts.reform.sendletter.services.util;
 
 import java.util.Map;
 import java.util.function.BiFunction;

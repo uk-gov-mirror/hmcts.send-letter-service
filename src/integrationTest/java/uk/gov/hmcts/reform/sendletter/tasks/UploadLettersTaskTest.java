@@ -18,9 +18,9 @@ import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
+import uk.gov.hmcts.reform.sendletter.services.PdfCreator;
+import uk.gov.hmcts.reform.sendletter.services.util.DuplexPreparator;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
 import java.io.File;
 import java.time.LocalTime;

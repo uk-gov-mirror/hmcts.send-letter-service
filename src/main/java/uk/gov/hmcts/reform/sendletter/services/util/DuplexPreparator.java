@@ -1,8 +1,9 @@
-package uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex;
+package uk.gov.hmcts.reform.sendletter.services.util;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.sendletter.exception.DuplexException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

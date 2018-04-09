@@ -1,9 +1,9 @@
-package uk.gov.hmcts.reform.slc.config;
+package uk.gov.hmcts.reform.sendletter.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.IHtmlToPdfConverter;
+import uk.gov.hmcts.reform.sendletter.services.util.IHtmlToPdfConverter;
 
 @Configuration
 public class PdfConversionConfig {

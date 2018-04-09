@@ -13,15 +13,14 @@ import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.exception.UnsupportedLetterRequestTypeException;
+import uk.gov.hmcts.reform.sendletter.model.PdfDoc;
 import uk.gov.hmcts.reform.sendletter.model.in.ILetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.services.util.DuplexPreparator;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfCreator;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfDoc;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.duplex.DuplexPreparator;
 
 import java.sql.Timestamp;
 import java.time.ZoneId;

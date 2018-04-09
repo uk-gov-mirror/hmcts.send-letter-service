@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.sendletter.services.zip;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.exception.DocumentZipException;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfDoc;
+import uk.gov.hmcts.reform.sendletter.model.PdfDoc;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

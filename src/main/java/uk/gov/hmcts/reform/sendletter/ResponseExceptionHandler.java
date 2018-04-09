@@ -16,11 +16,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.logging.exception.AbstractLoggingException;
 import uk.gov.hmcts.reform.sendletter.exception.InternalServerException;
+import uk.gov.hmcts.reform.sendletter.exception.InvalidPdfException;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
 import uk.gov.hmcts.reform.sendletter.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.sendletter.model.out.errors.ModelValidationError;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.exceptions.InvalidPdfException;
 
 import java.util.List;
 

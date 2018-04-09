@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.services.zip;
 
 import org.junit.Test;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.PdfDoc;
+import uk.gov.hmcts.reform.sendletter.model.PdfDoc;
 
 import java.io.ByteArrayInputStream;
 import java.util.zip.ZipInputStream;
