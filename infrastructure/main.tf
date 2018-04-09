@@ -39,6 +39,7 @@ module "send-letter-service" {
     FLYWAY_USER                   = "${module.db.user_name}"
     FLYWAY_PASSWORD               = "${module.db.postgresql_password}"
     ENCRYPTION_ENABLED            = "${var.encyption_enabled}"
+    SCHEDULING_ENABLED            = "${var.scheduling_enabled}"
   }
 }
 

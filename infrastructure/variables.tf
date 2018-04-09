@@ -50,3 +50,7 @@ variable s2s_url {
 variable encyption_enabled {
   default = "false"
 }
+
+variable scheduling_enabled {
+  default = "true"
+}
