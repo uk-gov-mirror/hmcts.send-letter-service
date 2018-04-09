@@ -35,7 +35,8 @@ public class LetterServiceTest {
             pdfCreator,
             letterRepository,
             zipper,
-            objectMapper
+            objectMapper,
+            false
         );
     }
 

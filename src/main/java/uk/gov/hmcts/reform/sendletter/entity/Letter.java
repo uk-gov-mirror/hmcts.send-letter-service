@@ -41,6 +41,7 @@ public class Letter {
     @Enumerated(EnumType.STRING)
     private LetterStatus status = LetterStatus.Created;
     private byte[] fileContent;
+    private Boolean isEncrypted;
 
     // For use by hibernate.
     private Letter() {
@@ -52,7 +53,8 @@ public class Letter {
         String service,
         JsonNode additionalData,
         String type,
-        byte[] fileContent
+        byte[] fileContent,
+        Boolean isEncrypted
     ) {
         this.id = id;
         this.messageId = messageId;
@@ -61,6 +63,7 @@ public class Letter {
         this.type = type;
         this.fileContent = fileContent;
         this.isFailed = false;
+        this.isEncrypted = isEncrypted;
     }
 
     public UUID getId() {
@@ -121,5 +124,13 @@ public class Letter {
 
     public JsonNode getAdditionalData() {
         return additionalData;
+    }
+
+    public Boolean isEncrypted() {
+        return isEncrypted;
+    }
+
+    public void setIsEncrypted(Boolean encrypted) {
+        isEncrypted = encrypted;
     }
 }

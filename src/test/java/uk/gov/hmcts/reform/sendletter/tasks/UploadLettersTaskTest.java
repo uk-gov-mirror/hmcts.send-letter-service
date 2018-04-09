@@ -67,7 +67,7 @@ public class UploadLettersTaskTest {
     }
 
     private Letter letterOfType(String type) {
-        return new Letter(UUID.randomUUID(), "msgId", "cmc", null, type, "hello".getBytes());
+        return new Letter(UUID.randomUUID(), "msgId", "cmc", null, type, "hello".getBytes(),true);
     }
 
     private void givenDbContains(Letter letter) {

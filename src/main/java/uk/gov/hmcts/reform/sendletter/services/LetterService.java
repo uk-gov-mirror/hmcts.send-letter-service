@@ -5,6 +5,7 @@ import org.apache.http.util.Asserts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
@@ -39,17 +40,20 @@ public class LetterService {
     private final LetterRepository letterRepository;
     private final Zipper zipper;
     private final ObjectMapper mapper;
+    private final boolean isEncryptionEnabled;//NOPMD
 
     public LetterService(
         PdfCreator pdfCreator,
         LetterRepository letterRepository,
         Zipper zipper,
-        ObjectMapper mapper
+        ObjectMapper mapper,
+        @Value("${encryption.enabled}") Boolean isEncryptionEnabled
     ) {
         this.pdfCreator = pdfCreator;
         this.letterRepository = letterRepository;
         this.zipper = zipper;
         this.mapper = mapper;
+        this.isEncryptionEnabled = isEncryptionEnabled;
     }
 
     // TODO: remove
@@ -57,13 +61,15 @@ public class LetterService {
     public LetterService(
         LetterRepository letterRepository,
         Zipper zipper,
-        ObjectMapper mapper
+        ObjectMapper mapper,
+        @Value("${encryption.enabled}") Boolean isEncryptionEnabled
     ) {
         this(
             new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert),
             letterRepository,
             zipper,
-            mapper
+            mapper,
+            isEncryptionEnabled
         );
     }
 
@@ -93,14 +99,14 @@ public class LetterService {
         );
 
         // TODO: encrypt zip content
-
         Letter dbLetter = new Letter(
             id,
             messageId,
             serviceName,
             mapper.valueToTree(letter.getAdditionalData()),
             letter.getType(),
-            zipContent
+            zipContent,
+            false //Currently files are always unencrypted.When PGP encryption is in place this value will be dynamic.
         );
 
         letterRepository.save(dbLetter);

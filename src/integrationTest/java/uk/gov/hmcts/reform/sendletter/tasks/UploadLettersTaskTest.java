@@ -54,7 +54,8 @@ public class UploadLettersTaskTest {
             new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert),
             repository,
             new Zipper(),
-            new ObjectMapper()
+            new ObjectMapper(),
+            false
         );
     }
 

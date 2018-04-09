@@ -58,7 +58,8 @@ public final class SampleData {
                 service,
                 new ObjectMapper().readTree("{}"),
                 "a type",
-                new byte[1]
+                new byte[1],
+                false
             );
         } catch (IOException e) {
             throw new RuntimeException(e);

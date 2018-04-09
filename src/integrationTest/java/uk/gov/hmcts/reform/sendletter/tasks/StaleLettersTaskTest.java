@@ -124,7 +124,7 @@ public class StaleLettersTaskTest {
     }
 
     private Letter createLetterWithSentToPrintTime(LocalTime sentToPrintAtTime) {
-        Letter letter = new Letter(UUID.randomUUID(), randomMessageId(), "service", null, "type", null);
+        Letter letter = new Letter(UUID.randomUUID(), randomMessageId(), "service", null, "type", null, false);
 
         if (sentToPrintAtTime != null) {
             letter.setStatus(LetterStatus.Uploaded);

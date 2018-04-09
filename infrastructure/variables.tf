@@ -46,3 +46,7 @@ variable "jenkins_AAD_objectId" {
 variable s2s_url {
   default = "http://betadevbccidams2slb.reform.hmcts.net:80"
 }
+
+variable encyption_enabled {
+  default = "false"
+}

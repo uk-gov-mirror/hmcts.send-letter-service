@@ -45,3 +45,6 @@ tasks:
   # Run every second.
   mark-letters-posted: ${FTP_REPORTS_CRON:*/1 * * * * *}
   stale-letters-report: ${FTP_REPORTS_CRON:*/1 * * * * *}
+
+encryption:
+  enabled: ${ENCRYPTION_ENABLED:false}

@@ -4,5 +4,6 @@ import java.util.Map;
 
 public interface ILetterRequest {
     String getType();
+
     Map<String, Object> getAdditionalData();
 }

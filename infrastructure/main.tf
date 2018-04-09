@@ -64,6 +64,7 @@ module "send-letter-service" {
     FLYWAY_URL                    = "jdbc:postgresql://${module.db.host_name}:${module.db.postgresql_listen_port}/${module.db.postgresql_database}"
     FLYWAY_USER                   = "${module.db.user_name}"
     FLYWAY_PASSWORD               = "${module.db.postgresql_password}"
+    ENCRYPTION_ENABLED            = "${var.encyption_enabled}"
   }
 }
 

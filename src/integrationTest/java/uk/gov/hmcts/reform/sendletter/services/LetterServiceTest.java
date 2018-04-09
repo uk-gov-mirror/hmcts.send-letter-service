@@ -52,7 +52,8 @@ public class LetterServiceTest {
             new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert),
             letterRepository,
             new Zipper(),
-            new ObjectMapper()
+            new ObjectMapper(),
+            false
         );
     }
 
