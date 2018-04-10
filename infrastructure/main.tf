@@ -11,7 +11,7 @@ resource "azurerm_resource_group" "rg" {
 }
 
 module "db" {
-  source              = "git@github.com:contino/moj-module-postgres.git?ref=master"
+  source              = "git@github.com:hmcts/moj-module-postgres.git?ref=master"
   product             = "${var.product}-db"
   location            = "${var.location_db}"
   env                 = "${var.env}"
@@ -20,7 +20,7 @@ module "db" {
 }
 
 module "send-letter-service" {
-  source              = "git@github.com:contino/moj-module-webapp?ref=master"
+  source              = "git@github.com:hmcts/moj-module-webapp?ref=master"
   product             = "${var.product}-${var.microservice}"
   location            = "${var.location_app}"
   env                 = "${var.env}"
@@ -45,7 +45,7 @@ module "send-letter-service" {
 
 # region save DB details to Azure Key Vault
 module "key-vault" {
-  source              = "git@github.com:contino/moj-module-key-vault?ref=master"
+  source              = "git@github.com:hmcts/moj-module-key-vault?ref=master"
   product             = "${var.product}"
   env                 = "${var.env}"
   tenant_id           = "${var.tenant_id}"
