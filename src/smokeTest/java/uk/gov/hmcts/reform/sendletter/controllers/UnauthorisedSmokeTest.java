@@ -36,9 +36,6 @@ public class UnauthorisedSmokeTest extends SmokeTestSuite {
 
         specification.get("/letters/" + LETTER_ID).then().statusCode(SC_UNAUTHORIZED);
         specification.body(createLetterBody).post("/letters").then().statusCode(SC_UNAUTHORIZED);
-        specification.put("/letters/" + LETTER_ID + "/is-failed").then().statusCode(SC_UNAUTHORIZED);
-        specification.put("/letters/" + LETTER_ID + "/sent-to-print-at").then().statusCode(SC_UNAUTHORIZED);
-        specification.put("/letters/" + LETTER_ID + "/printed-at").then().statusCode(SC_UNAUTHORIZED);
     }
 
     @Test
@@ -52,8 +49,5 @@ public class UnauthorisedSmokeTest extends SmokeTestSuite {
 
         specification.get("/letters/" + LETTER_ID).then().statusCode(SC_UNAUTHORIZED);
         specification.body(createLetterBody).post("/letters").then().statusCode(SC_UNAUTHORIZED);
-        specification.put("/letters/" + LETTER_ID + "/is-failed").then().statusCode(SC_UNAUTHORIZED);
-        specification.put("/letters/" + LETTER_ID + "/sent-to-print-at").then().statusCode(SC_UNAUTHORIZED);
-        specification.put("/letters/" + LETTER_ID + "/printed-at").then().statusCode(SC_UNAUTHORIZED);
     }
 }
