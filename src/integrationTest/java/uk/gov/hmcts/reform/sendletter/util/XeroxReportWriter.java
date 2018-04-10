@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.sendletter.util;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.assertj.core.util.Lists;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
+import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
 
 import java.io.File;
 import java.io.FileWriter;

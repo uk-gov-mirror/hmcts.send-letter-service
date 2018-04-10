@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.slc.config;
+package uk.gov.hmcts.reform.sendletter.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

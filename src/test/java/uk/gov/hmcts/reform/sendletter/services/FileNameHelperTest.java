@@ -2,8 +2,8 @@ package uk.gov.hmcts.reform.sendletter.services;
 
 import org.junit.Test;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.UnableToExtractIdFromFileNameException;
+import uk.gov.hmcts.reform.sendletter.exception.UnableToExtractIdFromFileNameException;
+import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
 
 import java.util.UUID;
 

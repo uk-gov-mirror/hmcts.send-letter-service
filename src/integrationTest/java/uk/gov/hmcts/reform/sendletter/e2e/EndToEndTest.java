@@ -29,8 +29,8 @@ import uk.gov.hmcts.reform.sendletter.logging.AppDependencyCommand;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.logging.Dependency;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
+import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
 import uk.gov.hmcts.reform.sendletter.util.XeroxReportWriter;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.slc.services.steps.sftpupload;
+package uk.gov.hmcts.reform.sendletter.model;
 
 import net.schmizz.sshj.xfer.InMemoryDestFile;
 

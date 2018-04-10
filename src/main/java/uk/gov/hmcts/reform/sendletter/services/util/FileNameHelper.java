@@ -1,7 +1,8 @@
-package uk.gov.hmcts.reform.slc.services.steps.getpdf;
+package uk.gov.hmcts.reform.sendletter.services.util;
 
 import com.microsoft.applicationinsights.core.dependencies.apachecommons.io.FilenameUtils;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.exception.UnableToExtractIdFromFileNameException;
 
 import java.util.UUID;
 

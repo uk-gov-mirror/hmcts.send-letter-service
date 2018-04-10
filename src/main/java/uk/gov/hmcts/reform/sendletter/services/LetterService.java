@@ -19,8 +19,8 @@ import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.util.DuplexPreparator;
+import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
-import uk.gov.hmcts.reform.slc.services.steps.getpdf.FileNameHelper;
 
 import java.sql.Timestamp;
 import java.time.ZoneId;

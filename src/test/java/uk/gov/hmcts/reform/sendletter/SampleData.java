@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
+import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
+import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
-import uk.gov.hmcts.reform.slc.model.LetterPrintStatus;
-import uk.gov.hmcts.reform.slc.services.steps.sftpupload.ParsedReport;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;

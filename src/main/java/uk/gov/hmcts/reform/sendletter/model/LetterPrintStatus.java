@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.slc.model;
+package uk.gov.hmcts.reform.sendletter.model;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;

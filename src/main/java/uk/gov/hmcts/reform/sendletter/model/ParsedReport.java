@@ -1,6 +1,4 @@
-package uk.gov.hmcts.reform.slc.services.steps.sftpupload;
-
-import uk.gov.hmcts.reform.slc.model.LetterPrintStatus;
+package uk.gov.hmcts.reform.sendletter.model;
 
 import java.util.List;
 

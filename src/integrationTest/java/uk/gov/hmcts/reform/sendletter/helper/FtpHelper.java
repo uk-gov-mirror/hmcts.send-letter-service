@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.sendletter.helper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import net.schmizz.sshj.SSHClient;
+import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.sendletter.services.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
-import uk.gov.hmcts.reform.slc.config.FtpConfigProperties;
 
 import java.io.IOException;
 import java.util.function.Supplier;

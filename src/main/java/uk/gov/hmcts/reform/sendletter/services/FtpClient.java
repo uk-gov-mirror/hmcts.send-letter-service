@@ -9,13 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.logging.AppDependency;
 import uk.gov.hmcts.reform.sendletter.logging.AppDependencyCommand;
 import uk.gov.hmcts.reform.sendletter.logging.Dependency;
-import uk.gov.hmcts.reform.slc.config.FtpConfigProperties;
-import uk.gov.hmcts.reform.slc.services.steps.sftpupload.InMemoryDownloadedFile;
-import uk.gov.hmcts.reform.slc.services.steps.sftpupload.Report;
+import uk.gov.hmcts.reform.sendletter.model.InMemoryDownloadedFile;
+import uk.gov.hmcts.reform.sendletter.model.Report;
 
 import java.io.IOException;
 import java.util.List;
