@@ -18,9 +18,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.reform.sendletter.PdfHelper;
+import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
@@ -76,11 +76,30 @@ public class EndToEndTest {
     }
 
     @Test
-    public void should_upload_letter_and_mark_posted() throws Throwable {
+    public void should_handle_old_letter_model() throws Throwable {
+        should_upload_letter_and_mark_posted(
+            post("/letters")
+                .header("ServiceAuthorization", "auth-header-value")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(readResource("letter.json"))
+        );
+    }
+
+    @Test
+    public void should_handle_new_letter_model() throws Throwable {
+        should_upload_letter_and_mark_posted(
+            post("/letters")
+                .header("ServiceAuthorization", "auth-header-value")
+                .contentType(MediaTypes.LETTER_V2)
+                .content(readResource("letter-with-pdf.json"))
+        );
+    }
+
+    private void should_upload_letter_and_mark_posted(MockHttpServletRequestBuilder request) throws Throwable {
         ArgumentCaptor<Dependency> dependencyCaptor = ArgumentCaptor.forClass(Dependency.class);
 
         try (LocalSftpServer server = LocalSftpServer.create()) {
-            send(readResource("letter.json"))
+            mvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -131,16 +150,6 @@ public class EndToEndTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private ResultActions send(String content) throws Exception {
-        MockHttpServletRequestBuilder request =
-            post("/letters")
-                .header("ServiceAuthorization", "auth-header-value")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
-
-        return mvc.perform(request);
     }
 
     private String readResource(final String fileName) throws IOException {
