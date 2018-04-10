@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.encryption;
 
+import com.google.common.io.Files;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
@@ -33,10 +34,24 @@ public final class PgpEncryptionUtil {
     private PgpEncryptionUtil() {
     }
 
+    /**
+     * Encrypts the given byte array using PGP encryption using Triple DES algorithm.
+     * This method assumes that the temporary volume is writable
+     *
+     * @param inputFile          input file byte array
+     * @param inputFileName      input file name to be encrypted
+     * @param pgpPublicKey       key used to encrypt file
+     * @param withIntegrityCheck Sets whether or not the resulting encrypted data will be protected
+     *                           using an integrity packet.
+     * @return PGP encrypted byte array
+     * @throws IOException  if an error occurs writing stream header information to the provider
+     *                      output stream.
+     * @throws PGPException if an error occurs initialising PGP encryption for the configured
+     *                      encryption method.
+     */
     public static byte[] encryptFile(
         byte[] inputFile,
-        String fileNamePrefix,
-        String fileNameSuffix,
+        String inputFileName,
         PGPPublicKey pgpPublicKey,
         boolean withIntegrityCheck
     ) throws IOException, PGPException {
@@ -45,8 +60,7 @@ public final class PgpEncryptionUtil {
         ByteArrayOutputStream byteArrayOutputStream =
             compressAndWriteFileToLiteralData(
                 inputFile,
-                fileNamePrefix,
-                fileNameSuffix
+                inputFileName
             );
 
         PGPEncryptedDataGenerator encryptedDataGenerator =
@@ -118,8 +132,7 @@ public final class PgpEncryptionUtil {
 
     private static ByteArrayOutputStream compressAndWriteFileToLiteralData(
         byte[] inputFile,
-        String fileNamePrefix,
-        String fileNameSuffix
+        String fileName
     ) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
@@ -127,7 +140,7 @@ public final class PgpEncryptionUtil {
             new PGPCompressedDataGenerator(PGPCompressedData.ZIP);
 
         //Creates an empty file in the default temporary-file directory
-        File tempFile = createTempFile(inputFile, fileNamePrefix, fileNameSuffix);
+        File tempFile = createTempFile(inputFile, fileName);
 
         PGPUtil.writeFileToLiteralData(
             pgpCompressedDataGenerator.open(byteArrayOutputStream),
@@ -142,10 +155,9 @@ public final class PgpEncryptionUtil {
 
     private static File createTempFile(
         byte[] inputFile,
-        String fileNamePrefix,
-        String fileNameSuffix
+        String fileName
     ) throws IOException {
-        File tempFile = File.createTempFile(fileNamePrefix, fileNameSuffix);
+        File tempFile = new File(Files.createTempDir(), fileName);
         FileOutputStream fos = new FileOutputStream(tempFile);
         fos.write(inputFile);
         return tempFile;
