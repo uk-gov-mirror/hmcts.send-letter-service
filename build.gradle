@@ -163,19 +163,9 @@ repositories {
   jcenter()
 }
 
-distributions {
-  main {
-    contents {
-      from(file("$rootDir/lib/AI-Agent.xml")) {
-        into "lib"
-      }
-    }
-  }
-}
-
 def versions = [
   springfoxSwagger: '2.7.0',
-  reformLogging: '2.0.2',
+  reformLogging: '2.1.1',
   jackson: dependencyManagement.importedProperties['jackson.version'],
   logback: '1.2.3'
 ]

@@ -1,25 +1,16 @@
 package uk.gov.hmcts.reform.sendletter.logging;
 
 import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.applicationinsights.telemetry.Duration;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.logging.appinsights.AbstractAppInsights;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.time.temporal.ChronoUnit.MILLIS;
-
-@Aspect
 @Component
 public class AppInsights extends AbstractAppInsights {
 
@@ -29,41 +20,7 @@ public class AppInsights extends AbstractAppInsights {
 
     public AppInsights(TelemetryClient telemetry) {
         super(telemetry);
-    }
 
-    // dependencies
-
-    @Pointcut("@annotation(dependency)")
-    public void dependencyPointCut(Dependency dependency) {
-        // point cut definition
-    }
-
-    @Around("dependencyPointCut(dependency)")
-    public Object trackDependency(ProceedingJoinPoint joinPoint, Dependency dependency) throws Throwable {
-        Instant start = Instant.now();
-
-        try {
-            Object proceed = joinPoint.proceed();
-
-            telemetry.trackDependency(
-                dependency.value(),
-                dependency.command(),
-                new Duration(MILLIS.between(start, Instant.now())),
-                true
-            );
-
-            return proceed;
-        } catch (Throwable exception) {
-            telemetry.trackDependency(
-                dependency.value(),
-                dependency.command(),
-                new Duration(MILLIS.between(start, Instant.now())),
-                false
-            );
-            telemetry.trackException((Exception) exception);
-
-            throw exception;
-        }
     }
 
     // events

@@ -2,10 +2,8 @@ package uk.gov.hmcts.reform.sendletter.controllers;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,16 +17,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.reform.sendletter.logging.AppDependency;
-import uk.gov.hmcts.reform.sendletter.logging.AppDependencyCommand;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
-import uk.gov.hmcts.reform.sendletter.logging.Dependency;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,19 +42,11 @@ public class SendLetterTest {
 
     @Test
     public void should_return_200_when_single_letter_is_sent() throws Throwable {
-        ArgumentCaptor<Dependency> dependencyCaptor = ArgumentCaptor.forClass(Dependency.class);
-
         MvcResult result = send(readResource("letter.json"))
             .andExpect(status().isOk())
             .andReturn();
 
         assertThat(result.getResponse().getContentAsString()).isNotNull();
-        verify(insights).trackDependency(any(ProceedingJoinPoint.class), dependencyCaptor.capture());
-
-        Dependency dependency = dependencyCaptor.getValue();
-
-        assertThat(dependency.value()).isEqualTo(AppDependency.AUTH_SERVICE);
-        assertThat(dependency.command()).isEqualTo(AppDependencyCommand.AUTH_SERVICE_HEADER);
     }
 
     @Test
