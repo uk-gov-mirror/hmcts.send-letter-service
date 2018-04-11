@@ -16,17 +16,19 @@ public class ZipFileNameHelperTest {
     public void should_generate_expected_file_name() {
         // given
         Letter letter = new Letter(randomUUID(), randomUUID().toString(), "cmc", null, "type", null, false);
-        LocalDateTime timestamp =
-            LocalDateTime.of(
-                LocalDate.of(2018, 3, 22),
-                LocalTime.of(16, 22, 11)
-            );
+        LocalDateTime createdAt = letter.getCreatedAt().toLocalDateTime();
 
         // when
-        String name = ZipFileNameHelper.generateName(letter, timestamp);
+        String name = ZipFileNameHelper.generateName(letter);
 
         // then
-        assertThat(name).isEqualTo("type_cmc_22032018162211_" + letter.getId() + ".zip");
+        assertThat(name).isEqualTo(
+            "type_cmc_"
+                + createdAt.format(ZipFileNameHelper.dateTimeFormatter)
+                + "_"
+                + letter.getId()
+                + ".zip"
+        );
     }
 
     @Test
@@ -35,7 +37,7 @@ public class ZipFileNameHelperTest {
         Letter letter = new Letter(randomUUID(), randomUUID().toString(), "cmc_claim_store", null, "type", null, false);
 
         // when
-        String name = ZipFileNameHelper.generateName(letter, LocalDateTime.now());
+        String name = ZipFileNameHelper.generateName(letter);
 
         // then
         assertThat(name).contains("cmcclaimstore");
