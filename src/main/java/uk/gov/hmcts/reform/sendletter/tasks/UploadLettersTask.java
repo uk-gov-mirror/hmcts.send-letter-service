@@ -10,10 +10,10 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.exception.DocumentZipException;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
-import uk.gov.hmcts.reform.sendletter.services.FtpAvailabilityChecker;
-import uk.gov.hmcts.reform.sendletter.services.FtpClient;
+import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
+import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
+import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.zip.ZipFileNameHelper;
-import uk.gov.hmcts.reform.sendletter.services.zip.ZippedDoc;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -94,7 +94,7 @@ public class UploadLettersTask {
 
     private String uploadToFtp(Letter letter) {
 
-        ZippedDoc zippedDoc = new ZippedDoc(
+        FileToSend zippedDoc = new FileToSend(
             ZipFileNameHelper.generateName(letter, now()),
             letter.getFileContent()
         );

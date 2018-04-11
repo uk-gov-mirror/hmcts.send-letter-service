@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sendletter.services;
 
 import org.assertj.core.api.AbstractBooleanAssert;
 import org.junit.Test;
+import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;

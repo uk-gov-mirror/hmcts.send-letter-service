@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.services;
+package uk.gov.hmcts.reform.sendletter.services.ftp;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

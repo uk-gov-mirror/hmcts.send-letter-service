@@ -28,10 +28,6 @@ public class Zipper {
         return baos.toByteArray();
     }
 
-    public ZippedDoc zip(String zipFileName, PdfDoc pdfDoc) {
-        return new ZippedDoc(zipFileName, zip(pdfDoc));
-    }
-
     public byte[] zip(PdfDoc pdfDoc) {
         try {
             return zipBytes(pdfDoc.filename, pdfDoc.content);

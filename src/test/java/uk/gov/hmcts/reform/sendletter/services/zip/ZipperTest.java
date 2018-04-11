@@ -17,14 +17,12 @@ public class ZipperTest {
         byte[] fileContent = toByteArray(getResource("hello.pdf"));
         byte[] expectedZipFileContent = toByteArray(getResource("hello.zip"));
 
-        ZippedDoc result = new Zipper().zip(
-            "hello.zip",
+        byte[] result = new Zipper().zip(
             new PdfDoc("hello.pdf", fileContent)
         );
 
         assertThat(result).isNotNull();
-        assertThat(result.filename).isEqualTo("hello.zip");
-        assertThat(asZip(result.content)).hasSameContentAs(asZip(expectedZipFileContent));
+        assertThat(asZip(result)).hasSameContentAs(asZip(expectedZipFileContent));
     }
 
     private ZipInputStream asZip(byte[] bytes) {

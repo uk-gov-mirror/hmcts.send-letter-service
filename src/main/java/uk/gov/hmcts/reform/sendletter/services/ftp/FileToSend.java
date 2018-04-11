@@ -1,16 +1,16 @@
-package uk.gov.hmcts.reform.sendletter.services.zip;
+package uk.gov.hmcts.reform.sendletter.services.ftp;
 
 import net.schmizz.sshj.xfer.InMemorySourceFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-public class ZippedDoc extends InMemorySourceFile {
+public class FileToSend extends InMemorySourceFile {
 
     public final String filename;
     public final byte[] content;
 
-    public ZippedDoc(String filename, byte[] content) {
+    public FileToSend(String filename, byte[] content) {
         this.filename = filename;
         this.content = content;
     }

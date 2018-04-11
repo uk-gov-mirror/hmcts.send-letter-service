@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.services;
+package uk.gov.hmcts.reform.sendletter.services.ftp;
 
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.sftp.RemoteResourceInfo;
@@ -98,7 +98,7 @@ public class FtpClient {
         });
     }
 
-    void testConnection() {
+    public void testConnection() {
         runWith(sftpClient -> null);
     }
 
