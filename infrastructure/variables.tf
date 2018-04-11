@@ -3,9 +3,8 @@ variable "product" {
   default = "send-letter-2"
 }
 
-variable "microservice" {
+variable "component" {
   type = "string"
-  default = "service"
 }
 
 variable "location_app" {
