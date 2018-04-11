@@ -61,7 +61,7 @@ public class ReportParser {
     private LetterPrintStatus toPrintStatus(CSVRecord record) {
         try {
             return new LetterPrintStatus(
-                FileNameHelper.extractId(record.get("InputFileName")),
+                FileNameHelper.extractIdFromPdfName(record.get("InputFileName")),
                 ZonedDateTime.parse(record.get("StartDate") + "T" + record.get("StartTime") + "Z",
                     DateTimeFormatter.ofPattern("dd-MM-yyyy'T'HH:mm'Z'").withZone(ZoneOffset.UTC))
             );

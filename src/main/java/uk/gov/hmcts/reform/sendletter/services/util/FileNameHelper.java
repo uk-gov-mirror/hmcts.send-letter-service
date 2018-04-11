@@ -10,16 +10,16 @@ public final class FileNameHelper {
 
     private static final String SEPARATOR = "_";
 
-    public static String generateName(Letter letter, String extension) {
-        return generateName(letter.getType(), letter.getService(), letter.getId(), extension);
+    public static String generatePdfName(Letter letter) {
+        return generatePdfName(letter.getType(), letter.getService(), letter.getId());
     }
 
-    public static String generateName(String type, String serviceName, UUID id, String extension) {
+    public static String generatePdfName(String type, String serviceName, UUID id) {
         String strippedService = serviceName.replace(SEPARATOR, "");
-        return type + SEPARATOR + strippedService + SEPARATOR + id + "." + extension;
+        return type + SEPARATOR + strippedService + SEPARATOR + id + ".pdf";
     }
 
-    public static UUID extractId(String fileName) {
+    public static UUID extractIdFromPdfName(String fileName) {
         String[] parts = FilenameUtils.removeExtension(fileName).split(SEPARATOR);
         if (parts.length < 3) {
             throw new UnableToExtractIdFromFileNameException("Invalid filename " + fileName);

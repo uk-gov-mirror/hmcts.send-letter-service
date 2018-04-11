@@ -146,7 +146,7 @@ public class EndToEndTest {
     private UUID validateGettingLetterId(File file) {
         try {
             PdfHelper.validateZippedPdf(Files.readAllBytes(file.toPath()));
-            return FileNameHelper.extractId(file.getName());
+            return FileNameHelper.extractIdFromPdfName(file.getName());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

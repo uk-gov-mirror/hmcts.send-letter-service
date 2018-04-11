@@ -93,7 +93,7 @@ public class LetterService {
 
         byte[] zipContent = zipper.zip(
             new PdfDoc(
-                FileNameHelper.generateName(letter.getType(), serviceName, id, "pdf"),
+                FileNameHelper.generatePdfName(letter.getType(), serviceName, id),
                 getPdfContent(letter)
             )
         );

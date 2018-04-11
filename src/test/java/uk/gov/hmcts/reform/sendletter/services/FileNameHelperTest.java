@@ -22,7 +22,7 @@ public class FileNameHelperTest {
         Letter letter = createLetter(letterId, "typeA", "cmc");
 
         // when
-        String result = FileNameHelper.generateName(letter, "pdf");
+        String result = FileNameHelper.generatePdfName(letter);
 
         // then
         assertThat(result).isEqualTo("typeA_cmc_" + letterId + ".pdf");
@@ -35,8 +35,8 @@ public class FileNameHelperTest {
         Letter letter1 = createLetter(letterId, "A", "B");
         Letter letter2 = createLetter(letterId, "A", "B");
 
-        String result1 = FileNameHelper.generateName(letter1, "pdf");
-        String result2 = FileNameHelper.generateName(letter2, "pdf");
+        String result1 = FileNameHelper.generatePdfName(letter1);
+        String result2 = FileNameHelper.generatePdfName(letter2);
 
         // then
         assertThat(result1).isEqualTo(result2);
@@ -48,8 +48,8 @@ public class FileNameHelperTest {
         Letter letter1 = createLetter(UUID.randomUUID(), "A", "B");
         Letter letter2 = createLetter(UUID.randomUUID(), "C", "D");
 
-        String result1 = FileNameHelper.generateName(letter1, "pdf");
-        String result2 = FileNameHelper.generateName(letter2, "pdf");
+        String result1 = FileNameHelper.generatePdfName(letter1);
+        String result2 = FileNameHelper.generatePdfName(letter2);
 
         // then
         assertThat(result1).isNotEqualTo(result2);
@@ -61,8 +61,8 @@ public class FileNameHelperTest {
         Letter letter1 = createLetter(UUID.randomUUID(), "A", "B");
         Letter letter2 = createLetter(UUID.randomUUID(), "A", "B");
 
-        String result1 = FileNameHelper.generateName(letter1, "pdf");
-        String result2 = FileNameHelper.generateName(letter2, "pdf");
+        String result1 = FileNameHelper.generatePdfName(letter1);
+        String result2 = FileNameHelper.generatePdfName(letter2);
 
         // then
         assertThat(result1).isNotEqualTo(result2);
@@ -73,7 +73,7 @@ public class FileNameHelperTest {
         UUID letterId = UUID.randomUUID();
         Letter letter = createLetter(letterId, "typeA", "cmc_claim_store");
 
-        String result = FileNameHelper.generateName(letter, "pdf");
+        String result = FileNameHelper.generatePdfName(letter);
 
         assertThat(result).isEqualTo("typeA_cmcclaimstore_" + letterId + ".pdf");
     }
@@ -86,8 +86,8 @@ public class FileNameHelperTest {
             createLetter(UUID.randomUUID(), "type", "my_service_"),
             createLetter(UUID.randomUUID(), "some_type", "my_service")
         ).forEach(letter -> {
-            String name = FileNameHelper.generateName(letter, "pdf");
-            UUID extractedId = FileNameHelper.extractId(name);
+            String name = FileNameHelper.generatePdfName(letter);
+            UUID extractedId = FileNameHelper.extractIdFromPdfName(name);
 
             assertThat(extractedId).isEqualTo(letter.getId());
         });
@@ -96,14 +96,14 @@ public class FileNameHelperTest {
     @Test
     public void should_throw_custom_exception_when_id_cannot_be_extracted_from_file_name() {
         assertThatThrownBy(
-            () -> FileNameHelper.extractId("a_b.pdf")
+            () -> FileNameHelper.extractIdFromPdfName("a_b.pdf")
         ).isInstanceOf(UnableToExtractIdFromFileNameException.class);
     }
 
     @Test
     public void should_throw_custom_exception_when_uuid_invalid() {
         assertThatThrownBy(
-            () -> FileNameHelper.extractId("a_b_notauuid.pdf")
+            () -> FileNameHelper.extractIdFromPdfName("a_b_notauuid.pdf")
         ).isInstanceOf(UnableToExtractIdFromFileNameException.class);
     }
 

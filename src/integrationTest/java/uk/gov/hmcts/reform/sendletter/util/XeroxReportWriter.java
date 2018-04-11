@@ -23,10 +23,10 @@ public final class XeroxReportWriter {
         );
 
         // Prepare a record for each of our letters.
-        List<List<String>> records = letterIds.map(x -> Lists.newArrayList(
+        List<List<String>> records = letterIds.map(id -> Lists.newArrayList(
             "01-01-2018",
             "10:30",
-            FileNameHelper.generateName("aType", "aService", x, "pdf")
+            FileNameHelper.generatePdfName("aType", "aService", id)
         )).collect(Collectors.toList());
 
         File report = new File(reportFolder, UUID.randomUUID() + ".csv");
