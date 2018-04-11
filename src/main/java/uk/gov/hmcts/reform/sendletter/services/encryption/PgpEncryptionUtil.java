@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.encryption;
+package uk.gov.hmcts.reform.sendletter.services.encryption;
 
 import com.google.common.io.Files;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;

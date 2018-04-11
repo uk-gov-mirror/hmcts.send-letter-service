@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.encryption;
+package uk.gov.hmcts.reform.sendletter.services.encryption;
 
 import uk.gov.hmcts.reform.logging.exception.AlertLevel;
 import uk.gov.hmcts.reform.logging.exception.UnknownErrorCodeException;
