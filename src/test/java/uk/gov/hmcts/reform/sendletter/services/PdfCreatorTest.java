@@ -8,8 +8,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
-import uk.gov.hmcts.reform.sendletter.services.util.DuplexPreparator;
-import uk.gov.hmcts.reform.sendletter.services.util.IHtmlToPdfConverter;
+import uk.gov.hmcts.reform.sendletter.services.pdf.DuplexPreparator;
+import uk.gov.hmcts.reform.sendletter.services.pdf.IHtmlToPdfConverter;
+import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

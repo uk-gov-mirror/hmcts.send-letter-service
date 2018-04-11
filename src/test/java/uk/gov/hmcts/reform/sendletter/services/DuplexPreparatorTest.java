@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.sendletter.services;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.Test;
 import uk.gov.hmcts.reform.sendletter.exception.DuplexException;
-import uk.gov.hmcts.reform.sendletter.services.util.DuplexPreparator;
+import uk.gov.hmcts.reform.sendletter.services.pdf.DuplexPreparator;
 
 import static com.google.common.io.Resources.getResource;
 import static com.google.common.io.Resources.toByteArray;

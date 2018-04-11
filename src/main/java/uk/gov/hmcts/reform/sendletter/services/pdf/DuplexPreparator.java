@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.services.util;
+package uk.gov.hmcts.reform.sendletter.services.pdf;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;

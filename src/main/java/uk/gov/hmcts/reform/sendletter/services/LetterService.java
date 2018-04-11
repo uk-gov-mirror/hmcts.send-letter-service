@@ -18,7 +18,8 @@ import uk.gov.hmcts.reform.sendletter.model.in.ILetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
-import uk.gov.hmcts.reform.sendletter.services.util.DuplexPreparator;
+import uk.gov.hmcts.reform.sendletter.services.pdf.DuplexPreparator;
+import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 

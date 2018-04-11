@@ -4,7 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.exception.InvalidPdfException;
-import uk.gov.hmcts.reform.sendletter.services.util.DuplexPreparator;
+import uk.gov.hmcts.reform.sendletter.services.pdf.DuplexPreparator;
+import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 
 import java.util.Base64;
 import java.util.List;

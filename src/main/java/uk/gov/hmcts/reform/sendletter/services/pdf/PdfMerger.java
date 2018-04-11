@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.services;
+package uk.gov.hmcts.reform.sendletter.services.pdf;
 
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import uk.gov.hmcts.reform.sendletter.exception.PdfMergeException;

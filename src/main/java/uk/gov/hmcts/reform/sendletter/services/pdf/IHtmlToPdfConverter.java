@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.services.util;
+package uk.gov.hmcts.reform.sendletter.services.pdf;
 
 import java.util.Map;
 import java.util.function.BiFunction;

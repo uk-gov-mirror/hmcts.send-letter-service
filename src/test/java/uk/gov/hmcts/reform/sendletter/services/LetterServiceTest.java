@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
+import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
 import java.util.Optional;
