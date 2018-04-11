@@ -35,7 +35,7 @@ public final class PgpEncryptionUtil {
     }
 
     /**
-     * Encrypts the given byte array using PGP encryption using Triple DES algorithm.
+     * Encrypts the given byte array using PGP encryption using AES 256 algorithm.
      * This method assumes that the temporary volume is writable
      *
      * @param inputFile          input file byte array
@@ -121,7 +121,7 @@ public final class PgpEncryptionUtil {
         PGPPublicKey pgpPublicKey,
         boolean withIntegrityCheck
     ) {
-        BcPGPDataEncryptorBuilder dataEncryptor = new BcPGPDataEncryptorBuilder(PGPEncryptedData.TRIPLE_DES);
+        BcPGPDataEncryptorBuilder dataEncryptor = new BcPGPDataEncryptorBuilder(PGPEncryptedData.AES_256);
         dataEncryptor.setWithIntegrityPacket(withIntegrityCheck);
         dataEncryptor.setSecureRandom(new SecureRandom());
 
