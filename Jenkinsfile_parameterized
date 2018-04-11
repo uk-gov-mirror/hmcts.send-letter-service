@@ -1,0 +1,34 @@
+#!groovy
+@Library("Infrastructure") _
+
+List<LinkedHashMap<String, Object>> secrets = [
+  secret('test-s2s-name', 'TEST_S2S_NAME'),
+  secret('test-s2s-secret', 'TEST_S2S_SECRET'),
+  secret('test-s2s-url', 'TEST_S2S_URL')
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [ $class: 'AzureKeyVaultSecret',
+    secretType: 'Secret',
+    name: secretName,
+    version: '',
+    envVariable: envVar
+  ]
+}
+
+properties([
+  parameters([
+    string(name: 'PRODUCT_NAME', defaultValue: 'send-letter', description: ''),
+    string(name: 'APP', defaultValue: 'service', description: ''),
+    string(name: 'TYPE', defaultValue: 'java', description: ''),
+    string(name: 'ENVIRONMENT', defaultValue: 'sandbox', description: 'Environment where code should be build and deployed'),
+    choice(name: 'SUBSCRIPTION', choices: 'sandbox', description: 'Azure subscriptions available to build in')
+  ]),
+  [$class: 'GithubProjectProperty', projectUrlStr: 'github.com/hmcts/send-letter-service'],
+  pipelineTriggers([[$class: 'GitHubPushTrigger']])
+])
+
+withParameterizedPipeline(params.TYPE, params.PRODUCT_NAME, params.APP, params.ENVIRONMENT, params.SUBSCRIPTION) {
+  enableDbMigration()
+  loadVaultSecrets(secrets)
+}
