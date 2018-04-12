@@ -53,3 +53,31 @@ variable encyption_enabled {
 variable scheduling_enabled {
   default = "true"
 }
+
+variable "ftp_hostname" {
+  default = "cmseft.services.xerox.com"
+}
+
+variable "ftp_port" {
+  default = "22"
+}
+
+variable "ftp_fingerprint" {
+  default = "SHA256:gYzreAtWAraVRFsOrcP9SPJq9atn7QxXh9pAauKud2U"
+}
+
+variable "ftp_target_folder" {
+  default = "TO_XEROX"
+}
+
+variable "ftp_smoke_test_target_folder" {
+  default = "SMOKE_TEST"
+}
+
+variable "ftp_reports_folder" {
+  default = "FROM_XEROX"
+}
+
+variable "ftp_reports_cron" {
+  default = "0 30 0 * * *"
+}

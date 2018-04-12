@@ -19,6 +19,24 @@ data "vault_generic_secret" "tests_s2s_secret" {
   path = "secret/${var.vault_section}/ccidam/service-auth-provider/api/microservice-keys/send-letter-tests"
 }
 
+data "vault_generic_secret" "ftp_user" {
+  path = "secret/${var.vault_section}/cc/send-letter-consumer/ftp-user"
+}
+
+data "vault_generic_secret" "ftp_private_key" {
+  path = "secret/${var.vault_section}/cc/send-letter-consumer/ftp-private-key"
+}
+
+data "vault_generic_secret" "ftp_public_key" {
+  path = "secret/${var.vault_section}/cc/send-letter-consumer/ftp-public-key"
+}
+
+locals {
+  ftp_private_key = "${replace(data.vault_generic_secret.ftp_private_key.data["value"], "\\n", "\n")}"
+  ftp_public_key  = "${replace(data.vault_generic_secret.ftp_public_key.data["value"], "\\n", "\n")}"
+  ftp_user        = "${data.vault_generic_secret.ftp_user.data["value"]}"
+}
+
 module "db" {
   source              = "git@github.com:hmcts/moj-module-postgres.git?ref=master"
   product             = "${var.product}-db"
@@ -50,6 +68,18 @@ module "send-letter-service" {
     FLYWAY_PASSWORD                 = "${module.db.postgresql_password}"
     ENCRYPTION_ENABLED              = "${var.encyption_enabled}"
     SCHEDULING_ENABLED              = "${var.scheduling_enabled}"
+
+    // ftp
+    FTP_HOSTNAME                    = "${var.ftp_hostname}"
+    FTP_PORT                        = "${var.ftp_port}"
+    FTP_FINGERPRINT                 = "${var.ftp_fingerprint}"
+    FTP_TARGET_FOLDER               = "${var.ftp_target_folder}"
+    FTP_SMOKE_TEST_TARGET_FOLDER    = "${var.ftp_smoke_test_target_folder}"
+    FTP_REPORTS_FOLDER              = "${var.ftp_reports_folder}"
+    FTP_REPORTS_CRON                = "${var.ftp_reports_cron}"
+    FTP_USER                        = "${local.ftp_user}"
+    FTP_PRIVATE_KEY                 = "${local.ftp_private_key}"
+    FTP_PUBLIC_KEY                  = "${local.ftp_public_key}"
   }
 }
 
