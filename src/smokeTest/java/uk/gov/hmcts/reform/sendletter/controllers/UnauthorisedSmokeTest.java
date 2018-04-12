@@ -27,7 +27,7 @@ public class UnauthorisedSmokeTest extends SmokeTestSuite {
     @Test
     public void must_have_authorisation_header_for_letter_status_endpoint() {
         RequestSpecification specification = getCommonRequestSpec()
-            .header(SYNTHETIC_TEST_TEST_NAME, getClass().getEnclosingMethod().getName())
+            .header(SYNTHETIC_TEST_TEST_NAME, "must_have_authorisation_header_for_letter_status_endpoint")
             .when();
 
         specification.get("/letters/" + LETTER_ID).then().statusCode(SC_UNAUTHORIZED);
@@ -37,7 +37,7 @@ public class UnauthorisedSmokeTest extends SmokeTestSuite {
     @Test
     public void should_not_authorise_with_bad_authorisation_token() {
         RequestSpecification specification = getCommonRequestSpec()
-            .header(SYNTHETIC_TEST_TEST_NAME, getClass().getEnclosingMethod().getName())
+            .header(SYNTHETIC_TEST_TEST_NAME, "should_not_authorise_with_bad_authorisation_token")
             .header("ServiceAuthorization", "invalid token")
             .when();
 
