@@ -14,15 +14,17 @@ public final class PdfHelper {
      * Validate that data is a zipped pdf or throw an exception.
      */
     public static void validateZippedPdf(byte[] data) throws IOException {
-        ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(data));
-        zip.getNextEntry(); //positions the stream at the beginning of the entry data
+        try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(data))) {
 
-        PreflightParser pdfParser = new PreflightParser(new ByteArrayDataSource(zip));
-        pdfParser.parse();
-        PreflightDocument document = pdfParser.getPreflightDocument();
-        // This will throw an exception if the file format is invalid,
-        // but ignores more minor errors such as missing metadata.
-        document.validate();
+            zip.getNextEntry(); //positions the stream at the beginning of the entry data
+
+            PreflightParser pdfParser = new PreflightParser(new ByteArrayDataSource(zip));
+            pdfParser.parse();
+            PreflightDocument document = pdfParser.getPreflightDocument();
+            // This will throw an exception if the file format is invalid,
+            // but ignores more minor errors such as missing metadata.
+            document.validate();
+        }
     }
 
     private PdfHelper() {
