@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.services.zip;
+package uk.gov.hmcts.reform.sendletter.services.util;
 
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 
@@ -6,21 +6,23 @@ import java.time.format.DateTimeFormatter;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
 
-public final class ZipFileNameHelper {
+// TODO: merge with `FileNameHelper`
+public final class FinalPackageFileNameHelper {
 
     public static final DateTimeFormatter dateTimeFormatter = ofPattern("ddMMyyyyHHmmss");
 
     public static String generateName(Letter letter) {
         return String.format(
-            "%s_%s_%s_%s.zip",
+            "%s_%s_%s_%s.%s",
             letter.getType(),
             letter.getService().replace("_", ""),
             letter.getCreatedAt().toLocalDateTime().format(dateTimeFormatter),
-            letter.getId()
+            letter.getId(),
+            letter.isEncrypted() ? "pgp" : "zip"
         );
     }
 
-    private ZipFileNameHelper() {
+    private FinalPackageFileNameHelper() {
         // utility class constructor
     }
 }

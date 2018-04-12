@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
-import uk.gov.hmcts.reform.sendletter.services.zip.ZipFileNameHelper;
+import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -94,21 +94,21 @@ public class UploadLettersTask {
 
     private String uploadToFtp(Letter letter) {
 
-        FileToSend zippedDoc = new FileToSend(
-            ZipFileNameHelper.generateName(letter),
+        FileToSend file = new FileToSend(
+            FinalPackageFileNameHelper.generateName(letter),
             letter.getFileContent()
         );
 
         logger.debug(
-            "Uploading letter id: {}, messageId: {}, zip filename: {}",
+            "Uploading letter id: {}, messageId: {}, file name: {}",
             letter.getId(),
             letter.getMessageId(),
-            zippedDoc.filename
+            file.filename
         );
 
-        ftp.upload(zippedDoc, isSmokeTest(letter));
+        ftp.upload(file, isSmokeTest(letter));
 
-        return zippedDoc.filename;
+        return file.filename;
     }
 
     private boolean isSmokeTest(Letter letter) {
