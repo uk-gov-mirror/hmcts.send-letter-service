@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -22,7 +21,6 @@ import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
-import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
 import uk.gov.hmcts.reform.sendletter.util.XeroxReportWriter;
@@ -55,9 +53,6 @@ public class EndToEndTest {
 
     @Autowired
     private LetterRepository repository;
-
-    @SpyBean
-    private AppInsights insights;
 
     @After
     public void cleanUp() {

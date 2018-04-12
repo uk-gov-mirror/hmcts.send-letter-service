@@ -149,7 +149,7 @@ repositories {
 
 def versions = [
   springfoxSwagger: '2.7.0',
-  reformLogging: '2.1.1',
+  reformLogging: '2.2.1',
   jackson: dependencyManagement.importedProperties['jackson.version'],
   logback: '1.2.3'
 ]
