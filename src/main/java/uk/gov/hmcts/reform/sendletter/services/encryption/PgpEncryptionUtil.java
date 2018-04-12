@@ -107,12 +107,9 @@ public final class PgpEncryptionUtil {
         byte[] bytes = bout.toByteArray();
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-        OutputStream outputStream = encryptedDataGenerator.open(byteArrayOutputStream, bytes.length);
-        outputStream.write(bytes);
-        outputStream.close();
-
-        byteArrayOutputStream.close();
+        try (OutputStream outputStream = encryptedDataGenerator.open(byteArrayOutputStream, bytes.length)) {
+            outputStream.write(bytes);
+        }
 
         return byteArrayOutputStream.toByteArray();
     }
@@ -142,13 +139,13 @@ public final class PgpEncryptionUtil {
         //Creates an empty file in the default temporary-file directory
         File tempFile = createTempFile(inputFile, fileName);
 
-        PGPUtil.writeFileToLiteralData(
-            pgpCompressedDataGenerator.open(byteArrayOutputStream),
-            PGPLiteralData.BINARY,
-            tempFile
-        );
-
-        pgpCompressedDataGenerator.close();
+        try (OutputStream out = pgpCompressedDataGenerator.open(byteArrayOutputStream)) {
+            PGPUtil.writeFileToLiteralData(
+                out,
+                PGPLiteralData.BINARY,
+                tempFile
+            );
+        }
 
         return byteArrayOutputStream;
     }
@@ -158,8 +155,9 @@ public final class PgpEncryptionUtil {
         String fileName
     ) throws IOException {
         File tempFile = new File(Files.createTempDir(), fileName);
-        FileOutputStream fos = new FileOutputStream(tempFile);
-        fos.write(inputFile);
-        return tempFile;
+        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+            fos.write(inputFile);
+            return tempFile;
+        }
     }
 }
