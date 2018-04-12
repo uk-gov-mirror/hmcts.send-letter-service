@@ -13,8 +13,17 @@ services:
     environment:
       - APPINSIGHTS_INSTRUMENTATIONKEY
       - FLYWAY_ENABLED=false
+      - FTP_FINGERPRINT="fingerprint"
+      - FTP_HOSTNAME="hostname"
+      - FTP_PORT=22
+      - FTP_PRIVATE_KEY="private"
+      - FTP_PUBLIC_KEY="public"
+      - FTP_REPORTS_FOLDER="/reports/"
+      - FTP_TARGET_FOLDER="/target/"
+      - FTP_USER="user"
       - LETTER_TRACKING_DB_PASSWORD
       - S2S_URL
+      - SCHEDULING_ENABLED
       # these environment variables are used by java-logging library
       - ROOT_APPENDER
       - JSON_CONSOLE_PRETTY_PRINT

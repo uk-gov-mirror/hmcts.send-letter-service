@@ -16,8 +16,17 @@ print_help() {
 
   Available parameters:
     APPINSIGHTS_INSTRUMENTATIONKEY      Defaults to '00000000-0000-0000-0000-000000000000'
+    FTP_FINGERPRINT                     Defaults to 'fingerprint'
+    FTP_HOSTNAME                        Defaults to 'hostname'
+    FTP_PORT                            Defaults to '22'
+    FTP_PRIVATE_KEY                     Defaults to 'private'
+    FTP_PUBLIC_KEY                      Defaults to 'public'
+    FTP_REPORTS_FOLDER                  Defaults to '/reports/'
+    FTP_TARGET_FOLDER                   Defaults to '/target/'
+    FTP_USER                            Defaults to 'user'
     LETTER_TRACKING_DB_PASSWORD         Defaults to 'password'
     S2S_URL                             Defaults to 'false' - disables health check
+    SCHEDULING_ENABLED                  Defaults to 'false'
   "
 }
 
@@ -28,8 +37,17 @@ FLYWAY_ENABLED=false
 
 # environment variables
 APPINSIGHTS_INSTRUMENTATIONKEY="00000000-0000-0000-0000-000000000000"
+FTP_FINGERPRINT="fingerprint"
+FTP_HOSTNAME="hostname"
+FTP_PORT=22
+FTP_PRIVATE_KEY="private"
+FTP_PUBLIC_KEY="public"
+FTP_REPORTS_FOLDER="/reports/"
+FTP_TARGET_FOLDER="/target/"
+FTP_USER="user"
 LETTER_TRACKING_DB_PASSWORD="password"
 S2S_URL=false
+SCHEDULING_ENABLED=false
 
 execute_script() {
   cd $(dirname "$0")/..
@@ -49,8 +67,17 @@ execute_script() {
   echo "Assigning environment variables.."
 
   export APPINSIGHTS_INSTRUMENTATIONKEY=${APPINSIGHTS_INSTRUMENTATIONKEY}
+  export FTP_FINGERPRINT=${FTP_FINGERPRINT}
+  export FTP_HOSTNAME=${FTP_HOSTNAME}
+  export FTP_PORT=${FTP_PORT}
+  export FTP_PRIVATE_KEY=${FTP_PRIVATE_KEY}
+  export FTP_PUBLIC_KEY=${FTP_PUBLIC_KEY}
+  export FTP_REPORTS_FOLDER=${FTP_REPORTS_FOLDER}
+  export FTP_TARGET_FOLDER=${FTP_TARGET_FOLDER}
+  export FTP_USER=${FTP_USER}
   export LETTER_TRACKING_DB_PASSWORD=${LETTER_TRACKING_DB_PASSWORD}
   export S2S_URL=${S2S_URL}
+  export SCHEDULING_ENABLED=${SCHEDULING_ENABLED}
 
   echo "Bringing up docker containers.."
 
@@ -71,8 +98,17 @@ while true ; do
     -p|--param)
       case "$2" in
         APPINSIGHTS_INSTRUMENTATIONKEY=*) APPINSIGHTS_INSTRUMENTATIONKEY="${2#*=}" ; shift 2 ;;
+        FTP_FINGERPRINT=*) FTP_FINGERPRINT="${2#*=}" ; shift 2 ;;
+        FTP_HOSTNAME=*) FTP_HOSTNAME="${2#*=}" ; shift 2 ;;
+        FTP_PORT=*) FTP_PORT="${2#*=}" ; shift 2 ;;
+        FTP_PRIVATE_KEY=*) FTP_PRIVATE_KEY="${2#*=}" ; shift 2 ;;
+        FTP_PUBLIC_KEY=*) FTP_PUBLIC_KEY="${2#*=}" ; shift 2 ;;
+        FTP_REPORTS_FOLDER=*) FTP_REPORTS_FOLDER="${2#*=}" ; shift 2 ;;
+        FTP_TARGET_FOLDER=*) FTP_TARGET_FOLDER="${2#*=}" ; shift 2 ;;
+        FTP_USER=*) FTP_USER="${2#*=}" ; shift 2 ;;
         LETTER_TRACKING_DB_PASSWORD=*) LETTER_TRACKING_DB_PASSWORD="${2#*=}" ; shift 2 ;;
         S2S_URL=*) S2S_URL="${2#*=}" ; shift 2 ;;
+        SCHEDULING_ENABLED=*) SCHEDULING_ENABLED="${2#*=}" ; shift 2 ;;
         *) shift 2 ;;
       esac ;;
     *) execute_script ; break ;;
