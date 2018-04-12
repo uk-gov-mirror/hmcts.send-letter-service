@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sendletter.services.zip;
 
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static java.time.format.DateTimeFormatter.ofPattern;

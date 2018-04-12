@@ -3,9 +3,7 @@ package uk.gov.hmcts.reform.sendletter.services.zip;
 import org.junit.Test;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
