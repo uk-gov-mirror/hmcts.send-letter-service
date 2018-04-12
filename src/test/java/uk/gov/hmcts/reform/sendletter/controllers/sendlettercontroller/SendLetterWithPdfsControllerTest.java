@@ -71,6 +71,7 @@ public class SendLetterWithPdfsControllerTest {
         verify(authService).authenticate(eq(authHeader));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void should_return_400_status_if_service_throws_InvalidPdfException() throws Exception {
         given(authService.authenticate(anyString())).willReturn("some_service_name");

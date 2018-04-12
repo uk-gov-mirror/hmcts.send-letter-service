@@ -55,24 +55,8 @@ sourceSets {
   }
 }
 
-compileJava {
-  options.compilerArgs << "-Xlint:unchecked"
-}
-
-compileTestJava {
-  options.compilerArgs << "-Xlint:unchecked"
-}
-
-compileFunctionalTestJava {
-  options.compilerArgs << "-Xlint:unchecked"
-}
-
-compileIntegrationTestJava {
-  options.compilerArgs << "-Xlint:unchecked"
-}
-
-compileSmokeTestJava {
-  options.compilerArgs << "-Xlint:unchecked"
+tasks.withType(JavaCompile) {
+  options.compilerArgs << "-Xlint:unchecked" << "-Werror"
 }
 
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {

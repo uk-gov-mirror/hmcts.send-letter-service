@@ -32,6 +32,7 @@ public final class PgpDecryptionHelper {
     /**
      * decrypt the passed in message stream.
      */
+    @SuppressWarnings("unchecked")
     public static byte[] decryptFile(byte[] in, InputStream keyIn, char... passwd) throws IOException, PGPException {
         Security.addProvider(new BouncyCastleProvider());
 
