@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static java.time.LocalDateTime.now;
 
@@ -51,20 +52,21 @@ public class UploadLettersTask {
             return;
         }
 
-        Iterator<Letter> iterator = repo.findByStatus(LetterStatus.Created).iterator();
+        try (Stream<Letter> stream = repo.findByStatus(LetterStatus.Created)) {
+            Iterator<Letter> iterator = stream.iterator();
+            while (iterator.hasNext()) {
+                Letter letter = iterator.next();
 
-        while (iterator.hasNext()) {
-            Letter letter = iterator.next();
-
-            try {
-                uploadLetter(letter);
-            } catch (FtpException exception) {
-                logger.error(String.format("Exception uploading letter %s", letter.getId()), exception);
-                break;
+                try {
+                    uploadLetter(letter);
+                } catch (FtpException exception) {
+                    logger.error(String.format("Exception uploading letter %s", letter.getId()), exception);
+                    break;
+                }
             }
-        }
 
-        logger.info("Completed letter upload job");
+            logger.info("Completed letter upload job");
+        }
     }
 
     private void uploadLetter(Letter letter) {
