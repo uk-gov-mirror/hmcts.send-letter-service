@@ -53,7 +53,8 @@ public class LetterServiceTest {
             letterRepository,
             new Zipper(),
             new ObjectMapper(),
-            false
+            false,
+            null
         );
     }
 

@@ -80,7 +80,7 @@ public final class PgpEncryptionUtil {
             new BcPGPPublicKeyRing(
                 getDecoderStream(new ByteArrayInputStream(data))
             )
-        ).orElseThrow(() -> new UnableToLoadPgpPublicKeyException("PGP Public key object could be constructed"));
+        ).orElseThrow(() -> new UnableToLoadPgpPublicKeyException("PGP Public key object could not be constructed"));
     }
 
     /**
@@ -89,7 +89,7 @@ public final class PgpEncryptionUtil {
      * be sign-only in such situations. So you've gotta go digging in through the key packets and
      * make sure you get the one that's valid for encryption.
      */
-    public static Optional<PGPPublicKey> lookupPublicSubkey(PGPPublicKeyRing ring) {
+    private static Optional<PGPPublicKey> lookupPublicSubkey(PGPPublicKeyRing ring) {
         Iterator<PGPPublicKey> keys = ring.getPublicKeys();
         while (keys.hasNext()) {
             PGPPublicKey key = keys.next();

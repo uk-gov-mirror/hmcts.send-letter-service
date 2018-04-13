@@ -13,6 +13,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -61,7 +62,17 @@ public class AppInsightsTest {
 
     @Test
     public void should_track_event_of_not_printed_letter() {
-        Letter letter = new Letter(UUID.randomUUID(), MESSAGE_ID, SERVICE_NAME, null, TYPE, null, false);
+        Letter letter = new Letter(
+            UUID.randomUUID(),
+            MESSAGE_ID,
+            SERVICE_NAME,
+            null,
+            TYPE,
+            null,
+            false,
+            Timestamp.valueOf(LocalDateTime.now())
+        );
+
         ZonedDateTime sentToPrint = ZonedDateTime.now(ZoneOffset.UTC);
         letter.setSentToPrintAt(Timestamp.from(sentToPrint.toInstant()));
 

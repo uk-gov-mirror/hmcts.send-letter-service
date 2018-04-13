@@ -20,7 +20,7 @@ public class PgpEncryptionUtilTest {
 
         byte[] inputZipFile = Resources.toByteArray(getResource(inputFileName));
 
-        byte[] pubKey = Resources.toByteArray(getResource("pubkey.asc"));
+        byte[] pubKey = Resources.toByteArray(getResource("encryption/pubkey.asc"));
         PGPPublicKey pgpPublicKey = PgpEncryptionUtil.loadPublicKey(pubKey);
 
         //when
@@ -35,7 +35,7 @@ public class PgpEncryptionUtilTest {
         //Currently this seems to be the only way to validate the file contents.
         byte[] decryptedZip = PgpDecryptionHelper.decryptFile(
             pgpEncryptedZip,
-            getClass().getResourceAsStream("/privatekey.asc"),
+            getClass().getResourceAsStream("/encryption/privatekey.asc"),
             "Password1".toCharArray()
         );
 
@@ -51,7 +51,7 @@ public class PgpEncryptionUtilTest {
 
         byte[] inputZipFile = Resources.toByteArray(getResource(inputFileName));
 
-        byte[] pubKey = Resources.toByteArray(getResource("pubkey.asc"));
+        byte[] pubKey = Resources.toByteArray(getResource("encryption/pubkey.asc"));
         PGPPublicKey pgpPublicKey = PgpEncryptionUtil.loadPublicKey(pubKey);
 
         //when
@@ -66,7 +66,7 @@ public class PgpEncryptionUtilTest {
         //Currently this seems to be the only way to validate the file contents.
         byte[] decryptedZip = PgpDecryptionHelper.decryptFile(
             pgpEncryptedZip,
-            getClass().getResourceAsStream("/privatekey.asc"),
+            getClass().getResourceAsStream("/encryption/privatekey.asc"),
             "Password1".toCharArray()
         );
 

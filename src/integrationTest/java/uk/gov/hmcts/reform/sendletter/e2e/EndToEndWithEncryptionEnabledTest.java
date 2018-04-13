@@ -10,10 +10,10 @@ import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @RunWith(SpringRunner.class)
-@TestPropertySource(properties = "scheduling.enabled=true")
-public class EndToEndTest extends BaseTest {
+@TestPropertySource(properties = {"scheduling.enabled=true", "encryption.enabled=true"})
+public class EndToEndWithEncryptionEnabledTest extends BaseTest {
 
-    private static final Boolean IS_ENCRYPTION_ENABLED = false;
+    private static final Boolean IS_ENCRYPTION_ENABLED = true;
 
     @Test
     public void should_handle_old_letter_model() throws Throwable {

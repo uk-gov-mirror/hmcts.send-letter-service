@@ -7,7 +7,6 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,7 +32,7 @@ public class Letter {
     @Type(type = "json")
     @Column(columnDefinition = "json")
     private JsonNode additionalData;
-    private final Timestamp createdAt = Timestamp.from(Instant.now());
+    private Timestamp createdAt;
     private Timestamp sentToPrintAt;
     private Timestamp printedAt;
     private boolean isFailed;
@@ -54,7 +53,8 @@ public class Letter {
         JsonNode additionalData,
         String type,
         byte[] fileContent,
-        Boolean isEncrypted
+        Boolean isEncrypted,
+        Timestamp createdAt
     ) {
         this.id = id;
         this.messageId = messageId;
@@ -64,6 +64,7 @@ public class Letter {
         this.fileContent = fileContent;
         this.isFailed = false;
         this.isEncrypted = isEncrypted;
+        this.createdAt = createdAt;
     }
 
     public UUID getId() {

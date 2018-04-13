@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -67,7 +69,16 @@ public class UploadLettersTaskTest {
     }
 
     private Letter letterOfType(String type) {
-        return new Letter(UUID.randomUUID(), "msgId", "cmc", null, type, "hello".getBytes(),true);
+        return new Letter(
+            UUID.randomUUID(),
+            "msgId",
+            "cmc",
+            null,
+            type,
+            "hello".getBytes(),
+            true,
+            Timestamp.valueOf(LocalDateTime.now())
+        );
     }
 
     private void givenDbContains(Letter letter) {

@@ -14,4 +14,8 @@ public class UnableToLoadPgpPublicKeyException extends UnknownErrorCodeException
     public UnableToLoadPgpPublicKeyException(String message) {
         super(AlertLevel.P1, message);
     }
+
+    public UnableToLoadPgpPublicKeyException(String message, Throwable cause) {
+        super(AlertLevel.P1, message, cause);
+    }
 }
