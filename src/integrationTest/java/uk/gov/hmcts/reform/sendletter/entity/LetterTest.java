@@ -1,22 +1,15 @@
 package uk.gov.hmcts.reform.sendletter.entity;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sendletter.SampleData;
-import uk.gov.hmcts.reform.sendletter.data.model.DbLetter;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
-import javax.sql.DataSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,39 +21,12 @@ public class LetterTest {
     @Autowired
     private LetterRepository repository;
 
-    @Autowired
-    private DataSource dataSource;
-
     @Test
     public void should_successfully_save_report_in_db() {
         repository.save(SampleData.letterEntity("a.service"));
         List<Letter> letters = Lists.newArrayList(repository.findAll());
         assertThat(letters.size()).isEqualTo(1);
         assertThat(letters.get(0).getStatus()).isEqualTo(LetterStatus.Created);
-    }
-
-    @Test
-    public void compatible_with_existing_records() throws Exception {
-        // Save a letter using the existing repository code.
-        NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-        ObjectMapper objectMapper = new ObjectMapper();
-        uk.gov.hmcts.reform.sendletter.data.LetterRepository repo =
-            new uk.gov.hmcts.reform.sendletter.data.LetterRepository(jdbcTemplate, objectMapper);
-        DbLetter dbLetter = new DbLetter(UUID.randomUUID(), "cmc", SampleData.letterRequest());
-        Instant instant = Instant.now();
-        String messageId = UUID.randomUUID().toString();
-        repo.save(dbLetter, instant, messageId);
-
-        List<Letter> letters = Lists.newArrayList(repository.findAll());
-        assertThat(letters.size()).isEqualTo(1);
-
-        Letter loaded = letters.get(0);
-        String expectedData = objectMapper.writeValueAsString(SampleData.letterRequest().additionalData);
-        assertThat(loaded.getAdditionalData().toString()).isEqualTo(expectedData);
-        assertThat(loaded.getCreatedAt()).isEqualTo(Timestamp.from(instant));
-        assertThat(loaded.getMessageId()).isEqualTo(messageId);
-        assertThat(loaded.getService()).isEqualTo("cmc");
-        assertThat(loaded.getType()).isEqualTo(dbLetter.type);
     }
 
     @Test
