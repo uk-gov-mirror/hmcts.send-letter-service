@@ -27,6 +27,8 @@ print_help() {
     LETTER_TRACKING_DB_PASSWORD         Defaults to 'password'
     S2S_URL                             Defaults to 'false' - disables health check
     SCHEDULING_ENABLED                  Defaults to 'false'
+    ENCRYPTION_ENABLED                  Defaults to 'false'
+    ENCRYPTION_PUBLIC_KEY               Defaults to 'public'
   "
 }
 
@@ -48,6 +50,8 @@ FTP_USER="user"
 LETTER_TRACKING_DB_PASSWORD="password"
 S2S_URL=false
 SCHEDULING_ENABLED=false
+ENCRYPTION_ENABLED=false
+ENCRYPTION_PUBLIC_KEY="public"
 
 execute_script() {
   cd $(dirname "$0")/..
@@ -78,6 +82,8 @@ execute_script() {
   export LETTER_TRACKING_DB_PASSWORD=${LETTER_TRACKING_DB_PASSWORD}
   export S2S_URL=${S2S_URL}
   export SCHEDULING_ENABLED=${SCHEDULING_ENABLED}
+  export ENCRYPTION_ENABLED=${ENCRYPTION_ENABLED}
+  export ENCRYPTION_PUBLIC_KEY=${ENCRYPTION_PUBLIC_KEY}
 
   echo "Bringing up docker containers.."
 
@@ -109,6 +115,8 @@ while true ; do
         LETTER_TRACKING_DB_PASSWORD=*) LETTER_TRACKING_DB_PASSWORD="${2#*=}" ; shift 2 ;;
         S2S_URL=*) S2S_URL="${2#*=}" ; shift 2 ;;
         SCHEDULING_ENABLED=*) SCHEDULING_ENABLED="${2#*=}" ; shift 2 ;;
+        ENCRYPTION_ENABLED=*) ENCRYPTION_ENABLED="${2#*=}" ; shift 2 ;;
+        ENCRYPTION_PUBLIC_KEY=*) ENCRYPTION_PUBLIC_KEY="${2#*=}" ; shift 2 ;;
         *) shift 2 ;;
       esac ;;
     *) execute_script ; break ;;

@@ -24,6 +24,8 @@ services:
       - LETTER_TRACKING_DB_PASSWORD
       - S2S_URL
       - SCHEDULING_ENABLED
+      - ENCRYPTION_ENABLED
+      - ENCRYPTION_PUBLIC_KEY
       # these environment variables are used by java-logging library
       - ROOT_APPENDER
       - JSON_CONSOLE_PRETTY_PRINT
