@@ -24,7 +24,7 @@ variable "env" {
 variable "vault_section" {
   type = "string"
   description = "Name of the environment-specific section in Vault key path, i.e. secret/{vault_section}/..."
-  default = "dev"
+  default = "test"
 }
 
 variable "ilbIp" {}
