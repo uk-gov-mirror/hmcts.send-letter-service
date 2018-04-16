@@ -3,10 +3,20 @@
     <AgentLogger>INFO</AgentLogger>
     <Instrumentation>
         <BuiltIn enabled="true">
+            <HIBERNATE enabled="true"/>
             <HTTP enabled="true"/>
         </BuiltIn>
-        <Class name="uk.gov.hmcts.reform.sendletter.services.LetterService">
-            <Method name="send" reportCaughtExceptions="true" reportExecutionTime="true"/>
+        <Class name="uk.gov.hmcts.reform.sendletter.services.encryption.PgpEncryptionUtil">
+            <Method name="encryptFile" reportCaughtExceptions="true" reportExecutionTime="true"/>
+        </Class>
+        <Class name="uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator">
+            <Method name="createFromTemplates" reportCaughtExceptions="true" reportExecutionTime="true"/>
+            <Method name="createFromBase64Pdfs" reportCaughtExceptions="true" reportExecutionTime="true"/>
+        </Class>
+        <Class name="uk.gov.hmcts.reform.sendletter.tasks.TaskSchedule">
+            <Method name="uploadLetters" reportCaughtExceptions="true" reportExecutionTime="true"/>
+            <Method name="markPosted" reportCaughtExceptions="true" reportExecutionTime="true"/>
+            <Method name="staleLetters" reportCaughtExceptions="true" reportExecutionTime="true"/>
         </Class>
     </Instrumentation>
 </ApplicationInsightsAgent>
