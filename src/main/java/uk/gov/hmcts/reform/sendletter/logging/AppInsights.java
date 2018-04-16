@@ -38,8 +38,4 @@ public class AppInsights extends AbstractAppInsights {
 
         telemetry.trackEvent(LETTER_NOT_PRINTED, properties, null);
     }
-
-    public void trackException(Exception exception) {
-        telemetry.trackException(exception);
-    }
 }

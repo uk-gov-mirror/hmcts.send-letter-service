@@ -6,11 +6,9 @@ import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
@@ -23,7 +21,6 @@ import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.encryption.PgpEncryptionUtil;
 import uk.gov.hmcts.reform.sendletter.services.encryption.UnableToLoadPgpPublicKeyException;
 import uk.gov.hmcts.reform.sendletter.services.encryption.UnableToPgpEncryptZipFileException;
-import uk.gov.hmcts.reform.sendletter.services.pdf.DuplexPreparator;
 import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
@@ -68,25 +65,6 @@ public class LetterService {
         this.isEncryptionEnabled = isEncryptionEnabled;
         this.encryptionPublicKey = encryptionPublicKey;
         this.pgpPublicKey = loadPgpPublicKey(encryptionPublicKey);
-    }
-
-    // TODO: remove
-    @Autowired
-    public LetterService(
-        LetterRepository letterRepository,
-        Zipper zipper,
-        ObjectMapper mapper,
-        @Value("${encryption.enabled}") Boolean isEncryptionEnabled,
-        @Value("${encryption.publicKey}") String encryptionPublicKey
-    ) {
-        this(
-            new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert),
-            letterRepository,
-            zipper,
-            mapper,
-            isEncryptionEnabled,
-            encryptionPublicKey
-        );
     }
 
     @Transactional

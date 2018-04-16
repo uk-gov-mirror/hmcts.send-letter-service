@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sendletter.tasks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
@@ -26,7 +25,6 @@ public class StaleLettersTask {
     private final AppInsights insights;
     private final LocalTime staleCutOffTime;
 
-    @Autowired
     public StaleLettersTask(
         LetterRepository repo,
         AppInsights insights,

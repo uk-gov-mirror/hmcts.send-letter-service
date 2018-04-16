@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -92,12 +91,5 @@ public class AppInsightsTest {
             eq(null)
         );
         assertThat(properties.getValue()).containsAllEntriesOf(expectedProperties);
-    }
-
-    @Test
-    public void should_track_exception() {
-        insights.trackException(new NullPointerException("Some null"));
-
-        verify(telemetry).trackException(any(NullPointerException.class));
     }
 }

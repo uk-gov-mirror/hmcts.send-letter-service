@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sendletter.tasks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
@@ -29,7 +28,6 @@ public class MarkLettersPostedTask {
 
     private static final Logger logger = LoggerFactory.getLogger(MarkLettersPostedTask.class);
 
-    @Autowired
     public MarkLettersPostedTask(LetterRepository repo,
                                  FtpClient ftp,
                                  FtpAvailabilityChecker checker,
