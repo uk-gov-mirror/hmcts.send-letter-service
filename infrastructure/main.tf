@@ -36,10 +36,12 @@ data "vault_generic_secret" "encryption_public_key" {
 }
 
 locals {
+  ase_name               = "${data.terraform_remote_state.core_apps_compute.ase_name[0]}"
   ftp_private_key        = "${replace(data.vault_generic_secret.ftp_private_key.data["value"], "\\n", "\n")}"
   ftp_public_key         = "${replace(data.vault_generic_secret.ftp_public_key.data["value"], "\\n", "\n")}"
   ftp_user               = "${data.vault_generic_secret.ftp_user.data["value"]}"
   encryption_public_key  = "${replace(data.vault_generic_secret.encryption_public_key.data["value"], "\\n", "\n")}"
+  s2s_url                = "http://rpe-service-auth-provider-${var.env}.service.${local.ase_name}.internal"
 }
 
 module "db" {

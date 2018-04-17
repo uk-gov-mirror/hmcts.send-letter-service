@@ -207,6 +207,10 @@ dependencies {
   smokeTestCompile sourceSets.main.runtimeClasspath
   smokeTestCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.7'
   smokeTestCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+
+  functionalTestCompile sourceSets.main.runtimeClasspath
+  functionalTestCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.7'
+  functionalTestCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
 }
 
 jar {
