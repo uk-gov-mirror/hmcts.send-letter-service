@@ -88,10 +88,11 @@ public class BaseTest {
     }
 
     private void createXeroxReport(LocalSftpServer server, Boolean isEncryptionEnabled) throws IOException {
-        Stream<UUID> letterIds = Arrays.stream(server.lettersFolder.listFiles())
-            .map(file -> validateGettingLetterId(file, isEncryptionEnabled));
+        try (Stream<UUID> letterIds = Arrays.stream(server.lettersFolder.listFiles())
+            .map(file -> validateGettingLetterId(file, isEncryptionEnabled))) {
 
-        XeroxReportWriter.writeReport(letterIds, server.reportFolder);
+            XeroxReportWriter.writeReport(letterIds, server.reportFolder);
+        }
     }
 
     // returning the Letter's ID from the filename.

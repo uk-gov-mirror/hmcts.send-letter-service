@@ -6,6 +6,7 @@ import org.bouncycastle.openpgp.PGPPublicKey;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import static com.google.common.io.Resources.getResource;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,8 +21,7 @@ public class PgpEncryptionUtilTest {
 
         byte[] inputZipFile = Resources.toByteArray(getResource(inputFileName));
 
-        byte[] pubKey = Resources.toByteArray(getResource("encryption/pubkey.asc"));
-        PGPPublicKey pgpPublicKey = PgpEncryptionUtil.loadPublicKey(pubKey);
+        PGPPublicKey pgpPublicKey = PgpEncryptionUtil.loadPublicKey(loadPublicKey());
 
         //when
         byte[] pgpEncryptedZip = PgpEncryptionUtil.encryptFile(
@@ -35,7 +35,7 @@ public class PgpEncryptionUtilTest {
         //Currently this seems to be the only way to validate the file contents.
         byte[] decryptedZip = PgpDecryptionHelper.decryptFile(
             pgpEncryptedZip,
-            getClass().getResourceAsStream("/encryption/privatekey.asc"),
+            loadPrivateKey(),
             "Password1".toCharArray()
         );
 
@@ -51,8 +51,7 @@ public class PgpEncryptionUtilTest {
 
         byte[] inputZipFile = Resources.toByteArray(getResource(inputFileName));
 
-        byte[] pubKey = Resources.toByteArray(getResource("encryption/pubkey.asc"));
-        PGPPublicKey pgpPublicKey = PgpEncryptionUtil.loadPublicKey(pubKey);
+        PGPPublicKey pgpPublicKey = PgpEncryptionUtil.loadPublicKey(loadPublicKey());
 
         //when
         byte[] pgpEncryptedZip = PgpEncryptionUtil.encryptFile(
@@ -66,7 +65,7 @@ public class PgpEncryptionUtilTest {
         //Currently this seems to be the only way to validate the file contents.
         byte[] decryptedZip = PgpDecryptionHelper.decryptFile(
             pgpEncryptedZip,
-            getClass().getResourceAsStream("/encryption/privatekey.asc"),
+            loadPrivateKey(),
             "Password1".toCharArray()
         );
 
@@ -82,5 +81,13 @@ public class PgpEncryptionUtilTest {
 
         assertThat(exc)
             .isInstanceOf(IOException.class);
+    }
+
+    private byte[] loadPublicKey() throws IOException {
+        return Resources.toByteArray(getResource("encryption/pubkey.asc"));
+    }
+
+    private InputStream loadPrivateKey() {
+        return getClass().getResourceAsStream("/encryption/privatekey.asc");
     }
 }
