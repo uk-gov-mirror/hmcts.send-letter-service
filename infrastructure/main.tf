@@ -63,7 +63,7 @@ module "send-letter-service" {
   subscription        = "${var.subscription}"
 
   app_settings = {
-    S2S_URL                         = "${var.s2s_url}"
+    S2S_URL                         = "${local.s2s_url}"
     LETTER_TRACKING_DB_HOST         = "${module.db.host_name}"
     LETTER_TRACKING_DB_PORT         = "${module.db.postgresql_listen_port}"
     LETTER_TRACKING_DB_USER_NAME    = "${module.db.user_name}"
@@ -129,26 +129,6 @@ resource "azurerm_key_vault_secret" "POSTGRES_PORT" {
 resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
   name      = "${var.component}-POSTGRES-DATABASE"
   value     = "${module.db.postgresql_database}"
-  vault_uri = "${module.key-vault.key_vault_uri}"
-}
-# endregion
-
-# region smoke test config
-resource "azurerm_key_vault_secret" "test-s2s-url" {
-  name      = "test-s2s-url"
-  value     = "${var.s2s_url}"
-  vault_uri = "${module.key-vault.key_vault_uri}"
-}
-
-resource "azurerm_key_vault_secret" "test-s2s-name" {
-  name      = "test-s2s-name"
-  value     = "send_letter_tests"
-  vault_uri = "${module.key-vault.key_vault_uri}"
-}
-
-resource "azurerm_key_vault_secret" "test-s2s-secret" {
-  name      = "test-s2s-secret"
-  value     = "${data.vault_generic_secret.tests_s2s_secret.data["value"]}"
   vault_uri = "${module.key-vault.key_vault_uri}"
 }
 # endregion

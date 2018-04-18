@@ -1,6 +1,6 @@
 
 resource "azurerm_key_vault_secret" "test-s2s-url" {
-  name      = "s2s-url-for-tests"
+  name      = "test-s2s-url"
   value     = "${local.s2s_url}"
   vault_uri = "${module.key-vault.key_vault_uri}"
 }
