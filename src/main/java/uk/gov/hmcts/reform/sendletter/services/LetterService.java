@@ -182,18 +182,18 @@ public class LetterService {
     }
 
     public LetterStatus getStatus(UUID id, String serviceName) {
-        Letter letter = letterRepository
+        return letterRepository
             .findByIdAndService(id, serviceName)
+            .map(letter -> new LetterStatus(
+                id,
+                letter.getStatus().name(),
+                letter.getMessageId(),
+                toDateTime(letter.getCreatedAt()),
+                toDateTime(letter.getSentToPrintAt()),
+                toDateTime(letter.getPrintedAt()),
+                letter.isFailed()
+            ))
             .orElseThrow(() -> new LetterNotFoundException(id));
-
-        return new LetterStatus(
-            id,
-            letter.getMessageId(),
-            toDateTime(letter.getCreatedAt()),
-            toDateTime(letter.getSentToPrintAt()),
-            toDateTime(letter.getPrintedAt()),
-            letter.isFailed()
-        );
     }
 
     public static ZonedDateTime toDateTime(Timestamp stamp) {

@@ -9,6 +9,8 @@ public class LetterStatus {
 
     public final UUID id;
 
+    public final String status;
+
     @JsonProperty("message_id")
     public final String messageId;
 
@@ -26,6 +28,7 @@ public class LetterStatus {
 
     public LetterStatus(
         final UUID id,
+        final String status,
         final String messageId,
         final ZonedDateTime createdAt,
         final ZonedDateTime sentToPrintAt,
@@ -33,6 +36,7 @@ public class LetterStatus {
         final boolean hasFailed
     ) {
         this.id = id;
+        this.status = status;
         this.messageId = messageId;
         this.createdAt = createdAt;
         this.sentToPrintAt = sentToPrintAt;
