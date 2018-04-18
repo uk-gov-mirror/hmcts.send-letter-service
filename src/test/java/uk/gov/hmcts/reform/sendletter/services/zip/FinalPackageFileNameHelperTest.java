@@ -80,6 +80,27 @@ public class FinalPackageFileNameHelperTest {
     }
 
     @Test
+    public void should_remove_underscores_from_letter_type() {
+        // given
+        Letter letter = new Letter(
+            randomUUID(),
+            randomUUID().toString(),
+            "service",
+            null,
+            "some_type",
+            null,
+            false,
+            Timestamp.valueOf(LocalDateTime.now())
+        );
+
+        // when
+        String name = FinalPackageFileNameHelper.generateName(letter);
+
+        // then
+        assertThat(name).contains("sometype");
+    }
+
+    @Test
     public void should_set_file_extension_based_on_whether_letter_is_encrypted() {
         Letter zippedLetter = new Letter(
             randomUUID(),

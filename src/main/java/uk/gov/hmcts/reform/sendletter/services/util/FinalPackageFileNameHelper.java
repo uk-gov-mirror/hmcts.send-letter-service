@@ -32,7 +32,7 @@ public final class FinalPackageFileNameHelper {
     ) {
         return String.format(
             "%s_%s_%s_%s.%s",
-            type,
+            type.replace("_", ""),
             service.replace("_", ""),
             createdAtDateTime.format(dateTimeFormatter),
             id,
