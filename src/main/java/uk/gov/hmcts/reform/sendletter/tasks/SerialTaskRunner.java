@@ -52,10 +52,16 @@ public final class SerialTaskRunner {
                 }
             } finally {
                 if (locked) {
-                    if (unlock(id, connection)) {
-                        log.info("Released lock {}", name);
-                    } else {
-                        log.warn("Failed to release lock {}", name);
+                    try {
+                        if (unlock(id, connection)) {
+                            log.info("Released lock {}", name);
+                        } else {
+                            log.warn("Failed to release lock {}", name);
+                        }
+                    } catch (SQLException s) {
+                        // Avoid throwing an Exception from this block
+                        // since it will mask any Exception thrown by the task.
+                        log.error("Exception unlocking task {}", name, s);
                     }
                 }
             }

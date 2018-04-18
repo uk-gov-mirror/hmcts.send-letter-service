@@ -99,13 +99,12 @@ public class SerialTaskRunnerLockingTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void runs_task_when_unlocking_throws_exception() throws SQLException {
+    public void does_not_throw_sql_exception_when_unlocking_throws_exception() throws SQLException {
         setupSuccessfulLocking();
         when(statement.executeQuery(startsWith("SELECT pg_advisory_unlock"))).thenThrow(SQLException.class);
 
-        Throwable exception = catchThrowable(() -> taskRunner.tryRun(MarkLettersPosted, task));
-
-        assertThat(exception).isInstanceOf(TaskRunnerException.class);
+        // Should not throw a SQLException.
+        taskRunner.tryRun(MarkLettersPosted, task);
         verify(task, only()).run();
     }
 
