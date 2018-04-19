@@ -13,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.reform.sendletter.PdfHelper;
+import uk.gov.hmcts.reform.sendletter.config.ThreadPoolConfig;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
@@ -75,6 +76,15 @@ public class BaseTest {
             await().atMost(15, SECONDS).untilAsserted(
                 () -> assertThat(letterHasBeenPosted()).as("Letter not posted").isTrue()
             );
+
+            // Wait for the Xerox report to be deleted so that we don't stop the FTP server before the send letters
+            // task has finished using it.
+            await().atMost(15, SECONDS).untilAsserted(
+                () -> assertThat(server.reportFolder.listFiles()).as("Xerox reports not deleted!").isEmpty()
+            );
+
+            assertThat(ThreadPoolConfig.getUnhandledTaskExceptionCount())
+                .as("Scheduled tasks encountered unhandled exceptions!").isZero();
         }
     }
 
