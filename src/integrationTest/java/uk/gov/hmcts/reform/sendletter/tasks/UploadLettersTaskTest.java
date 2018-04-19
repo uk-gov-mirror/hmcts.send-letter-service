@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
@@ -25,9 +26,11 @@ import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 import java.io.File;
 import java.time.LocalTime;
 import java.util.UUID;
+import java.util.stream.IntStream;
 import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -109,7 +112,7 @@ public class UploadLettersTaskTest {
 
         // when
         try (LocalSftpServer server = LocalSftpServer.create()) {
-            task.run();
+            assertThat(catchThrowable(task::run)).isInstanceOf(FtpException.class);
 
             // then
             // file does not exist in SFTP site.
@@ -122,5 +125,24 @@ public class UploadLettersTaskTest {
             assertThat(l.getSentToPrintAt()).isNull();
             assertThat(l.getFileContent()).isNotNull();
         }
+    }
+
+    @Test
+    public void should_process_all_letter_batches() throws Exception {
+        // Twice the batch size.
+        int letterCount = 20;
+        IntStream.rangeClosed(1, letterCount).forEach(
+            x -> letterService.send(SampleData.letterRequest(), "service"));
+
+        UploadLettersTask task = new UploadLettersTask(
+            repository,
+            FtpHelper.getSuccessfulClient(LocalSftpServer.port),
+            availabilityChecker
+        );
+
+        try (LocalSftpServer server = LocalSftpServer.create()) {
+            task.run();
+        }
+        assertThat(repository.findByStatus(LetterStatus.Uploaded).count()).isEqualTo(letterCount);
     }
 }

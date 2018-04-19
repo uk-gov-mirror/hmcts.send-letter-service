@@ -26,20 +26,24 @@ import static java.util.stream.Collectors.toList;
 
 public final class SampleData {
 
-    public static LetterRequest letterRequest() throws IOException {
-        return new LetterRequest(
-            singletonList(
-                new Document(
-                    Resources.toString(getResource("template.html"), UTF_8),
-                    ImmutableMap.of(
-                        "name", "John",
-                        "reference", UUID.randomUUID()
+    public static LetterRequest letterRequest() {
+        try {
+            return new LetterRequest(
+                singletonList(
+                    new Document(
+                        Resources.toString(getResource("template.html"), UTF_8),
+                        ImmutableMap.of(
+                            "name", "John",
+                            "reference", UUID.randomUUID()
+                        )
                     )
-                )
-            ),
-            "someType",
-            Maps.newHashMap()
-        );
+                ),
+                "someType",
+                Maps.newHashMap()
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static LetterWithPdfsRequest letterWithPdfsRequest() throws IOException {

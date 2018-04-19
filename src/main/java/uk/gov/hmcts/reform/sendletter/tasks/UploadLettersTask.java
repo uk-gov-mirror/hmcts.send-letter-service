@@ -3,11 +3,9 @@ package uk.gov.hmcts.reform.sendletter.tasks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
-import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
@@ -15,16 +13,14 @@ import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import static java.time.LocalDateTime.now;
 
 @Component
 public class UploadLettersTask {
     private static final Logger logger = LoggerFactory.getLogger(UploadLettersTask.class);
-
     public static final String SMOKE_TEST_LETTER_TYPE = "smoke_test";
 
     private final LetterRepository repo;
@@ -41,7 +37,6 @@ public class UploadLettersTask {
         this.availabilityChecker = availabilityChecker;
     }
 
-    @Transactional
     public void run() {
         logger.info("Started letter upload job");
 
@@ -50,21 +45,14 @@ public class UploadLettersTask {
             return;
         }
 
-        try (Stream<Letter> stream = repo.findByStatus(LetterStatus.Created)) {
-            Iterator<Letter> iterator = stream.iterator();
-            while (iterator.hasNext()) {
-                Letter letter = iterator.next();
-
-                try {
-                    uploadLetter(letter);
-                } catch (FtpException exception) {
-                    logger.error(String.format("Exception uploading letter %s", letter.getId()), exception);
-                    break;
-                }
-            }
-
-            logger.info("Completed letter upload job");
-        }
+        // Upload the letters in batches.
+        // With each batch we mark them Uploaded so they no longer appear in the query.
+        List<Letter> letters;
+        do {
+            letters = repo.findFirst10ByStatus(LetterStatus.Created);
+            letters.forEach(this::uploadLetter);
+        } while (!letters.isEmpty());
+        logger.info("Completed letter upload job");
     }
 
     private void uploadLetter(Letter letter) {

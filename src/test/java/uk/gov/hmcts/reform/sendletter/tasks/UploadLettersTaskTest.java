@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
+import org.assertj.core.util.Lists;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +16,6 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -65,7 +65,7 @@ public class UploadLettersTaskTest {
 
         task.run();
 
-        verify(repo, never()).findByStatus(Created);
+        verify(repo, never()).findByStatus(eq(Created));
     }
 
     private Letter letterOfType(String type) {
@@ -81,9 +81,10 @@ public class UploadLettersTaskTest {
         );
     }
 
+    @SuppressWarnings("unchecked")
     private void givenDbContains(Letter letter) {
-        given(repo.findByStatus(Created))
-            .willReturn(Stream.of(letter));
+        // Return letter on first call, then empty list.
+        given(repo.findFirst10ByStatus(eq(Created)))
+            .willReturn(Lists.newArrayList(letter)).willReturn(Lists.newArrayList());
     }
-
 }
