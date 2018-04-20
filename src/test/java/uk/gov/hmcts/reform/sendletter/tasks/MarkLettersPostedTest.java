@@ -9,12 +9,12 @@ import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.Report;
 import uk.gov.hmcts.reform.sendletter.services.ReportParser;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 
-import java.io.IOException;
 import java.time.LocalTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,17 +35,18 @@ public class MarkLettersPostedTest {
     @Mock FtpClient ftpClient;
     @Mock FtpAvailabilityChecker availabilityChecker;
     @Mock ReportParser parser;
+    @Mock AppInsights insights;
 
     private MarkLettersPostedTask task;
 
     @Before
     public void setup() {
         given(availabilityChecker.isFtpAvailable(any())).willReturn(true);
-        task = new MarkLettersPostedTask(repo, ftpClient, availabilityChecker, parser);
+        task = new MarkLettersPostedTask(repo, ftpClient, availabilityChecker, parser, insights);
     }
 
     @Test
-    public void continues_processing_if_letter_not_found() throws IOException {
+    public void continues_processing_if_letter_not_found() {
         String filePath = "a.csv";
         UUID known = UUID.randomUUID();
         UUID unknown = UUID.randomUUID();

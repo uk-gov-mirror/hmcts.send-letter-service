@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.sendletter.services.ReportParser;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
@@ -25,17 +26,20 @@ public class MarkLettersPostedTask {
     private final FtpClient ftpClient;
     private final FtpAvailabilityChecker ftpAvailabilityChecker;
     private final ReportParser parser;
+    private final AppInsights insights;
 
     private static final Logger logger = LoggerFactory.getLogger(MarkLettersPostedTask.class);
 
     public MarkLettersPostedTask(LetterRepository repo,
                                  FtpClient ftp,
                                  FtpAvailabilityChecker checker,
-                                 ReportParser parser) {
+                                 ReportParser parser,
+                                 AppInsights insights) {
         this.repo = repo;
         this.ftpClient = ftp;
         this.ftpAvailabilityChecker = checker;
         this.parser = parser;
+        this.insights = insights;
     }
 
     public void run(LocalTime now) {
@@ -47,6 +51,7 @@ public class MarkLettersPostedTask {
                 .stream()
                 .map(parser::parse)
                 .forEach(parsedReport -> {
+                    insights.trackPrintReportReceived(parsedReport);
                     parsedReport.statuses.forEach(this::updatePrintedAt);
 
                     if (parsedReport.allRowsParsed) {
@@ -71,7 +76,7 @@ public class MarkLettersPostedTask {
                 letter.setPrintedAt(Timestamp.from(letterPrintStatus.printedAt.toInstant()));
                 letter.setStatus(LetterStatus.Posted);
                 repo.save(letter);
-                logger.info("Marking letter {} as Posted", letter.getId());
+                logger.info("Marking letter {} as {}", letter.getId(), LetterStatus.Posted);
             } else {
                 logger.info(
                     "Skipping processing of letter {} with status {}",
@@ -80,7 +85,7 @@ public class MarkLettersPostedTask {
                 );
             }
         } else {
-            logger.error(
+            logger.warn(
                 "Failed to update printing date for letter {} - unknown letter",
                 letterPrintStatus.id
             );

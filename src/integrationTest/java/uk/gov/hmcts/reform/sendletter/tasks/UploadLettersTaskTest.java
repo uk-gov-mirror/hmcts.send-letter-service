@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
+import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
@@ -32,6 +33,8 @@ import javax.persistence.EntityManager;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -47,6 +50,9 @@ public class UploadLettersTaskTest {
 
     @Mock
     private FtpAvailabilityChecker availabilityChecker;
+
+    @Mock
+    private AppInsights insights;
 
     private LetterService letterService;
 
@@ -69,7 +75,8 @@ public class UploadLettersTaskTest {
         UploadLettersTask task = new UploadLettersTask(
             repository,
             FtpHelper.getSuccessfulClient(LocalSftpServer.port),
-            availabilityChecker
+            availabilityChecker,
+            insights
         );
 
         // Invoke the upload job.
@@ -91,6 +98,8 @@ public class UploadLettersTaskTest {
             // pdf content should be removed now
             assertThat(l.getFileContent()).isNull();
         }
+
+        verify(insights).trackUploadedLetters(1);
     }
 
     @Test
@@ -104,7 +113,8 @@ public class UploadLettersTaskTest {
         UploadLettersTask task = new UploadLettersTask(
             repository,
             FtpHelper.getFailingClient(LocalSftpServer.port),
-            availabilityChecker
+            availabilityChecker,
+            insights
         );
 
         // and
@@ -125,6 +135,8 @@ public class UploadLettersTaskTest {
             assertThat(l.getSentToPrintAt()).isNull();
             assertThat(l.getFileContent()).isNotNull();
         }
+
+        verify(insights, never()).trackUploadedLetters(0);
     }
 
     @Test
@@ -137,12 +149,14 @@ public class UploadLettersTaskTest {
         UploadLettersTask task = new UploadLettersTask(
             repository,
             FtpHelper.getSuccessfulClient(LocalSftpServer.port),
-            availabilityChecker
+            availabilityChecker,
+            insights
         );
 
         try (LocalSftpServer server = LocalSftpServer.create()) {
             task.run();
         }
         assertThat(repository.findByStatus(LetterStatus.Uploaded).count()).isEqualTo(letterCount);
+        verify(insights).trackUploadedLetters(letterCount);
     }
 }

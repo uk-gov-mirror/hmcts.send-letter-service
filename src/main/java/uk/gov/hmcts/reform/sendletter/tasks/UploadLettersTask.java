@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
@@ -26,15 +27,18 @@ public class UploadLettersTask {
     private final LetterRepository repo;
     private final FtpClient ftp;
     private final FtpAvailabilityChecker availabilityChecker;
+    private final AppInsights insights;
 
     public UploadLettersTask(
         LetterRepository repo,
         FtpClient ftp,
-        FtpAvailabilityChecker availabilityChecker
+        FtpAvailabilityChecker availabilityChecker,
+        AppInsights insights
     ) {
         this.repo = repo;
         this.ftp = ftp;
         this.availabilityChecker = availabilityChecker;
+        this.insights = insights;
     }
 
     public void run() {
@@ -48,10 +52,18 @@ public class UploadLettersTask {
         // Upload the letters in batches.
         // With each batch we mark them Uploaded so they no longer appear in the query.
         List<Letter> letters;
+        int counter = 0;
+
         do {
             letters = repo.findFirst10ByStatus(LetterStatus.Created);
             letters.forEach(this::uploadLetter);
+            counter += letters.size();
         } while (!letters.isEmpty());
+
+        if (counter > 0) {
+            insights.trackUploadedLetters(counter);
+        }
+
         logger.info("Completed letter upload job");
     }
 
