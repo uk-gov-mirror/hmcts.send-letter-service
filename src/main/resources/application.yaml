@@ -31,7 +31,8 @@ spring:
         test-while-idle: true
         test-on-return: true
         remove-abandoned: true
-        remove-abandoned-timeout: 60
+        # Allow connections 2 hours idle before timing out.
+        remove-abandoned-timeout: 7200
         log-abandoned: true
         abandon-when-percentage-full: 0
 
