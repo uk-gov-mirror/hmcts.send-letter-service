@@ -48,4 +48,4 @@ tasks:
 
 encryption:
   enabled: ${ENCRYPTION_ENABLED:false}
-  publicKey: ${ENCRYPTION_PUBLIC_KEY}
+  publicKey: ${ENCRYPTION_PUBLIC_KEY:}
