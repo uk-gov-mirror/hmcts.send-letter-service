@@ -66,7 +66,7 @@ public class ReportParser {
                     DateTimeFormatter.ofPattern("dd-MM-yyyy'T'HH:mm'Z'").withZone(ZoneOffset.UTC))
             );
         } catch (Exception exc) {
-            logger.error("Error parsing row: " + record, exc);
+            logger.error("Error parsing row: {}", record, exc);
             return null;
         }
     }

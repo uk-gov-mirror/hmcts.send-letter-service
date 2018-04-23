@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.time.LocalDateTime.now;
+import static uk.gov.hmcts.reform.sendletter.tasks.Task.UploadLetters;
 
 @Component
 public class UploadLettersTask {
@@ -42,12 +43,12 @@ public class UploadLettersTask {
     }
 
     public void run() {
-        logger.info("Started letter upload job");
-
         if (!availabilityChecker.isFtpAvailable(now().toLocalTime())) {
-            logger.info("Not processing due to FTP downtime window");
+            logger.info("Not processing '{}' task due to FTP downtime window", UploadLetters);
             return;
         }
+
+        logger.info("Started '{}' task", UploadLetters);
 
         // Upload the letters in batches.
         // With each batch we mark them Uploaded so they no longer appear in the query.
@@ -64,7 +65,7 @@ public class UploadLettersTask {
             insights.trackUploadedLetters(counter);
         }
 
-        logger.info("Completed letter upload job");
+        logger.info("Completed '{}' task", UploadLetters);
     }
 
     private void uploadLetter(Letter letter) {

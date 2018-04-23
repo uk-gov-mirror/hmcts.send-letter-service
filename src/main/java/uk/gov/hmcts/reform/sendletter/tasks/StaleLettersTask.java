@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.stream.Stream;
 
+import static uk.gov.hmcts.reform.sendletter.tasks.Task.StaleLetters;
+
 /**
  * Task to run report on unprinted letters and report them to AppInsights.
  */
@@ -44,11 +46,11 @@ public class StaleLettersTask {
                 .with(staleCutOffTime)
         );
 
-        logger.info("Started stale letter report job with cut-off of {}", staleCutOff);
+        logger.info("Started '{}' task with cut-off of {}", StaleLetters, staleCutOff);
 
         try (Stream<Letter> letters = repo.findByStatusAndSentToPrintAtBefore(LetterStatus.Uploaded, staleCutOff)) {
             long count = letters.peek(insights::trackStaleLetter).count();
-            logger.info("Completed stale letter report job. Letters found: {}", count);
+            logger.info("Completed '{}' task. Letters found: {}", StaleLetters, count);
         }
     }
 }
