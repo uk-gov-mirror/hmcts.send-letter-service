@@ -5,7 +5,16 @@
         <BuiltIn enabled="true">
             <HIBERNATE enabled="true"/>
             <HTTP enabled="true"/>
+            <JDBC enabled="true"/>
         </BuiltIn>
+        <Class name="uk.gov.hmcts.reform.sendletter.entity.LetterRepository">
+            <Method name="findFirst10ByStatus"/>
+            <Method name="findByStatus"/>
+            <Method name="findByStatusAndSentToPrintAtBefore"/>
+            <Method name="findByMessageIdAndStatusOrderByCreatedAtDesc"/>
+            <Method name="findById"/>
+            <Method name="findByIdAndService"/>
+        </Class>
         <Class name="uk.gov.hmcts.reform.sendletter.services.encryption.PgpEncryptionUtil">
             <Method name="encryptFile"/>
         </Class>
