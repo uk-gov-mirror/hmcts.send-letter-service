@@ -138,6 +138,36 @@ dependencyCheck {
   suppressionFile = 'dependency-check-suppressions.xml'
 }
 
+dependencyManagement {
+  dependencies {
+    // openfeign imports 0.4.9 which imports io.netty 4.0.27.
+    // reactivex 0.4.20 follows the release compatibility but still falls under owasp risk factor.
+    // reactivex 0.4.20 uses io.netty 4.1.5 which is OK with owasp.
+    // latest (1.4.4) spring cloud starter feign library does not update either of those
+    dependencySet(group: 'io.reactivex', version: '0.4.20') {
+      entry 'rxnetty'
+      entry 'rxnetty-contexts'
+      entry 'rxnetty-servo'
+    }
+    // we are already basing our work for jackson 2.9.4.
+    // spring boot dependency management plugin downgrades
+    // hystrix related libraries use 2.4.3 and not clear if plan to upgrade
+    // bump to 2.9.5 because of https://nvd.nist.gov/vuln/detail/CVE-2018-7489
+    dependencySet(group: 'com.fasterxml.jackson.core', version: '2.9.5') {
+      entry 'jackson-annotations'
+      entry 'jackson-core'
+      entry 'jackson-databind'
+    }
+    // the url pattern of "" is not correctly handled in tomcat
+    // it is possible for unauthorised users to gain access to web application resources that should have been protected
+    // not bumping tomcat-annotations-api as it introduces way more vulnerabilities than 8.5.27
+    dependencySet(group: 'org.apache.tomcat.embed', version: '8.5.29') {
+      entry 'tomcat-embed-core'
+      entry 'tomcat-embed-websocket'
+    }
+  }
+}
+
 def springBootVersion = plugins.getPlugin('org.springframework.boot').class.package.implementationVersion
 
 repositories {
@@ -151,8 +181,8 @@ repositories {
 def versions = [
   springfoxSwagger: '2.7.0',
   reformLogging: '2.2.1',
-  jackson: dependencyManagement.importedProperties['jackson.version'],
-  logback: '1.2.3'
+  logback: '1.2.3',
+  hystrix: '1.4.0.RELEASE'
 ]
 
 dependencies {
@@ -160,11 +190,11 @@ dependencies {
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springBootVersion
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: springBootVersion
 
-  compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
-  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.jackson
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310'
 
   compile group: 'org.flywaydb', name: 'flyway-core', version: '5.0.7'
-  compile group: 'org.postgresql', name: 'postgresql', version: '42.2.1'
+  compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
 
   compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
@@ -179,8 +209,8 @@ dependencies {
   compile group: 'ch.qos.logback', name: 'logback-classic', version: versions.logback
   compile group: 'ch.qos.logback', name: 'logback-core', version: versions.logback
 
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix', version: '1.4.0.RELEASE'
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix-dashboard', version: '1.4.0.RELEASE'
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix', version: versions.hystrix
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix-dashboard', version: versions.hystrix
 
   compile group: 'com.hierynomus', name: 'sshj', version: '0.23.0'
   compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.8'
