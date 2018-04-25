@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
+import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -31,7 +32,7 @@ public class StaleLettersTask {
     public StaleLettersTask(
         LetterRepository repo,
         AppInsights insights,
-        FtpAvailabilityChecker checker
+        IFtpAvailabilityChecker checker
     ) {
         this.repo = repo;
         this.insights = insights;

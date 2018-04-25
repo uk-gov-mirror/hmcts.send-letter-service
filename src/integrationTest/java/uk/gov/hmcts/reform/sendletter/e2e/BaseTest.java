@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.sendletter.config.ThreadPoolConfig;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.helper.FakeFtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.encryption.PgpDecryptionHelper;
 import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
@@ -48,6 +49,9 @@ public class BaseTest {
     @Autowired
     private LetterRepository repository;
 
+    @Autowired
+    private FakeFtpAvailabilityChecker fakeFtpAvailabilityChecker;
+
     @After
     public void cleanUp() {
         // This test commits transactions to the database
@@ -60,6 +64,10 @@ public class BaseTest {
         Boolean isEncryptionEnabled
     ) throws Throwable {
         try (LocalSftpServer server = LocalSftpServer.create()) {
+
+            // sftp servers is up, now the background jobs can start connecting to it
+            fakeFtpAvailabilityChecker.setAvailable(true);
+
             mvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();

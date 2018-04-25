@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalTime;
 
 @Component
-public class FtpAvailabilityChecker {
+public class FtpAvailabilityChecker implements IFtpAvailabilityChecker {
 
     private final LocalTime downtimeStart;
     private final LocalTime downtimeEnd;

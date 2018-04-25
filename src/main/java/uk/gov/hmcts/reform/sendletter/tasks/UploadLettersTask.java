@@ -8,8 +8,8 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
-import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
+import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
 import java.sql.Timestamp;
@@ -27,13 +27,13 @@ public class UploadLettersTask {
 
     private final LetterRepository repo;
     private final FtpClient ftp;
-    private final FtpAvailabilityChecker availabilityChecker;
+    private final IFtpAvailabilityChecker availabilityChecker;
     private final AppInsights insights;
 
     public UploadLettersTask(
         LetterRepository repo,
         FtpClient ftp,
-        FtpAvailabilityChecker availabilityChecker,
+        IFtpAvailabilityChecker availabilityChecker,
         AppInsights insights
     ) {
         this.repo = repo;

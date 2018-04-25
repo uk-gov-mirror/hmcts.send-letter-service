@@ -9,8 +9,8 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.sendletter.services.ReportParser;
-import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
+import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 
 import java.sql.Timestamp;
 import java.time.LocalTime;
@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.sendletter.tasks.Task.MarkLettersPosted;
 public class MarkLettersPostedTask {
     private final LetterRepository repo;
     private final FtpClient ftpClient;
-    private final FtpAvailabilityChecker ftpAvailabilityChecker;
+    private final IFtpAvailabilityChecker ftpAvailabilityChecker;
     private final ReportParser parser;
     private final AppInsights insights;
 
@@ -34,7 +34,7 @@ public class MarkLettersPostedTask {
 
     public MarkLettersPostedTask(LetterRepository repo,
                                  FtpClient ftp,
-                                 FtpAvailabilityChecker checker,
+                                 IFtpAvailabilityChecker checker,
                                  ReportParser parser,
                                  AppInsights insights) {
         this.repo = repo;
