@@ -28,8 +28,8 @@ before_install:
 
 script:
   - pgsanity --add-semicolon src/main/resources/db/migration/*.sql
-  - ./gradlew test
-  - ./gradlew integration
+  - ./gradlew test -i
+  - ./gradlew integration -i
 
 after_success:
   - ./gradlew jacocoTestReport
