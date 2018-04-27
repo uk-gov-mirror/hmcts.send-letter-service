@@ -24,6 +24,7 @@ import static uk.gov.hmcts.reform.sendletter.tasks.Task.MarkLettersPosted;
  */
 @Component
 public class MarkLettersPostedTask {
+
     private final LetterRepository repo;
     private final FtpClient ftpClient;
     private final IFtpAvailabilityChecker ftpAvailabilityChecker;
@@ -32,11 +33,13 @@ public class MarkLettersPostedTask {
 
     private static final Logger logger = LoggerFactory.getLogger(MarkLettersPostedTask.class);
 
-    public MarkLettersPostedTask(LetterRepository repo,
-                                 FtpClient ftp,
-                                 IFtpAvailabilityChecker checker,
-                                 ReportParser parser,
-                                 AppInsights insights) {
+    public MarkLettersPostedTask(
+        LetterRepository repo,
+        FtpClient ftp,
+        IFtpAvailabilityChecker checker,
+        ReportParser parser,
+        AppInsights insights
+    ) {
         this.repo = repo;
         this.ftpClient = ftp;
         this.ftpAvailabilityChecker = checker;
@@ -54,7 +57,7 @@ public class MarkLettersPostedTask {
                 .map(parser::parse)
                 .forEach(parsedReport -> {
                     insights.trackPrintReportReceived(parsedReport);
-                    parsedReport.statuses.forEach(this::updatePrintedAt);
+                    parsedReport.statuses.forEach(this::markAsPosted);
 
                     if (parsedReport.allRowsParsed) {
                         logger.info("Report {} successfully parsed, deleting", parsedReport.path);
@@ -70,7 +73,7 @@ public class MarkLettersPostedTask {
         }
     }
 
-    private void updatePrintedAt(LetterPrintStatus letterPrintStatus) {
+    private void markAsPosted(LetterPrintStatus letterPrintStatus) {
         Optional<Letter> optional = repo.findById(letterPrintStatus.id);
         if (optional.isPresent()) {
             Letter letter = optional.get();
@@ -78,17 +81,17 @@ public class MarkLettersPostedTask {
                 letter.setPrintedAt(Timestamp.from(letterPrintStatus.printedAt.toInstant()));
                 letter.setStatus(LetterStatus.Posted);
                 repo.save(letter);
-                logger.info("Marking letter {} as {}", letter.getId(), LetterStatus.Posted);
+                logger.info("Marked letter {} as posted", letter.getId());
             } else {
-                logger.info(
-                    "Skipping processing of letter {} with status {}",
+                logger.warn(
+                    "Failed to mark letter as posted {} - unexpected status: {}",
                     letter.getId(),
                     letter.getStatus()
                 );
             }
         } else {
             logger.warn(
-                "Failed to update printing date for letter {} - unknown letter",
+                "Failed to mark letter {} as posted - unknown letter",
                 letterPrintStatus.id
             );
         }

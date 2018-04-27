@@ -57,7 +57,11 @@ public class UploadLettersTask {
 
         do {
             letters = repo.findFirst10ByStatus(LetterStatus.Created);
-            letters.forEach(this::uploadLetter);
+            letters
+                .forEach(letter -> {
+                    uploadToFtp(letter);
+                    markAsUploaded(letter);
+                });
             counter += letters.size();
         } while (!letters.isEmpty());
 
@@ -68,25 +72,7 @@ public class UploadLettersTask {
         logger.info("Completed '{}' task", UploadLetters);
     }
 
-    private void uploadLetter(Letter letter) {
-        uploadToFtp(letter);
-
-        logger.info("Successfully uploaded letter {}", letter.getId());
-
-        // Upload succeeded, mark the letter as Uploaded.
-        letter.setStatus(LetterStatus.Uploaded);
-        letter.setSentToPrintAt(Timestamp.from(Instant.now()));
-
-        // remove pdf content, as it's no longer needed
-        letter.setFileContent(null);
-
-        repo.saveAndFlush(letter);
-
-        logger.info("Marked letter {} as {}", letter.getId(), letter.getStatus());
-    }
-
     private void uploadToFtp(Letter letter) {
-
         FileToSend file = new FileToSend(
             FinalPackageFileNameHelper.generateName(letter),
             letter.getFileContent()
@@ -100,6 +86,20 @@ public class UploadLettersTask {
         );
 
         ftp.upload(file, isSmokeTest(letter));
+
+        logger.info("Successfully uploaded letter {}", letter.getId());
+    }
+
+    private void markAsUploaded(Letter letter) {
+        letter.setStatus(LetterStatus.Uploaded);
+        letter.setSentToPrintAt(Timestamp.from(Instant.now()));
+
+        // remove pdf content, as it's no longer needed
+        letter.setFileContent(null);
+
+        repo.saveAndFlush(letter);
+
+        logger.info("Marked letter {} as {}", letter.getId(), letter.getStatus());
     }
 
     private boolean isSmokeTest(Letter letter) {
