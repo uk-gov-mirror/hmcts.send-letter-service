@@ -24,7 +24,7 @@ public class ProcessMessageTest extends FunctionalTestSuite {
         throws Exception {
         String letterId = sendPrintLetterRequest(
             signIn(),
-            sampleLetterRequestJson("letter_single_document_two_pages")
+            sampleLetterRequestJson("letter_single_document_two_pages.json")
         );
 
         try (SFTPClient sftp = getSftpClient()) {
