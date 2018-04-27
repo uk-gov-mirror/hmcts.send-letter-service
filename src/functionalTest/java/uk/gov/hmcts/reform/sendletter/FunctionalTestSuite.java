@@ -31,8 +31,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @TestPropertySource("classpath:application.properties")
 public abstract class FunctionalTestSuite {
 
-    protected static final String SMOKE_TEST_LETTER_TYPE = "smoke_test";
-
     @Value("${s2s-url}")
     protected String s2sUrl;
 
@@ -161,7 +159,7 @@ public abstract class FunctionalTestSuite {
     protected String getPdfFileNamePattern(String letterId) {
         return String.format(
             "%s_%s_%s.pdf",
-            Pattern.quote(SMOKE_TEST_LETTER_TYPE),
+            Pattern.quote("smoke_test"),
             Pattern.quote(s2sName.replace("_", "")),
             Pattern.quote(letterId)
         );
@@ -172,7 +170,7 @@ public abstract class FunctionalTestSuite {
 
         return String.format(
             format,
-            Pattern.quote(SMOKE_TEST_LETTER_TYPE),
+            Pattern.quote("smoketest"),
             Pattern.quote(s2sName.replace("_", "")),
             Pattern.quote(letterId)
         );
