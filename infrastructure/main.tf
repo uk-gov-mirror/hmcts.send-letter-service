@@ -4,10 +4,6 @@ provider "vault" {
   address = "https://vault.reform.hmcts.net:6200"
 }
 
-locals {
-  db_connection_options = "?ssl=true"
-}
-
 # Make sure the resource group exists
 resource "azurerm_resource_group" "rg" {
   name     = "${var.product}-${var.component}-${var.env}"
@@ -41,7 +37,10 @@ locals {
   ftp_public_key         = "${replace(data.vault_generic_secret.ftp_public_key.data["value"], "\\n", "\n")}"
   ftp_user               = "${data.vault_generic_secret.ftp_user.data["value"]}"
   encryption_public_key  = "${replace(data.vault_generic_secret.encryption_public_key.data["value"], "\\n", "\n")}"
-  s2s_url                = "http://rpe-service-auth-provider-${var.env}.service.${local.ase_name}.internal"
+  local_env              = "${(var.env == "preview" || var.env == "spreview") ? (var.env == "preview" ) ? "aat" : "saat" : var.env}"
+  local_ase              = "${(var.env == "preview" || var.env == "spreview") ? (var.env == "preview" ) ? "core-compute-aat" : "core-compute-saat" : local.ase_name}"
+  s2s_url                = "http://rpe-service-auth-provider-${local.local_env}.service.${local.local_ase}.internal"
+  db_connection_options  = "?ssl=true"
 }
 
 module "db" {

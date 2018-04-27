@@ -1,0 +1,42 @@
+#!groovy
+
+@Library("Infrastructure")
+
+def type = "java"
+def product = "rpe"
+def component = "send-letter-service"
+
+def channel = '#rpe-build-notices'
+
+List<LinkedHashMap<String, Object>> secrets = [
+  secret('test-s2s-name', 'TEST_S2S_NAME'),
+  secret('test-s2s-secret', 'TEST_S2S_SECRET'),
+  secret('test-s2s-url', 'TEST_S2S_URL'),
+  secret('test-ftp-hostname', 'TEST_FTP_HOSTNAME'),
+  secret('test-ftp-port', 'TEST_FTP_PORT'),
+  secret('test-ftp-fingerprint', 'TEST_FTP_FINGERPRINT'),
+  secret('test-ftp-target-folder', 'TEST_FTP_TARGET_FOLDER'),
+  secret('test-ftp-user', 'TEST_FTP_USER'),
+  secret('test-ftp-private-key', 'TEST_FTP_PRIVATE_KEY'),
+  secret('test-ftp-public-key', 'TEST_FTP_PUBLIC_KEY'),
+  secret('test-encryption-enabled', 'TEST_ENCRYPTION_ENABLED')
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [ $class: 'AzureKeyVaultSecret',
+    secretType: 'Secret',
+    name: secretName,
+    version: '',
+    envVariable: envVar
+  ]
+}
+
+withPipeline(type , product, component) {
+   after('test') {
+        sh './gradlew integration'
+   }
+
+  enableDbMigration()
+  enableSlackNotifications(channel)
+  loadVaultSecrets(secrets)
+}

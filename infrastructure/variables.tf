@@ -47,7 +47,7 @@ variable encyption_enabled {
 }
 
 variable scheduling_enabled {
-  default = "true"
+  default = "false"
 }
 
 variable "ftp_hostname" {
@@ -76,4 +76,8 @@ variable "ftp_reports_folder" {
 
 variable "ftp_reports_cron" {
   default = "0 30 0 * * *"
+}
+
+variable "deployment_namespace" {
+  default = ""
 }
