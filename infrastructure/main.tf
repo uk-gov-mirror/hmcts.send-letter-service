@@ -53,12 +53,14 @@ locals {
 }
 
 module "db" {
-  source              = "git@github.com:hmcts/moj-module-postgres.git?ref=master"
+  source              = "git@github.com:hmcts/moj-module-postgres?ref=cnp-449-tactical"
   product             = "${var.product}-db"
   location            = "${var.location_db}"
   env                 = "${var.env}"
   postgresql_database = "postgres"
   postgresql_user     = "letter_tracking"
+  sku_name            = "GP_Gen5_2"
+  sku_tier            = "GeneralPurpose"
 }
 
 module "send-letter-service" {
