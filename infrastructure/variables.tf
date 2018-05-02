@@ -1,6 +1,5 @@
 variable "product" {
   type    = "string"
-  default = "send-letter-2"
 }
 
 variable "component" {
