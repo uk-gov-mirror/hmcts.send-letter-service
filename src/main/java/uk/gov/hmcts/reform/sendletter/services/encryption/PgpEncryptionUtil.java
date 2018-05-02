@@ -14,6 +14,8 @@ import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.bc.BcPGPPublicKeyRing;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDataEncryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPublicKeyKeyEncryptionMethodGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,6 +32,8 @@ import static org.bouncycastle.openpgp.PGPUtil.getDecoderStream;
 
 public final class PgpEncryptionUtil {
 
+    private static final Logger log = LoggerFactory.getLogger(PgpEncryptionUtil.class);
+
     // Prevent instantiation.
     private PgpEncryptionUtil() {
     }
@@ -44,43 +48,49 @@ public final class PgpEncryptionUtil {
      * @param withIntegrityCheck Sets whether or not the resulting encrypted data will be protected
      *                           using an integrity packet.
      * @return PGP encrypted byte array
-     * @throws IOException  if an error occurs writing stream header information to the provider
-     *                      output stream.
-     * @throws PGPException if an error occurs initialising PGP encryption for the configured
-     *                      encryption method.
      */
     public static byte[] encryptFile(
         byte[] inputFile,
         String inputFileName,
         PGPPublicKey pgpPublicKey,
         boolean withIntegrityCheck
-    ) throws IOException, PGPException {
-        Security.addProvider(new BouncyCastleProvider());
+    ) {
+        try {
+            Security.addProvider(new BouncyCastleProvider());
 
-        ByteArrayOutputStream byteArrayOutputStream =
-            compressAndWriteFileToLiteralData(
-                inputFile,
-                inputFileName
-            );
+            ByteArrayOutputStream byteArrayOutputStream =
+                compressAndWriteFileToLiteralData(
+                    inputFile,
+                    inputFileName
+                );
 
-        PGPEncryptedDataGenerator encryptedDataGenerator =
-            prepareDataEncryptor(
-                pgpPublicKey,
-                withIntegrityCheck
-            );
+            PGPEncryptedDataGenerator encryptedDataGenerator =
+                prepareDataEncryptor(
+                    pgpPublicKey,
+                    withIntegrityCheck
+                );
 
-        return writeEncryptedDataToOutputStream(byteArrayOutputStream, encryptedDataGenerator);
+            return writeEncryptedDataToOutputStream(byteArrayOutputStream, encryptedDataGenerator);
+        } catch (IOException | PGPException exc) {
+            log.error("Error encrypting file", exc);
+            throw new UnableToPgpEncryptZipFileException(exc);
+        }
     }
 
     /**
      * Returns raw key bytes as a Bouncy Castle PGP public key.
      */
-    public static PGPPublicKey loadPublicKey(byte[] data) throws IOException {
-        return lookupPublicSubkey(
-            new BcPGPPublicKeyRing(
-                getDecoderStream(new ByteArrayInputStream(data))
-            )
-        ).orElseThrow(() -> new UnableToLoadPgpPublicKeyException("PGP Public key object could not be constructed"));
+    public static PGPPublicKey loadPublicKey(byte[] data) {
+        try {
+            return lookupPublicSubkey(
+                new BcPGPPublicKeyRing(
+                    getDecoderStream(new ByteArrayInputStream(data))
+                )
+            ).orElseThrow(() -> new UnableToLoadPgpPublicKeyException(null));
+        } catch (IOException e) {
+            log.error("Error loading public key", e);
+            throw new UnableToLoadPgpPublicKeyException(e);
+        }
     }
 
     /**

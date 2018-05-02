@@ -74,13 +74,13 @@ public class PgpEncryptionUtilTest {
     }
 
     @Test
-    public void should_throw_io_exception_when_invalid_pubic_key_is_passed() {
+    public void should_throw_custom_exception_when_invalid_pubic_key_is_passed() {
         Throwable exc = Assertions.catchThrowable(
             () -> PgpEncryptionUtil.loadPublicKey("this is not public key".getBytes())
         );
 
         assertThat(exc)
-            .isInstanceOf(IOException.class);
+            .isInstanceOf(UnableToLoadPgpPublicKeyException.class);
     }
 
     private byte[] loadPublicKey() throws IOException {
