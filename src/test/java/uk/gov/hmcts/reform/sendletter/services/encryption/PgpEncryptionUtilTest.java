@@ -27,8 +27,7 @@ public class PgpEncryptionUtilTest {
         byte[] pgpEncryptedZip = PgpEncryptionUtil.encryptFile(
             inputZipFile,
             inputFileName,
-            pgpPublicKey,
-            true
+            pgpPublicKey
         );
 
         //We are decrypting it using BountyCastle to validate if the decrypted zip is same as input file.
@@ -42,36 +41,6 @@ public class PgpEncryptionUtilTest {
         //then
         assertThat(inputZipFile).containsExactly(decryptedZip.content);
         assertThat(decryptedZip.filename).isEqualTo(inputFileName);
-    }
-
-    @Test
-    public void should_encrypt_and_create_pgp_encrypted_zip_file_when_integrity_packects_are_not_added()
-        throws Exception {
-        //Given
-        String inputFileName = "unencrypted.zip";
-
-        byte[] inputZipFile = Resources.toByteArray(getResource(inputFileName));
-
-        PGPPublicKey pgpPublicKey = PgpEncryptionUtil.loadPublicKey(loadPublicKey());
-
-        //when
-        byte[] pgpEncryptedZip = PgpEncryptionUtil.encryptFile(
-            inputZipFile,
-            inputFileName,
-            pgpPublicKey,
-            false
-        );
-
-        //We are decrypting it using BountyCastle to validate if the decrypted zip is same as input file.
-        //Currently this seems to be the only way to validate the file contents.
-        PgpDecryptionHelper.DecryptedFile decryptedZip = PgpDecryptionHelper.decryptFile(
-            pgpEncryptedZip,
-            loadPrivateKey(),
-            "Password1".toCharArray()
-        );
-
-        //then
-        assertThat(inputZipFile).containsExactly(decryptedZip.content);
     }
 
     @Test

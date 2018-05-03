@@ -33,9 +33,12 @@ public final class PgpDecryptionHelper {
      * decrypt the passed in message stream.
      */
     @SuppressWarnings("unchecked")
-    public static DecryptedFile decryptFile(byte[] in, InputStream keyIn, char... passwd)
-        throws IOException, PGPException
-    {
+    public static DecryptedFile decryptFile(
+        byte[] in,
+        InputStream keyIn,
+        char... passwd
+    ) throws IOException, PGPException {
+
         Security.addProvider(new BouncyCastleProvider());
 
         PGPObjectFactory objectFactory = new PGPObjectFactory(in, new JcaKeyFingerprintCalculator());

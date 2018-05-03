@@ -42,18 +42,16 @@ public final class PgpEncryptionUtil {
      * Encrypts the given byte array using PGP encryption using AES 256 algorithm.
      * This method assumes that the temporary volume is writable
      *
-     * @param inputFile          input file byte array
-     * @param inputFileName      input file name to be encrypted
-     * @param pgpPublicKey       key used to encrypt file
-     * @param withIntegrityCheck Sets whether or not the resulting encrypted data will be protected
-     *                           using an integrity packet.
+     * @param inputFile     input file byte array
+     * @param inputFileName input file name to be encrypted
+     * @param pgpPublicKey  key used to encrypt file
+     *
      * @return PGP encrypted byte array
      */
     public static byte[] encryptFile(
         byte[] inputFile,
         String inputFileName,
-        PGPPublicKey pgpPublicKey,
-        boolean withIntegrityCheck
+        PGPPublicKey pgpPublicKey
     ) {
         try {
             Security.addProvider(new BouncyCastleProvider());
@@ -64,11 +62,7 @@ public final class PgpEncryptionUtil {
                     inputFileName
                 );
 
-            PGPEncryptedDataGenerator encryptedDataGenerator =
-                prepareDataEncryptor(
-                    pgpPublicKey,
-                    withIntegrityCheck
-                );
+            PGPEncryptedDataGenerator encryptedDataGenerator = prepareDataEncryptor(pgpPublicKey);
 
             return writeEncryptedDataToOutputStream(byteArrayOutputStream, encryptedDataGenerator);
         } catch (IOException | PGPException exc) {
@@ -124,12 +118,9 @@ public final class PgpEncryptionUtil {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private static PGPEncryptedDataGenerator prepareDataEncryptor(
-        PGPPublicKey pgpPublicKey,
-        boolean withIntegrityCheck
-    ) {
+    private static PGPEncryptedDataGenerator prepareDataEncryptor(PGPPublicKey pgpPublicKey) {
         BcPGPDataEncryptorBuilder dataEncryptor = new BcPGPDataEncryptorBuilder(PGPEncryptedData.AES_256);
-        dataEncryptor.setWithIntegrityPacket(withIntegrityCheck);
+        dataEncryptor.setWithIntegrityPacket(true);
         dataEncryptor.setSecureRandom(new SecureRandom());
 
         PGPEncryptedDataGenerator encryptedDataGenerator = new PGPEncryptedDataGenerator(dataEncryptor);

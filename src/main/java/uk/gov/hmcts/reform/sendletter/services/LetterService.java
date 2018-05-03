@@ -129,7 +129,7 @@ public class LetterService {
             false
         );
 
-        return PgpEncryptionUtil.encryptFile(zipContent, zipFileName, pgpPublicKey, true);
+        return PgpEncryptionUtil.encryptFile(zipContent, zipFileName, pgpPublicKey);
     }
 
     private PGPPublicKey loadPgpPublicKey(String encryptionPublicKey) {
