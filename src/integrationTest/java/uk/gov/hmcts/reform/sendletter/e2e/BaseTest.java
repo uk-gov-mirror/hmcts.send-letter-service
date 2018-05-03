@@ -132,13 +132,18 @@ public class BaseTest {
             if (isEncryptionEnabled) {
                 // Decrypt encrypted zip file so that we can confirm if we are able to decrypt the encrypted zip
                 // using private key and passphrase
-                content = PgpDecryptionHelper.decryptFile(
+                PgpDecryptionHelper.DecryptedFile decryptedFile = PgpDecryptionHelper.decryptFile(
                     content,
                     getClass().getResourceAsStream("/encryption/privatekey.asc"),
                     "Password1".toCharArray()
                 );
+
+                assertThat(decryptedFile.filename).endsWith(".zip");
+                PdfHelper.validateZippedPdf(decryptedFile.content);
+
+            } else {
+                PdfHelper.validateZippedPdf(content);
             }
-            PdfHelper.validateZippedPdf(content);
         } catch (IOException | PGPException e) {
             // File may still be being written to disk by FTP server.
             return false;

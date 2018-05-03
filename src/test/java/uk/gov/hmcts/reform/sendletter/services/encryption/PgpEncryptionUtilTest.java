@@ -33,14 +33,15 @@ public class PgpEncryptionUtilTest {
 
         //We are decrypting it using BountyCastle to validate if the decrypted zip is same as input file.
         //Currently this seems to be the only way to validate the file contents.
-        byte[] decryptedZip = PgpDecryptionHelper.decryptFile(
+        PgpDecryptionHelper.DecryptedFile decryptedZip = PgpDecryptionHelper.decryptFile(
             pgpEncryptedZip,
             loadPrivateKey(),
             "Password1".toCharArray()
         );
 
         //then
-        assertThat(inputZipFile).containsExactly(decryptedZip);
+        assertThat(inputZipFile).containsExactly(decryptedZip.content);
+        assertThat(decryptedZip.filename).isEqualTo(inputFileName);
     }
 
     @Test
@@ -63,14 +64,14 @@ public class PgpEncryptionUtilTest {
 
         //We are decrypting it using BountyCastle to validate if the decrypted zip is same as input file.
         //Currently this seems to be the only way to validate the file contents.
-        byte[] decryptedZip = PgpDecryptionHelper.decryptFile(
+        PgpDecryptionHelper.DecryptedFile decryptedZip = PgpDecryptionHelper.decryptFile(
             pgpEncryptedZip,
             loadPrivateKey(),
             "Password1".toCharArray()
         );
 
         //then
-        assertThat(inputZipFile).containsExactly(decryptedZip);
+        assertThat(inputZipFile).containsExactly(decryptedZip.content);
     }
 
     @Test

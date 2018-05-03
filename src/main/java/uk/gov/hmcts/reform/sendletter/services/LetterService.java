@@ -126,7 +126,7 @@ public class LetterService {
             serviceName,
             createdAt,
             id,
-            true
+            false
         );
 
         return PgpEncryptionUtil.encryptFile(zipContent, zipFileName, pgpPublicKey, true);
