@@ -28,9 +28,7 @@ data "vault_generic_secret" "ftp_public_key" {
 }
 
 data "vault_generic_secret" "encryption_public_key" {
-  # Changing the path temporarily so that terraform can refresh new value for prod.
-  #path = "secret/${var.vault_section}/cc/send-letter/encryption-key"
-  path = "secret/${var.vault_section}/cc/send-letter-consumer/ftp-public-key"
+  path = "secret/${var.vault_section}/cc/send-letter/encryption-key"
 }
 
 locals {
