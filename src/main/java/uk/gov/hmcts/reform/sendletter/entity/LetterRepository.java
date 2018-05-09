@@ -21,4 +21,6 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
     Optional<Letter> findById(UUID id);
 
     Optional<Letter> findByIdAndService(UUID id, String service);
+
+    int countByStatus(LetterStatus status);
 }
