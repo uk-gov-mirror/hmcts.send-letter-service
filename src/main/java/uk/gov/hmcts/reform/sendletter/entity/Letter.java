@@ -123,6 +123,10 @@ public class Letter {
         return isFailed;
     }
 
+    public void setAdditionalData(JsonNode additionalData) {
+        this.additionalData = additionalData;
+    }
+
     public JsonNode getAdditionalData() {
         return additionalData;
     }

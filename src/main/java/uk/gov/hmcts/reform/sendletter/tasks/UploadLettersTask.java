@@ -78,16 +78,15 @@ public class UploadLettersTask {
             letter.getFileContent()
         );
 
-        logger.debug(
-            "Uploading letter id: {}, messageId: {}, file name: {}",
-            letter.getId(),
-            letter.getMessageId(),
-            file.filename
-        );
-
         ftp.upload(file, isSmokeTest(letter));
 
-        logger.info("Successfully uploaded letter {}", letter.getId());
+        logger.info(
+            "Uploaded letter id: {}, messageId: {}, file name: {}, additional data: {}",
+            letter.getId(),
+            letter.getMessageId(),
+            file.filename,
+            letter.getAdditionalData()
+        );
     }
 
     private void markAsUploaded(Letter letter) {
