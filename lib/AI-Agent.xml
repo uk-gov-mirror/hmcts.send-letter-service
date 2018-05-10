@@ -18,11 +18,6 @@
         <Class name="uk.gov.hmcts.reform.sendletter.services.encryption.PgpEncryptionUtil">
             <Method name="encryptFile"/>
         </Class>
-        <Class name="uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient">
-            <Method name="upload"/>
-            <Method name="downloadReports"/>
-            <Method name="deleteReport"/>
-        </Class>
         <Class name="uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator">
             <Method name="createFromTemplates"/>
             <Method name="createFromBase64Pdfs"/>

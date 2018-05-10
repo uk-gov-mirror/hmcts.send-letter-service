@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
+import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.Report;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
@@ -40,13 +41,14 @@ public class FtpClientTest {
     @Mock private SFTPClient sftpClient;
     @Mock private SFTPFileTransfer sftpFileTransfer;
     @Mock private FtpConfigProperties ftpProps;
+    @Mock private AppInsights insights;
 
     @Before
     public void setUp() throws Exception {
         given(sshClient.newSFTPClient()).willReturn(sftpClient);
         given(sftpClient.getFileTransfer()).willReturn(sftpFileTransfer);
 
-        client = new FtpClient(() -> sshClient, ftpProps);
+        client = new FtpClient(() -> sshClient, ftpProps, insights);
     }
 
     @Test

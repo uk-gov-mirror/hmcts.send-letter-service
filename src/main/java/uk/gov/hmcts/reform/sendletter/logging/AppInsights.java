@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sendletter.logging;
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.core.dependencies.apachecommons.lang3.BooleanUtils;
+import com.microsoft.applicationinsights.telemetry.Duration;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.logging.appinsights.AbstractAppInsights;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
@@ -28,6 +29,24 @@ public class AppInsights extends AbstractAppInsights {
     public AppInsights(TelemetryClient telemetry) {
         super(telemetry);
 
+    }
+
+    // dependencies
+
+    private void trackDependency(String dependency, String command, java.time.Duration duration, boolean success) {
+        telemetry.trackDependency(dependency, command, new Duration(duration.toMillis()), success);
+    }
+
+    public void trackFtpUpload(java.time.Duration duration, boolean success) {
+        trackDependency(AppDependency.FTP_CLIENT, AppDependencyCommand.FTP_FILE_UPLOADED, duration, success);
+    }
+
+    public void trackFtpReportDeletion(java.time.Duration duration, boolean success) {
+        trackDependency(AppDependency.FTP_CLIENT, AppDependencyCommand.FTP_REPORT_DELETED, duration, success);
+    }
+
+    public void trackFtpReportDownload(java.time.Duration duration, boolean success) {
+        trackDependency(AppDependency.FTP_CLIENT, AppDependencyCommand.FTP_REPORT_DOWNLOADED, duration, success);
     }
 
     // events

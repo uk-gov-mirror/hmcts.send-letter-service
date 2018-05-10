@@ -4,11 +4,14 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import net.schmizz.sshj.SSHClient;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
+import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 
 import java.io.IOException;
 import java.util.function.Supplier;
+
+import static org.mockito.Mockito.mock;
 
 public final class FtpHelper {
 
@@ -25,7 +28,7 @@ public final class FtpHelper {
             client.addHostKeyVerifier((a, b, c) -> verified);
             return client;
         };
-        return new FtpClient(s, getFtpConfig(port));
+        return new FtpClient(s, getFtpConfig(port), mock(AppInsights.class));
     }
 
     public static FtpClient getFailingClient(int port) throws IOException {

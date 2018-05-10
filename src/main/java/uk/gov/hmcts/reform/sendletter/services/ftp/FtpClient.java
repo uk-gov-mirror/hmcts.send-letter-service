@@ -11,10 +11,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
+import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.InMemoryDownloadedFile;
 import uk.gov.hmcts.reform.sendletter.model.Report;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
@@ -32,18 +35,26 @@ public class FtpClient {
 
     private final Supplier<SSHClient> sshClientSupplier;
 
+    private final AppInsights insights;
+
     // region constructor
     public FtpClient(
         Supplier<SSHClient> sshClientSupplier,
-        FtpConfigProperties configProperties
+        FtpConfigProperties configProperties,
+        AppInsights insights
     ) {
         this.sshClientSupplier = sshClientSupplier;
         this.configProperties = configProperties;
+        this.insights = insights;
     }
     // endregion
 
     public void upload(LocalSourceFile file, boolean isSmokeTestFile) {
+        Instant now = Instant.now();
+
         runWith(sftp -> {
+            boolean isSuccess = false;
+
             try {
                 String folder = isSmokeTestFile
                     ? configProperties.getSmokeTestTargetFolder()
@@ -52,9 +63,13 @@ public class FtpClient {
                 String path = String.join("/", folder, file.getName());
                 sftp.getFileTransfer().upload(file, path);
 
+                isSuccess = true;
+
                 return null;
             } catch (IOException exc) {
                 throw new FtpException("Unable to upload file.", exc);
+            } finally {
+                insights.trackFtpUpload(Duration.between(now, Instant.now()), isSuccess);
             }
         });
     }
@@ -63,11 +78,15 @@ public class FtpClient {
      * Downloads ALL files from reports directory.
      */
     public List<Report> downloadReports() {
+        Instant now = Instant.now();
+
         return runWith(sftp -> {
+            boolean isSuccess = false;
+
             try {
                 SFTPFileTransfer transfer = sftp.getFileTransfer();
 
-                return sftp.ls(configProperties.getReportsFolder())
+                List<Report> reports = sftp.ls(configProperties.getReportsFolder())
                     .stream()
                     .filter(this::isReportFile)
                     .map(file -> {
@@ -80,20 +99,34 @@ public class FtpClient {
                         }
                     })
                     .collect(toList());
+
+                isSuccess = true;
+
+                return reports;
             } catch (IOException exc) {
                 throw new FtpException("Error while downloading reports", exc);
+            } finally {
+                insights.trackFtpReportDownload(Duration.between(now, Instant.now()), isSuccess);
             }
         });
     }
 
     public void deleteReport(String reportPath) {
+        Instant now = Instant.now();
+
         runWith(sftp -> {
+            boolean isSuccess = false;
+
             try {
                 sftp.rm(reportPath);
+
+                isSuccess = true;
 
                 return null;
             } catch (Exception exc) {
                 throw new FtpException("Error while deleting report: " + reportPath, exc);
+            } finally {
+                insights.trackFtpReportDeletion(Duration.between(now, Instant.now()), isSuccess);
             }
         });
     }

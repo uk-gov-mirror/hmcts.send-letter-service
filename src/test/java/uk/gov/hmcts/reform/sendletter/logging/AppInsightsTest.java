@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.sendletter.logging;
 
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.applicationinsights.telemetry.Duration;
 import com.microsoft.applicationinsights.telemetry.TelemetryContext;
 import org.junit.After;
 import org.junit.Before;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -26,9 +28,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,6 +64,68 @@ public class AppInsightsTest {
     @After
     public void tearDown() {
         reset(telemetry);
+    }
+
+    // dependencies
+
+    // doing all dependencies in one go as they are not requiring any logic whatsoever
+    @Test
+    public void should_track_all_ftp_dependencies() {
+        Instant now = ZonedDateTime.now().toInstant();
+        java.time.Duration duration = java.time.Duration.between(now, now.plusSeconds(1));
+
+        // resetting now to be able to verify exactly what tested
+        reset(telemetry);
+
+        insights.trackFtpUpload(duration, true);
+        insights.trackFtpReportDeletion(duration, true);
+        insights.trackFtpReportDownload(duration, true);
+
+        verify(telemetry).trackDependency(
+            eq(AppDependency.FTP_CLIENT),
+            eq(AppDependencyCommand.FTP_FILE_UPLOADED),
+            any(Duration.class),
+            eq(true)
+        );
+        verify(telemetry).trackDependency(
+            eq(AppDependency.FTP_CLIENT),
+            eq(AppDependencyCommand.FTP_REPORT_DELETED),
+            any(Duration.class),
+            eq(true)
+        );
+        verify(telemetry).trackDependency(
+            eq(AppDependency.FTP_CLIENT),
+            eq(AppDependencyCommand.FTP_REPORT_DOWNLOADED),
+            any(Duration.class),
+            eq(true)
+        );
+        verifyNoMoreInteractions(telemetry);
+
+        reset(telemetry);
+
+        insights.trackFtpUpload(duration, false);
+        insights.trackFtpReportDeletion(duration, false);
+        insights.trackFtpReportDownload(duration, false);
+
+        verify(telemetry).trackDependency(
+            eq(AppDependency.FTP_CLIENT),
+            eq(AppDependencyCommand.FTP_FILE_UPLOADED),
+            any(Duration.class),
+            eq(false)
+        );
+        verify(telemetry).trackDependency(
+            eq(AppDependency.FTP_CLIENT),
+            eq(AppDependencyCommand.FTP_REPORT_DELETED),
+            any(Duration.class),
+            eq(false)
+        );
+        verify(telemetry).trackDependency(
+            eq(AppDependency.FTP_CLIENT),
+            eq(AppDependencyCommand.FTP_REPORT_DOWNLOADED),
+            any(Duration.class),
+            eq(false)
+        );
+        verifyNoMoreInteractions(telemetry);
     }
 
     // events
