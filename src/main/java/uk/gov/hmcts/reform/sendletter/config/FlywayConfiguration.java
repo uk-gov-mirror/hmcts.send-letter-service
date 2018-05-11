@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.sendletter.data.migration.FlywayNoOpStrategy;
 @AutoConfigureBefore(FlywayAutoConfiguration.class)
 @Configuration
 @ConditionalOnClass(Flyway.class)
-@ConditionalOnProperty(prefix = "flyway", name = "enabled", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "spring.flyway", name = "enabled", matchIfMissing = true)
 public class FlywayConfiguration {
 
     @Bean

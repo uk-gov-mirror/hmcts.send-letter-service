@@ -1,6 +1,8 @@
 FROM openjdk:8-jre
 
-COPY build/install/send-letter-service /opt/app/
+COPY build/bootScripts/send-letter-service /opt/app/bin/
+
+COPY build/libs/send-letter-service.jar /opt/app/lib/
 
 WORKDIR /opt/app
 

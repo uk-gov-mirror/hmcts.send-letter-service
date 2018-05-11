@@ -6,7 +6,7 @@ import java.time.LocalTime;
 
 public class FakeFtpAvailabilityChecker implements IFtpAvailabilityChecker {
 
-    private boolean isAvailable = false;
+    private boolean isAvailable;
 
     @Override
     public boolean isFtpAvailable(LocalTime time) {

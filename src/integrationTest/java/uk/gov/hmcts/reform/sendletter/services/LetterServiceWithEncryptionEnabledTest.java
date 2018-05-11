@@ -62,7 +62,7 @@ public class LetterServiceWithEncryptionEnabledTest {
 
         UUID id = service.send(letterRequest, SERVICE_NAME);
 
-        Letter letterInDb = letterRepository.findOne(id);
+        Letter letterInDb = letterRepository.findById(id).get();
 
         byte[] encryptedZip = letterInDb.getFileContent();
 

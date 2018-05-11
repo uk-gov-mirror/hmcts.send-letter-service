@@ -2,10 +2,10 @@ package uk.gov.hmcts.reform.sendletter.model.in;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import java.io.Serializable;
 import java.util.Map;
+import javax.validation.constraints.NotEmpty;
 
 public class Document implements Serializable {
 

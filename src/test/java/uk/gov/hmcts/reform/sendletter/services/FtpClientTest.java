@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
@@ -23,12 +23,13 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.doNothing;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -57,7 +58,7 @@ public class FtpClientTest {
         RemoteResourceInfo nonCsvFile = mock(RemoteResourceInfo.class);
         given(nonCsvFile.isRegularFile()).willReturn(true);
         given(nonCsvFile.getName()).willReturn("test-report.pdf");
-
+        given(ftpProps.getReportsFolder()).willReturn("reports");
         given(sftpClient.ls(anyString()))
             .willReturn(singletonList(nonCsvFile));
 
@@ -71,7 +72,7 @@ public class FtpClientTest {
     @Test
     public void should_track_failure_when_trying_to_download_report() throws IOException {
         // given
-        willThrow(IOException.class).given(sftpClient).ls(anyString());
+        willThrow(IOException.class).given(sftpClient).ls(eq(null));
 
         // when
         Throwable exception = catchThrowable(() -> client.downloadReports());

@@ -3,12 +3,12 @@ plugins {
   id 'checkstyle'
   id 'pmd'
   id 'jacoco'
-  id 'io.spring.dependency-management' version '1.0.4.RELEASE'
+  id 'io.spring.dependency-management' version '1.0.5.RELEASE'
   id 'org.flywaydb.flyway' version '5.0.7'
-  id 'org.springframework.boot' version '1.5.10.RELEASE'
+  id 'org.springframework.boot' version '2.0.2.RELEASE'
   id 'org.owasp.dependencycheck' version '3.1.2'
   id 'com.github.ben-manes.versions' version '0.17.0'
-  id 'org.sonarqube' version '2.6.1'
+  id 'org.sonarqube' version '2.6.2'
   id 'info.solidsoft.pitest' version '1.3.0'
 }
 
@@ -82,7 +82,7 @@ task smoke(type: Test) {
 
 checkstyle {
   maxWarnings = 0
-  toolVersion = '8.7'
+  toolVersion = '8.9'
   // need to set configDir to rootDir otherwise submodule will use submodule/config/checkstyle
   configDir = new File(rootDir, 'config/checkstyle')
 }
@@ -138,18 +138,23 @@ dependencyCheck {
   suppressionFile = 'dependency-check-suppressions.xml'
 }
 
+def springBootVersion = plugins.getPlugin('org.springframework.boot').class.package.implementationVersion
+def springCloudVersion = 'Finchley.M9'
+
 dependencyManagement {
   dependencies {
-    // openfeign imports 0.4.9 which imports io.netty 4.0.27.
-    // reactivex 0.4.20 follows the release compatibility but still falls under owasp risk factor.
-    // reactivex 0.4.20 uses io.netty 4.1.5 which is OK with owasp.
+    dependencySet(group: 'com.google.guava', version: '20.0') {
+      entry 'guava'
+    }
+    // openfeign imports 0.4.9 which imports io.netty 4.0.27
+    // reactivex 0.4.20 follows the release compatibility but still falls under owasp risk factor
+    // reactivex 0.4.20 uses io.netty 4.1.5 which is OK with owasp
     // latest (1.4.4) spring cloud starter feign library does not update either of those
     dependencySet(group: 'io.reactivex', version: '0.4.20') {
       entry 'rxnetty'
       entry 'rxnetty-contexts'
       entry 'rxnetty-servo'
     }
-    // we are already basing our work for jackson 2.9.4.
     // spring boot dependency management plugin downgrades
     // hystrix related libraries use 2.4.3 and not clear if plan to upgrade
     // bump to 2.9.5 because of https://nvd.nist.gov/vuln/detail/CVE-2018-7489
@@ -158,40 +163,38 @@ dependencyManagement {
       entry 'jackson-core'
       entry 'jackson-databind'
     }
-    // the url pattern of "" is not correctly handled in tomcat
-    // it is possible for unauthorised users to gain access to web application resources that should have been protected
-    // not bumping tomcat-annotations-api as it introduces way more vulnerabilities than 8.5.27
-    dependencySet(group: 'org.apache.tomcat.embed', version: '8.5.29') {
-      entry 'tomcat-embed-core'
-      entry 'tomcat-embed-websocket'
-    }
+  }
+  imports {
+    mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
   }
 }
 
-def springBootVersion = plugins.getPlugin('org.springframework.boot').class.package.implementationVersion
-
 repositories {
+  jcenter()
   // until new projects get to jcenter
   maven {
-    url  "https://dl.bintray.com/hmcts/hmcts-maven"
+    url "https://dl.bintray.com/hmcts/hmcts-maven"
   }
-  jcenter()
+  maven {
+    url "https://repo.spring.io/libs-milestone"
+  }
+  mavenLocal()
 }
 
 def versions = [
-  springfoxSwagger: '2.7.0',
-  reformLogging: '2.2.1',
-  logback: '1.2.3',
-  hystrix: '1.4.0.RELEASE'
+  springfoxSwagger: '2.9.0',
+  reformLogging: '3.0.1',
+  hystrix: '1.4.4.RELEASE'
 ]
 
 dependencies {
+  runtime("org.springframework.boot:spring-boot-properties-migrator")
+
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springBootVersion
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: springBootVersion
-
-  compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
-  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310'
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-json', version: springBootVersion
 
   compile group: 'org.flywaydb', name: 'flyway-core', version: '5.0.7'
   compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
@@ -201,32 +204,26 @@ dependencies {
 
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'java-logging-appinsights', version: versions.reformLogging
-  compile group: 'uk.gov.hmcts.reform', name: 'http-proxy-spring-boot-autoconfigure', version: '1.1.0'
-  compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '0.6.0'
-  compile group: 'uk.gov.hmcts.reform', name: 'reform-api-standards', version: '0.3.0'
+  compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.0'
+  compile group: 'uk.gov.hmcts.reform', name: 'reform-api-standards', version: '0.4.0'
   compile group: 'uk.gov.hmcts.reform', name: 'pdf-generator', version: '1.0.2'
 
-  compile group: 'ch.qos.logback', name: 'logback-classic', version: versions.logback
-  compile group: 'ch.qos.logback', name: 'logback-core', version: versions.logback
-
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix', version: versions.hystrix
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-hystrix-dashboard', version: versions.hystrix
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: versions.hystrix
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix-dashboard', version: versions.hystrix
 
   compile group: 'com.hierynomus', name: 'sshj', version: '0.23.0'
   compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.8'
   compile group: 'org.apache.commons', name: 'commons-csv', version: '1.5'
 
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc', version: springBootVersion
-  compile("org.springframework.boot:spring-boot-starter-data-jpa")
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion
   compile group: 'com.vladmihalcea', name: 'hibernate-types-5', version: '2.1.1'
   compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.55'
   compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.55'
   compile group: 'org.bouncycastle', name: 'bcpg-jdk15on', version: '1.59'
 
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
-  testCompile group: 'com.google.guava', name: 'guava', version: '23.4-jre'
   testCompile group: 'org.apache.sshd', name: 'sshd-core', version: '1.7.0'
-  testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.1'
+  testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
   testCompile group: 'org.apache.pdfbox', name: 'preflight', version: '2.0.8'
 
   integrationTestCompile sourceSets.main.runtimeClasspath
@@ -243,15 +240,19 @@ dependencies {
   functionalTestCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
 }
 
-jar {
-  archiveName 'send-letter-service.jar'
+mainClassName = 'uk.gov.hmcts.reform.sendletter.Application'
+
+bootJar {
+  archiveName = 'send-letter-service.jar'
 
   manifest {
     attributes('Implementation-Version': project.version.toString())
   }
 }
 
-task migratePostgresDatabase(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
+import org.flywaydb.gradle.task.FlywayMigrateTask
+
+task migratePostgresDatabase(type: FlywayMigrateTask) {
   baselineOnMigrate = true
   if (project.hasProperty("dburl")) {
     url = "jdbc:postgresql://${dburl}"

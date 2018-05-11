@@ -2,25 +2,29 @@ spring:
   application:
     name: Send Letter Service
   datasource:
-      url: jdbc:tc:postgresql:9.6://localhost/letter_tracking
-      driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
-      properties:
-        charSet: UTF-8
-      maxWaitForConnection: 1
-      minSize: 8
-      maxSize: 32
-      evictionInterval: 10
-      minIdleTime: 1 minute
-      checkConnectionWhileIdle: true
-      checkConnectionOnReturn: true
-      removeAbandoned: true
-      removeAbandonedTimeout: 60
-      abandonWhenPercentageFull: 0
-      testOnBorrow: true
-      validationQuery: SELECT 1
-  jackson:
-    serialization:
-      write_dates_as_timestamps: false
+    url: jdbc:tc:postgresql:9.6://localhost/letter_tracking
+    driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
+    properties:
+      charSet: UTF-8
+    maxWaitForConnection: 1
+    minSize: 8
+    maxSize: 32
+    evictionInterval: 10
+    minIdleTime: 1 minute
+    checkConnectionWhileIdle: true
+    checkConnectionOnReturn: true
+    removeAbandoned: true
+    removeAbandonedTimeout: 60
+    abandonWhenPercentageFull: 0
+    testOnBorrow: true
+    validationQuery: SELECT 1
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            # silence the 'wall-of-text' - unnecessary exception throw about blob types
+            non_contextual_creation: true
 
 ftp:
   hostname: localhost

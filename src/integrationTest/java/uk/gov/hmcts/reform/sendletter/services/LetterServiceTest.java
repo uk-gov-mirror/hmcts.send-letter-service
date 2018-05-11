@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -67,7 +67,7 @@ public class LetterServiceTest {
     public void generates_and_saves_zipped_pdf() throws IOException {
         UUID id = service.send(SampleData.letterRequest(), SERVICE_NAME);
 
-        Letter result = letterRepository.findOne(id);
+        Letter result = letterRepository.findById(id).get();
         PdfHelper.validateZippedPdf(result.getFileContent());
     }
 
@@ -76,7 +76,7 @@ public class LetterServiceTest {
         // given
         LetterRequest sampleRequest = SampleData.letterRequest();
         UUID id1 = service.send(sampleRequest, SERVICE_NAME);
-        Letter letter = letterRepository.findOne(id1);
+        Letter letter = letterRepository.findById(id1).get();
 
         // and
         assertThat(letter.getStatus()).isEqualByComparingTo(Created);
@@ -96,7 +96,7 @@ public class LetterServiceTest {
         // given
         LetterRequest sampleRequest = SampleData.letterRequest();
         UUID id1 = service.send(sampleRequest, SERVICE_NAME);
-        Letter letter = letterRepository.findOne(id1);
+        Letter letter = letterRepository.findById(id1).get();
 
         // and
         assertThat(letter.getStatus()).isEqualByComparingTo(Created);

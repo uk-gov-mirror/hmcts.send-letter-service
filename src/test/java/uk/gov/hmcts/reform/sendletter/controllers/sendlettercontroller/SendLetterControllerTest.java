@@ -24,10 +24,10 @@ import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -84,7 +84,7 @@ public class SendLetterControllerTest {
         sendLetter(readResource("controller/letter/v1/letter-without-type.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
-                .json("{\"errors\":[{\"field_name\":\"type\",\"message\":\"may not be empty\"}]}"));
+                .json("{\"errors\":[{\"field_name\":\"type\",\"message\":\"must not be empty\"}]}"));
 
         verify(letterService, never()).send(any(LetterRequest.class), anyString());
     }
@@ -94,7 +94,7 @@ public class SendLetterControllerTest {
         sendLetter(readResource("controller/letter/v1/letter-without-template.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
-                .json("{\"errors\":[{\"field_name\":\"documents[0].template\",\"message\":\"may not be empty\"}]}"));
+                .json("{\"errors\":[{\"field_name\":\"documents[0].template\",\"message\":\"must not be empty\"}]}"));
 
         verify(letterService, never()).send(any(LetterRequest.class), anyString());
     }
@@ -105,7 +105,7 @@ public class SendLetterControllerTest {
         sendLetter(readResource("controller/letter/v1/letter-without-template-values.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
-                .json("{\"errors\":[{\"field_name\":\"documents[0].values\",\"message\":\"may not be empty\"}]}"));
+                .json("{\"errors\":[{\"field_name\":\"documents[0].values\",\"message\":\"must not be empty\"}]}"));
 
         verify(letterService, never()).send(any(LetterRequest.class), anyString());
     }
