@@ -84,6 +84,18 @@ public class StaleLettersTaskTest {
     }
 
     @Test
+    public void should_not_report_to_insights_when_there_is_an_unprinted_letter_generated_during_smoke_test() {
+        // given
+        createLetterWithSentToPrintTime(secondBeforeCutOff, UploadLettersTask.SMOKE_TEST_LETTER_TYPE);
+
+        // when
+        task.run();
+
+        // then
+        verify(insights, never()).trackStaleLetter(any(Letter.class));
+    }
+
+    @Test
     public void should_not_pick_up_letter_if_sent_to_print_happened_at_the_cutoff_and_later() {
         // given
         createLetterWithSentToPrintTime(cutOff);
@@ -123,13 +135,13 @@ public class StaleLettersTaskTest {
         verify(insights, never()).trackStaleLetter(any(Letter.class));
     }
 
-    private Letter createLetterWithSentToPrintTime(LocalTime sentToPrintAtTime) {
+    private Letter createLetterWithSentToPrintTime(LocalTime sentToPrintAtTime, String type) {
         Letter letter = new Letter(
             UUID.randomUUID(),
             randomMessageId(),
             "service",
             null,
-            "type",
+            type,
             null,
             false,
             Timestamp.valueOf(LocalDateTime.now())
@@ -146,5 +158,9 @@ public class StaleLettersTaskTest {
         }
 
         return repository.save(letter);
+    }
+
+    private Letter createLetterWithSentToPrintTime(LocalTime sentToPrintAtTime) {
+        return createLetterWithSentToPrintTime(sentToPrintAtTime, "type");
     }
 }
