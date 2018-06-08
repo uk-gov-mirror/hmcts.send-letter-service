@@ -20,6 +20,10 @@ variable "env" {
   type = "string"
 }
 
+variable "capacity" {
+  default = "1"
+}
+
 variable "vault_section" {
   type = "string"
   description = "Name of the environment-specific section in Vault key path, i.e. secret/{vault_section}/..."

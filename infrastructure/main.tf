@@ -71,6 +71,7 @@ module "send-letter-service" {
   ilbIp               = "${var.ilbIp}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
   subscription        = "${var.subscription}"
+  capacity            = "${var.capacity}"
 
   app_settings = {
     S2S_URL                         = "${local.s2s_url}"
