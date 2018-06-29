@@ -33,6 +33,13 @@ The integrity check feature in OpenPGP, when handling a message that was encrypt
         <cve>CVE-2017-14798</cve>
     </suppress>
 
+    <!-- relates to admin pack extension which is not installed for us -->
+    <suppress>
+        <notes><![CDATA[postgresql before versions 10.4, 9.6.9 is vulnerable in the adminpack extension, the pg_catalog.pg_logfile_rotate() function doesn't follow the same ACLs than pg_rorate_logfile. If the adminpack is added to a database, an attacker able to connect to it could exploit this to force log rotation.]]></notes>
+        <gav regex="true">org\.postgresql:postgresql:42\.2\.2</gav>
+        <cve>CVE-2018-1115</cve>
+    </suppress>
+
     <!-- not really applicable at server level. hopefully get better cover with spring boot 2 -->
 
     <suppress>
