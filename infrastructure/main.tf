@@ -61,6 +61,7 @@ module "db" {
   postgresql_user     = "send_letter"
   sku_name            = "GP_Gen5_2"
   sku_tier            = "GeneralPurpose"
+  common_tags         = "${var.common_tags}"
 }
 
 module "send-letter-service" {
@@ -72,6 +73,7 @@ module "send-letter-service" {
   resource_group_name = "${azurerm_resource_group.rg.name}"
   subscription        = "${var.subscription}"
   capacity            = "${var.capacity}"
+  common_tags         = "${var.common_tags}"
 
   app_settings = {
     S2S_URL                         = "${local.s2s_url}"

@@ -84,3 +84,7 @@ variable "ftp_reports_cron" {
 variable "deployment_namespace" {
   default = ""
 }
+
+variable "common_tags" {
+  type = "map"
+}
