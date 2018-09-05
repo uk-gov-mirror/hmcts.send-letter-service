@@ -6,7 +6,7 @@ services:
       file: docker-compose-core.yml
       service: service
     environment:
-      - FLYWAY_ENABLED=true
+      - SPRING_FLYWAY_ENABLED=true
     depends_on:
       - send-letter-flyway
   send-letter-database:

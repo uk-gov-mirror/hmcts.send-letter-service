@@ -12,7 +12,6 @@ services:
     container_name: send-letter-service
     environment:
       - APPINSIGHTS_INSTRUMENTATIONKEY
-      - FLYWAY_ENABLED=false
       - FTP_FINGERPRINT="fingerprint"
       - FTP_HOSTNAME="hostname"
       - FTP_PORT=22
@@ -24,6 +23,7 @@ services:
       - LETTER_TRACKING_DB_PASSWORD
       - S2S_URL
       - SCHEDULING_ENABLED
+      - SPRING_FLYWAY_ENABLED=false
       - ENCRYPTION_ENABLED
       - ENCRYPTION_PUBLIC_KEY
       # these environment variables are used by java-logging library
