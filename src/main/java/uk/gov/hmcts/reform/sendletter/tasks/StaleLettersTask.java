@@ -18,8 +18,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.stream.Stream;
 
-import static uk.gov.hmcts.reform.sendletter.tasks.Task.StaleLetters;
-
 /**
  * Task to run report on unprinted letters and report them to AppInsights.
  */
@@ -27,6 +25,7 @@ import static uk.gov.hmcts.reform.sendletter.tasks.Task.StaleLetters;
 @ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
 public class StaleLettersTask {
     private static final Logger logger = LoggerFactory.getLogger(StaleLettersTask.class);
+    private static final String TASK_NAME = "StaleLetters";
 
     private final LetterRepository repo;
     private final AppInsights insights;
@@ -43,7 +42,7 @@ public class StaleLettersTask {
     }
 
     @Transactional
-    @SchedulerLock(name = "StaleLetters")
+    @SchedulerLock(name = TASK_NAME)
     @Scheduled(cron = "${tasks.stale-letters-report}")
     public void run() {
         Timestamp staleCutOff = Timestamp.valueOf(
@@ -52,11 +51,11 @@ public class StaleLettersTask {
                 .with(staleCutOffTime)
         );
 
-        logger.info("Started '{}' task with cut-off of {}", StaleLetters, staleCutOff);
+        logger.info("Started '{}' task with cut-off of {}", TASK_NAME, staleCutOff);
 
         try (Stream<Letter> letters = repo.findByStatusAndSentToPrintAtBefore(LetterStatus.Uploaded, staleCutOff)) {
             long count = letters.peek(insights::trackStaleLetter).count();
-            logger.info("Completed '{}' task. Letters found: {}", StaleLetters, count);
+            logger.info("Completed '{}' task. Letters found: {}", TASK_NAME, count);
         }
     }
 }

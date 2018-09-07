@@ -20,8 +20,6 @@ import java.sql.Timestamp;
 import java.time.LocalTime;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.sendletter.tasks.Task.MarkLettersPosted;
-
 /**
  * Fetches reports from Xerox SFTP concerning posted
  * letters and sets posted letters as Posted in the database.
@@ -37,6 +35,7 @@ public class MarkLettersPostedTask {
     private final AppInsights insights;
 
     private static final Logger logger = LoggerFactory.getLogger(MarkLettersPostedTask.class);
+    private static final String TASK_NAME = "MarkLettersPosted";
 
     public MarkLettersPostedTask(
         LetterRepository repo,
@@ -52,15 +51,15 @@ public class MarkLettersPostedTask {
         this.insights = insights;
     }
 
-    @SchedulerLock(name = "MarkLettersPosted")
+    @SchedulerLock(name = TASK_NAME)
     @Scheduled(cron = "${tasks.mark-letters-posted}")
     public void run() {
         if (!ftpAvailabilityChecker.isFtpAvailable(LocalTime.now())) {
-            logger.info("Not processing '{}' task due to FTP downtime window", MarkLettersPosted);
+            logger.info("Not processing '{}' task due to FTP downtime window", TASK_NAME);
             return;
         }
 
-        logger.info("Started '{}' task", MarkLettersPosted);
+        logger.info("Started '{}' task", TASK_NAME);
         try {
             ftpClient
                 .downloadReports()
@@ -78,7 +77,7 @@ public class MarkLettersPostedTask {
                     }
                 });
 
-            logger.info("Completed '{}' task", MarkLettersPosted);
+            logger.info("Completed '{}' task", TASK_NAME);
         } catch (FtpException f) {
             logger.warn("Error fetching Xerox reports", f);
         }

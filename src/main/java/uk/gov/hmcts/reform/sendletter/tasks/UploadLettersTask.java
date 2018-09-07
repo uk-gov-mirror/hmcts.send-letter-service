@@ -21,13 +21,13 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.time.LocalDateTime.now;
-import static uk.gov.hmcts.reform.sendletter.tasks.Task.UploadLetters;
 
 @Component
 @ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
 public class UploadLettersTask {
     private static final Logger logger = LoggerFactory.getLogger(UploadLettersTask.class);
     public static final String SMOKE_TEST_LETTER_TYPE = "smoke_test";
+    private static final String TASK_NAME = "UploadLetters";
 
     private final LetterRepository repo;
     private final FtpClient ftp;
@@ -46,15 +46,15 @@ public class UploadLettersTask {
         this.insights = insights;
     }
 
-    @SchedulerLock(name = "UploadLetters")
+    @SchedulerLock(name = TASK_NAME)
     @Scheduled(fixedDelayString = "${tasks.upload-letters-interval-ms}")
     public void run() {
         if (!availabilityChecker.isFtpAvailable(now().toLocalTime())) {
-            logger.info("Not processing '{}' task due to FTP downtime window", UploadLetters);
+            logger.info("Not processing '{}' task due to FTP downtime window", TASK_NAME);
             return;
         }
 
-        logger.info("Started '{}' task", UploadLetters);
+        logger.info("Started '{}' task", TASK_NAME);
 
         // Upload the letters in batches.
         // With each batch we mark them Uploaded so they no longer appear in the query.
@@ -75,7 +75,7 @@ public class UploadLettersTask {
             insights.trackUploadedLetters(counter);
         }
 
-        logger.info("Completed '{}' task", UploadLetters);
+        logger.info("Completed '{}' task", TASK_NAME);
     }
 
     private void uploadToFtp(Letter letter) {
