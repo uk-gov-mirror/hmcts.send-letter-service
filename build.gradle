@@ -158,8 +158,9 @@ repositories {
 }
 
 def versions = [
-  springfoxSwagger: '2.9.2',
-  reformLogging: '3.0.1'
+  reformLogging: '3.0.1',
+  shedlock: '1.1.0',
+  springfoxSwagger: '2.9.2'
 ]
 
 dependencies {
@@ -170,6 +171,9 @@ dependencies {
 
   compile group: 'org.flywaydb', name: 'flyway-core', version: '5.1.4'
   compile group: 'org.postgresql', name: 'postgresql', version: '42.2.4'
+
+  compile group: 'net.javacrumbs.shedlock', name: 'shedlock-provider-jdbc-template', version: versions.shedlock
+  compile group: 'net.javacrumbs.shedlock', name: 'shedlock-spring', version: versions.shedlock
 
   compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger

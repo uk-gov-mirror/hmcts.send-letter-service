@@ -53,6 +53,11 @@ variable scheduling_enabled {
   default = "false"
 }
 
+variable scheduling_lock_at_most_for {
+  default = "PT10M"
+  description = "For how long to keep the lock of the specific task"
+}
+
 variable "ftp_hostname" {
   default = "cmseft.services.xerox.com"
 }

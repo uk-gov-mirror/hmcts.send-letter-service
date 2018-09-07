@@ -1,7 +1,10 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
+import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
@@ -21,6 +24,7 @@ import static uk.gov.hmcts.reform.sendletter.tasks.Task.StaleLetters;
  * Task to run report on unprinted letters and report them to AppInsights.
  */
 @Component
+@ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
 public class StaleLettersTask {
     private static final Logger logger = LoggerFactory.getLogger(StaleLettersTask.class);
 
@@ -39,6 +43,8 @@ public class StaleLettersTask {
     }
 
     @Transactional
+    @SchedulerLock(name = "StaleLetters")
+    @Scheduled(cron = "${tasks.stale-letters-report}")
     public void run() {
         Timestamp staleCutOff = Timestamp.valueOf(
             LocalDateTime.now()

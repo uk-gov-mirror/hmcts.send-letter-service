@@ -10,7 +10,12 @@ import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @RunWith(SpringRunner.class)
-@TestPropertySource(properties = "scheduling.enabled=true")
+@TestPropertySource(properties = {
+    "scheduling.enabled=true",
+    "tasks.upload-letters-interval-ms=1000",
+    "tasks.mark-letters-posted=*/1 * * * * *",
+    "tasks.stale-letters-report=*/1 * * * * *"
+})
 public class EndToEndTest extends BaseTest {
 
     private static final Boolean IS_ENCRYPTION_ENABLED = false;

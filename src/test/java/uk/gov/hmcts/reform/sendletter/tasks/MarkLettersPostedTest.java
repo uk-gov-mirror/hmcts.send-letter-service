@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.sendletter.services.ReportParser;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 
-import java.time.LocalTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -60,7 +59,7 @@ public class MarkLettersPostedTest {
         given(repo.findById(unknown)).willReturn(Optional.empty());
 
         // when
-        task.run(LocalTime.MIDNIGHT);
+        task.run();
 
         // then
         assertThat(letter.getStatus()).isEqualTo(LetterStatus.Posted);
@@ -79,7 +78,7 @@ public class MarkLettersPostedTest {
         given(repo.findById(any())).willReturn(Optional.of(SampleData.letterEntity("cmc")));
 
         // when
-        task.run(LocalTime.now());
+        task.run();
 
         // then
         verify(ftpClient).deleteReport(reportName);
@@ -98,7 +97,7 @@ public class MarkLettersPostedTest {
         given(repo.findById(any())).willReturn(Optional.of(SampleData.letterEntity("cmc")));
 
         // when
-        task.run(LocalTime.now());
+        task.run();
 
         // then
         verify(ftpClient, never()).deleteReport(anyString());

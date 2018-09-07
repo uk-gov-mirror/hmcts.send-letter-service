@@ -23,14 +23,12 @@ public class ThreadPoolConfig {
     public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
         ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 
-        // Make the threads identifiable in the debugger.
-        threadPoolTaskScheduler.setThreadNamePrefix("SendLetterTask");
-
-        // Add a custom error handler to log unhandled exceptions and track the number of errors.
+        threadPoolTaskScheduler.setThreadNamePrefix("SendLetterTask-");
         threadPoolTaskScheduler.setErrorHandler(t -> {
             log.error("Unhandled exception during task. {}: {}", t.getClass(), t.getMessage(), t);
             errorCount++;
         });
+
         return threadPoolTaskScheduler;
     }
 }

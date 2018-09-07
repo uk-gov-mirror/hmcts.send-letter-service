@@ -58,7 +58,7 @@ public class MarkLettersPostedTaskTest {
 
             // Prepare the response CSV from Xerox and run the task.
             XeroxReportWriter.writeReport(Stream.of(letter.getId()), server.reportFolder);
-            task.run(LocalTime.MIDNIGHT);
+            task.run();
         }
 
         // Check that the letter has moved to the Posted state.

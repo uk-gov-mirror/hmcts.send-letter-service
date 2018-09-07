@@ -88,6 +88,7 @@ module "send-letter-service" {
     FLYWAY_PASSWORD                 = "${module.db.postgresql_password}"
     ENCRYPTION_ENABLED              = "${var.encyption_enabled}"
     SCHEDULING_ENABLED              = "${var.scheduling_enabled}"
+    SCHEDULING_LOCK_AT_MOST_FOR     = "${var.scheduling_lock_at_most_for}"
     // ftp
     FTP_HOSTNAME                    = "${var.ftp_hostname}"
     FTP_PORT                        = "${var.ftp_port}"

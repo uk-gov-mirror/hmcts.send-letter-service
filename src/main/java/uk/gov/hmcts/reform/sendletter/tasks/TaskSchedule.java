@@ -2,16 +2,10 @@ package uk.gov.hmcts.reform.sendletter.tasks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.exception.TaskRunnerException;
 
-import java.time.LocalTime;
 import javax.sql.DataSource;
 
-@Component
-@ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
 public class TaskSchedule {
 
     private static final Logger log = LoggerFactory.getLogger(TaskSchedule.class);
@@ -33,17 +27,14 @@ public class TaskSchedule {
         this.dataSource = source;
     }
 
-    @Scheduled(fixedDelayString = "${tasks.upload-letters-interval-ms}")
     public void uploadLetters() {
         tryRun(Task.UploadLetters, upload::run);
     }
 
-    @Scheduled(cron = "${tasks.mark-letters-posted}")
     public void markPosted() {
-        tryRun(Task.MarkLettersPosted, () -> markPosted.run(LocalTime.now()));
+        tryRun(Task.MarkLettersPosted, markPosted::run);
     }
 
-    @Scheduled(cron = "${tasks.stale-letters-report}")
     public void staleLetters() {
         tryRun(Task.StaleLetters, staleReport::run);
     }
