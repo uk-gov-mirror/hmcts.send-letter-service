@@ -20,6 +20,18 @@ variable "location_db" {
   default = "UK South"
 }
 
+variable "appinsights_location" {
+  type        = "string"
+  default     = "West Europe"
+  description = "Location for Application Insights"
+}
+
+variable "application_type" {
+  type        = "string"
+  default     = "Web"
+  description = "Type of Application Insights (Web/Other)"
+}
+
 variable "env" {
   type = "string"
 }
