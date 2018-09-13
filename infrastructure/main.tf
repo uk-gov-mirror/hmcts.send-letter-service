@@ -50,6 +50,8 @@ locals {
   vaultName              = "${(var.env == "preview" || var.env == "spreview") ? local.previewVaultName : local.nonPreviewVaultName}"
 
   db_connection_options  = "?ssl=true"
+
+  sku_size = "${var.env == "prod" || var.env == "sprod" || var.env == "aat" ? "I2" : "I1"}"
 }
 
 module "db" {
@@ -74,6 +76,9 @@ module "send-letter-service" {
   subscription        = "${var.subscription}"
   capacity            = "${var.capacity}"
   common_tags         = "${var.common_tags}"
+  asp_name            = "${var.product}-${var.component}-${var.env}"
+  asp_rg              = "${var.product}-${var.component}-${var.env}"
+  instance_size       = "${local.sku_size}"
 
   app_settings = {
     S2S_URL                         = "${local.s2s_url}"
