@@ -1,66 +1,48 @@
-
-resource "azurerm_key_vault_secret" "test-s2s-url" {
-  name      = "test-s2s-url"
-  value     = "${local.s2s_url}"
-  vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
+# copy S2S secret from S2S's vault to app's vault, so that it can be passed to tests by Jenkins
+data "azurerm_key_vault_secret" "source_test_s2s_secret" {
+  name      = "microservicekey-send-letter-tests"
+  vault_uri = "${local.s2s_vault_url}"
 }
 
-resource "azurerm_key_vault_secret" "test-s2s-name" {
-  name      = "test-s2s-name"
-  value     = "send_letter_tests"
-  vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
-}
-
-resource "azurerm_key_vault_secret" "test-s2s-secret" {
+resource "azurerm_key_vault_secret" "test_s2s_secret" {
   name      = "test-s2s-secret"
-  value     = "${data.vault_generic_secret.tests_s2s_secret.data["value"]}"
+  value     = "${data.azurerm_key_vault_secret.source_test_s2s_secret.value}"
   vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
 }
 
-resource "azurerm_key_vault_secret" "test-ftp-hostname" {
-  name      = "test-ftp-hostname"
-  value     = "${var.ftp_hostname}"
-  vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
-}
-
-resource "azurerm_key_vault_secret" "test-ftp-port" {
-  name      = "test-ftp-port"
-  value     = "${var.ftp_port}"
-  vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
-}
-
-resource "azurerm_key_vault_secret" "test-ftp-fingerprint" {
-  name      = "test-ftp-fingerprint"
-  value     = "${var.ftp_fingerprint}"
-  vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
-}
-
-resource "azurerm_key_vault_secret" "test-ftp-target-folder" {
-  name      = "test-ftp-target-folder"
-  value     = "${var.ftp_smoke_test_target_folder}"
-  vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
-}
-
-resource "azurerm_key_vault_secret" "test-ftp-user" {
+# Secrets for tests are stored in permanent (long-lived) Azure Key Vault instances.
+# With the exception of (s)preview all Vault instances are long-lived. For preview, however,
+# test secrets (not created during deployment) need to be copied over from a permanent vault -
+# that's what the code below does.
+data "azurerm_key_vault_secret" "source_test_ftp_user" {
   name      = "test-ftp-user"
-  value     = "${local.ftp_user}"
+  vault_uri = "${local.permanent_vault_uri}"
+}
+
+resource "azurerm_key_vault_secret" "test_ftp_user" {
+  name      = "test-ftp-user"
+  value     = "${data.azurerm_key_vault_secret.source_test_ftp_user.value}"
   vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
 }
 
-resource "azurerm_key_vault_secret" "test-ftp-private-key" {
+data "azurerm_key_vault_secret" "source_test_ftp_private_key" {
   name      = "test-ftp-private-key"
-  value     = "${local.ftp_private_key}"
+  vault_uri = "${local.permanent_vault_uri}"
+}
+
+resource "azurerm_key_vault_secret" "test_ftp_private_key" {
+  name      = "test-ftp-private-key"
+  value     = "${data.azurerm_key_vault_secret.source_test_ftp_private_key.value}"
   vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
 }
 
-resource "azurerm_key_vault_secret" "test-ftp-public-key" {
+data "azurerm_key_vault_secret" "source_test_ftp_public_key" {
   name      = "test-ftp-public-key"
-  value     = "${local.ftp_public_key}"
-  vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
+  vault_uri = "${local.permanent_vault_uri}"
 }
 
-resource "azurerm_key_vault_secret" "test-encryption-enabled" {
-  name      = "test-encryption-enabled"
-  value     = "${var.encyption_enabled}"
+resource "azurerm_key_vault_secret" "test_ftp_public_key" {
+  name      = "test-ftp-public-key"
+  value     = "${data.azurerm_key_vault_secret.source_test_ftp_public_key.value}"
   vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
 }
