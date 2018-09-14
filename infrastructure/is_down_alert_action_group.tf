@@ -1,6 +1,6 @@
 data "azurerm_key_vault_secret" "sl_email_secret" {
   name      = "send-letter-failure-email"
-  vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
+  vault_uri = "${local.permanent_vault_uri}"
 }
 
 module "is-down-action-group" {
