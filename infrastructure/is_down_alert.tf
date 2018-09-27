@@ -28,7 +28,7 @@ union
 EOF
 
   frequency_in_minutes       = 10
-  time_window_in_minutes     = 15
+  time_window_in_minutes     = 30
   severity_level             = "2"
   action_group_name          = "${module.is-down-action-group.action_group_name}"
   custom_email_subject       = "Send Letter is DOWN"
