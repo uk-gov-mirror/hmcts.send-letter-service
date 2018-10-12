@@ -187,7 +187,7 @@ dependencies {
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.0.1.RELEASE'
 
   compile group: 'com.hierynomus', name: 'sshj', version: '0.26.0'
-  compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.11'
+  compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.12'
   compile group: 'org.apache.commons', name: 'commons-csv', version: '1.5'
 
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion
