@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
 
+    <suppress>
+        <notes><![CDATA[ No version resolving the issue is available yet. ]]></notes>
+        <cve>CVE-2016-7048</cve>
+    </suppress>
+
     <!-- PGP! -->
 
     <suppress>
@@ -20,6 +25,13 @@
         <gav regex="true">^org\.testcontainers:postgresql:.*$</gav>
         <cpe>cpe:/a:postgresql:postgresql</cpe>
     </suppress>
+
+    <suppress>
+        <notes><![CDATA[ Used by testcontainers supressed above ]]></notes>
+        <gav regex="true">^org\.jetbrains:annotations:.*$</gav>
+        <cve>CVE-2017-8316</cve>
+    </suppress>
+
     <suppress>
         <notes><![CDATA[Related to Groovy LDAP API which is not used by the service]]></notes>
         <gav regex="true">^org\.codehaus\.groovy:groovy-(json|xml):.*$</gav>
