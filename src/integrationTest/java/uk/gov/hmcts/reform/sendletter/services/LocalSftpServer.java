@@ -65,7 +65,7 @@ public final class LocalSftpServer implements AutoCloseable {
         });
 
         sshd.setPort(port);
-        SftpSubsystemFactory factory = new SftpSubsystemFactory.Builder().withShutdownOnExit(true).build();
+        SftpSubsystemFactory factory = new SftpSubsystemFactory.Builder().build();
 
         sshd.setSubsystemFactories(singletonList(factory));
         sshd.setCommandFactory(new ScpCommandFactory());
