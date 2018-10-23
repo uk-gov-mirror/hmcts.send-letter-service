@@ -209,7 +209,7 @@ dependencies {
   integrationTestCompile group: 'org.awaitility', name: 'awaitility', version: '3.1.2'
 
   smokeTestCompile sourceSets.main.runtimeClasspath
-  smokeTestCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.1.1'
+  smokeTestCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.2.0'
   smokeTestCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
 
   functionalTestCompile sourceSets.main.runtimeClasspath
