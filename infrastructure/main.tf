@@ -29,7 +29,7 @@ locals {
   # where vaults are short-lived and can only store secrets generated during deployment
   permanent_vault_uri    = "https://${var.raw_product}-send-letter-${local.local_env}.vault.azure.net/"
 
-  db_connection_options  = "?ssl=true"
+  db_connection_options  = "?sslmode=require"
 
   sku_size = "${var.env == "prod" || var.env == "sprod" || var.env == "aat" ? "I2" : "I1"}"
 }
