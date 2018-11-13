@@ -31,5 +31,14 @@ withPipeline(type , product, component) {
 
   enableDbMigration()
   enableSlackNotifications(channel)
-  loadVaultSecrets(secrets)
+
+  onPR {
+    loadVaultSecrets(secrets + [
+      secret('send-letter-failure-email', 'TEST_FAILURE_EMAIL')
+    ])
+  }
+
+  onNonPR {
+    loadVaultSecrets(secrets)
+  }
 }
