@@ -6,7 +6,7 @@ def type = "java"
 def product = "rpe"
 def component = "send-letter-service"
 
-def channel = '#rpe-build-notices'
+def channel = '#bsp-build-notices'
 
 List<LinkedHashMap<String, Object>> secrets = [
   secret('test-s2s-secret', 'TEST_S2S_SECRET'),

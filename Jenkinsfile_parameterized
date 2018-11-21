@@ -29,8 +29,11 @@ properties([
   pipelineTriggers([[$class: 'GitHubPushTrigger']])
 ])
 
+def channel = '#bsp-build-notices'
+
 withParameterizedPipeline(params.TYPE, params.PRODUCT_NAME, params.APP, params.ENVIRONMENT, params.SUBSCRIPTION) {
   enableDbMigration()
+  enableSlackNotifications(channel)
 
   onPR {
     loadVaultSecrets(secrets + [
