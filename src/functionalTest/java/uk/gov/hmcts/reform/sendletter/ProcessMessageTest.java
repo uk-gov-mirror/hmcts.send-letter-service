@@ -24,7 +24,7 @@ public class ProcessMessageTest extends FunctionalTestSuite {
         throws Exception {
         String letterId = sendPrintLetterRequest(
             signIn(),
-            sampleLetterRequestJson("letter_single_document_two_pages.json")
+            sampleLetterRequestJson("letter_single_document.json", "two-page-template.html")
         );
 
         try (SFTPClient sftp = getSftpClient()) {
@@ -43,7 +43,7 @@ public class ProcessMessageTest extends FunctionalTestSuite {
         throws Exception {
         String letterId = sendPrintLetterRequest(
             signIn(),
-            sampleLetterRequestJson("letter_single_document_one_page.json")
+            sampleLetterRequestJson("letter_single_document.json", "one-page-template.html")
         );
 
         try (SFTPClient sftp = getSftpClient()) {
@@ -62,7 +62,7 @@ public class ProcessMessageTest extends FunctionalTestSuite {
         throws Exception {
         String letterId = sendPrintLetterRequest(
             signIn(),
-            sampleLetterRequestJson("letter_two_documents_even_pages.json")
+            sampleLetterRequestJson("letter_two_documents.json", "two-page-template.html")
         );
 
         try (SFTPClient sftp = getSftpClient()) {
@@ -81,7 +81,7 @@ public class ProcessMessageTest extends FunctionalTestSuite {
         throws Exception {
         String letterId = sendPrintLetterRequest(
             signIn(),
-            sampleLetterRequestJson("letter_two_documents_odd_pages.json")
+            sampleLetterRequestJson("letter_two_documents.json", "one-page-template.html")
         );
 
         try (SFTPClient sftp = getSftpClient()) {
