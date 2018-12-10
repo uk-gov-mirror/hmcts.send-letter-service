@@ -34,7 +34,7 @@ public class ProcessMessageTestForPdfEndpoint extends FunctionalTestSuite {
             assertThat(sftpFile.getName()).matches(getFileNamePattern(letterId));
 
             if (!isEncryptionEnabled) {
-                validatePdfFile(letterId, sftp, sftpFile, 1);
+                validatePdfFile(letterId, sftp, sftpFile, 2);
             }
         }
     }
@@ -53,7 +53,7 @@ public class ProcessMessageTestForPdfEndpoint extends FunctionalTestSuite {
             assertThat(sftpFile.getName()).matches(getFileNamePattern(letterId));
 
             if (!isEncryptionEnabled) {
-                validatePdfFile(letterId, sftp, sftpFile, 2);
+                validatePdfFile(letterId, sftp, sftpFile, 4);
             }
         }
     }
