@@ -25,10 +25,10 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static org.springframework.http.ResponseEntity.badRequest;
 import static org.springframework.http.ResponseEntity.status;
 
@@ -90,9 +90,9 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ServiceNotConfiguredException.class)
-    protected ResponseEntity<String> handleUnprocessableEntityException(ServiceNotConfiguredException exc) {
+    protected ResponseEntity<String> handleServiceNotConfiguredException(ServiceNotConfiguredException exc) {
         log.warn(exc.getMessage(), exc);
-        return status(UNPROCESSABLE_ENTITY).build();
+        return status(FORBIDDEN).body("Service not configured");
     }
 
     @ExceptionHandler(Exception.class)

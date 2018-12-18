@@ -132,12 +132,12 @@ public class SendLetterControllerTest {
     }
 
     @Test
-    public void should_return_422_if_service_throws_ServiceNotConfiguredException() throws Exception {
+    public void should_return_403_if_service_throws_ServiceNotConfiguredException() throws Exception {
         given(authService.authenticate("auth-header-value")).willReturn("service-name");
         given(letterService.save(any(), any())).willThrow(new ServiceNotConfiguredException("invalid service"));
 
         sendLetter(readResource("controller/letter/v1/letter.json"))
-            .andExpect(status().is(422));
+            .andExpect(status().isForbidden());
     }
 
     @Test
