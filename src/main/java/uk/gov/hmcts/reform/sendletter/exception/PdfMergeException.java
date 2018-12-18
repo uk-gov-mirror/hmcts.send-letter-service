@@ -1,14 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.exception;
 
-import uk.gov.hmcts.reform.logging.exception.AlertLevel;
-import uk.gov.hmcts.reform.logging.exception.UnknownErrorCodeException;
-
-/**
- * SonarQube reports as error. Max allowed - 5 parents
- */
-@SuppressWarnings("squid:MaximumInheritanceDepth")
-public class PdfMergeException extends UnknownErrorCodeException {
+public class PdfMergeException extends RuntimeException {
     public PdfMergeException(String message, Throwable cause) {
-        super(AlertLevel.P3, message, cause);
+        super(message, cause);
     }
 }
