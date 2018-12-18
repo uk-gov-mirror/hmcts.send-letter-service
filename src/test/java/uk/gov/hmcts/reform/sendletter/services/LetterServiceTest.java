@@ -55,7 +55,7 @@ public class LetterServiceTest {
         LetterRequest letter = SampleData.letterRequest();
 
         // when
-        service.send(letter, "some_service");
+        service.save(letter, "some_service");
 
         // then
         verify(pdfCreator).createFromTemplates(letter.documents);
@@ -70,7 +70,7 @@ public class LetterServiceTest {
         LetterWithPdfsRequest letter = SampleData.letterWithPdfsRequest();
 
         // when
-        service.send(letter, "some_service");
+        service.save(letter, "some_service");
 
         // then
         verify(pdfCreator).createFromBase64Pdfs(letter.documents);
@@ -90,7 +90,7 @@ public class LetterServiceTest {
         when(zipper.zip(any(PdfDoc.class))).thenReturn(inputZipFile);
 
         // when
-        service.send(letter, "some_service");
+        service.save(letter, "some_service");
 
         // then
         verify(pdfCreator).createFromTemplates(letter.documents);
@@ -111,7 +111,7 @@ public class LetterServiceTest {
         when(zipper.zip(any(PdfDoc.class))).thenReturn(inputZipFile);
 
         // when
-        service.send(letter, "some_service");
+        service.save(letter, "some_service");
 
         // then
         verify(pdfCreator).createFromBase64Pdfs(letter.documents);
@@ -140,7 +140,7 @@ public class LetterServiceTest {
 
         // when
         Throwable err =
-            catchThrowable(() -> service.send(SampleData.letterWithPdfsRequest(), serviceWithoutFolderConfigured));
+            catchThrowable(() -> service.save(SampleData.letterWithPdfsRequest(), serviceWithoutFolderConfigured));
 
         // then
         assertThat(err)

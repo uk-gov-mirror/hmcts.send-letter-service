@@ -48,7 +48,7 @@ public class SendLetterWithPdfsControllerTest {
         sendLetter(validJson);
 
         // then
-        verify(letterService).send(any(LetterWithPdfsRequest.class), anyString());
+        verify(letterService).save(any(LetterWithPdfsRequest.class), anyString());
     }
 
     @Test

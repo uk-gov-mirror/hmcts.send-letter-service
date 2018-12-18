@@ -78,7 +78,7 @@ public class UploadLettersTaskTest {
 
     @Test
     public void uploads_file_to_sftp_and_sets_letter_status_to_uploaded() throws Exception {
-        UUID id = letterService.send(SampleData.letterRequest(), "bulkprint");
+        UUID id = letterService.save(SampleData.letterRequest(), "bulkprint");
         UploadLettersTask task = new UploadLettersTask(
             repository,
             FtpHelper.getSuccessfulClient(LocalSftpServer.port),
@@ -112,9 +112,9 @@ public class UploadLettersTaskTest {
     @Test
     public void should_fail_to_upload_to_sftp_and_stop_from_uploading_any_other_letters() throws Exception {
         // given
-        UUID id = letterService.send(SampleData.letterRequest(), "bulkprint");
+        UUID id = letterService.save(SampleData.letterRequest(), "bulkprint");
         // additional letter to verify upload loop broke and zipper was never called again
-        letterService.send(SampleData.letterRequest(), "bulkprint");
+        letterService.save(SampleData.letterRequest(), "bulkprint");
 
         // and
         UploadLettersTask task = new UploadLettersTask(
@@ -151,7 +151,7 @@ public class UploadLettersTaskTest {
         // Twice the batch size.
         int letterCount = 20;
         IntStream.rangeClosed(1, letterCount).forEach(
-            x -> letterService.send(SampleData.letterRequest(), "bulkprint"));
+            x -> letterService.save(SampleData.letterRequest(), "bulkprint"));
 
         UploadLettersTask task = new UploadLettersTask(
             repository,

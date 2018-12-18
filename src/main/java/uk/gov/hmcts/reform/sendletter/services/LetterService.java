@@ -69,7 +69,7 @@ public class LetterService {
     }
 
     @Transactional
-    public UUID send(ILetterRequest letter, String serviceName) {
+    public UUID save(ILetterRequest letter, String serviceName) {
         String messageId = generateChecksum(letter);
         Asserts.notEmpty(serviceName, "serviceName");
 

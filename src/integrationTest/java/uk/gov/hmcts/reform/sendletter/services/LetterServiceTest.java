@@ -73,7 +73,7 @@ public class LetterServiceTest {
 
     @Test
     public void generates_and_saves_zipped_pdf() throws IOException {
-        UUID id = service.send(SampleData.letterRequest(), SERVICE_NAME);
+        UUID id = service.save(SampleData.letterRequest(), SERVICE_NAME);
 
         Letter result = letterRepository.findById(id).get();
         PdfHelper.validateZippedPdf(result.getFileContent());
@@ -83,14 +83,14 @@ public class LetterServiceTest {
     public void returns_same_id_on_resubmit() throws IOException {
         // given
         LetterRequest sampleRequest = SampleData.letterRequest();
-        UUID id1 = service.send(sampleRequest, SERVICE_NAME);
+        UUID id1 = service.save(sampleRequest, SERVICE_NAME);
         Letter letter = letterRepository.findById(id1).get();
 
         // and
         assertThat(letter.getStatus()).isEqualByComparingTo(Created);
 
         // when
-        UUID id2 = service.send(sampleRequest, SERVICE_NAME);
+        UUID id2 = service.save(sampleRequest, SERVICE_NAME);
 
         // then
         assertThat(id1).isEqualByComparingTo(id2);
@@ -103,7 +103,7 @@ public class LetterServiceTest {
     public void saves_an_new_letter_if_previous_one_has_been_sent_to_print() throws IOException {
         // given
         LetterRequest sampleRequest = SampleData.letterRequest();
-        UUID id1 = service.send(sampleRequest, SERVICE_NAME);
+        UUID id1 = service.save(sampleRequest, SERVICE_NAME);
         Letter letter = letterRepository.findById(id1).get();
 
         // and
@@ -112,7 +112,7 @@ public class LetterServiceTest {
         // when
         letter.setStatus(Uploaded);
         letterRepository.saveAndFlush(letter);
-        UUID id2 = service.send(sampleRequest, SERVICE_NAME);
+        UUID id2 = service.save(sampleRequest, SERVICE_NAME);
 
         // then
         assertThat(id1).isNotEqualByComparingTo(id2);
@@ -123,13 +123,13 @@ public class LetterServiceTest {
 
     @Test
     public void should_not_allow_null_service_name() {
-        assertThatThrownBy(() -> service.send(SampleData.letterRequest(), null))
+        assertThatThrownBy(() -> service.save(SampleData.letterRequest(), null))
             .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     public void should_not_allow_empty_service_name() {
-        assertThatThrownBy(() -> service.send(SampleData.letterRequest(), ""))
+        assertThatThrownBy(() -> service.save(SampleData.letterRequest(), ""))
             .isInstanceOf(IllegalStateException.class);
     }
 

@@ -71,7 +71,7 @@ public class LetterServiceWithEncryptionEnabledTest {
             serviceFolderMapping
         );
 
-        UUID id = service.send(letterRequest, SERVICE_NAME);
+        UUID id = service.save(letterRequest, SERVICE_NAME);
 
         Letter letterInDb = letterRepository.findById(id).get();
 
