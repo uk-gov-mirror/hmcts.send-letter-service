@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
+import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.services.AuthService;
@@ -128,6 +129,15 @@ public class SendLetterControllerTest {
         MvcResult result = sendLetterWithoutAuthHeader(readResource("controller/letter/v1/letter.json")).andReturn();
 
         assertThat(result.getResponse().getStatus()).isEqualTo(401);
+    }
+
+    @Test
+    public void should_return_422_if_service_throws_ServiceNotConfiguredException() throws Exception {
+        given(authService.authenticate("auth-header-value")).willReturn("service-name");
+        given(letterService.send(any(), any())).willThrow(new ServiceNotConfiguredException("invalid service"));
+
+        sendLetter(readResource("controller/letter/v1/letter.json"))
+            .andExpect(status().is(422));
     }
 
     @Test

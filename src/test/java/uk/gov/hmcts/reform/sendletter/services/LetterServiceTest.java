@@ -9,10 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
+import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.sendletter.model.PdfDoc;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.services.encryption.UnableToLoadPgpPublicKeyException;
+import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
@@ -20,7 +22,9 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static com.google.common.io.Resources.getResource;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -33,6 +37,7 @@ public class LetterServiceTest {
     @Mock LetterRepository letterRepository;
     @Mock Zipper zipper;
     @Mock ObjectMapper objectMapper;
+    @Mock ServiceFolderMapping serviceFolderMapping;
 
     private LetterService service;
 
@@ -44,6 +49,7 @@ public class LetterServiceTest {
     @Test
     public void should_generate_final_pdf_from_template_when_old_model_is_passed() throws Exception {
         // given
+        given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
         createLetterService(false, null);
 
         LetterRequest letter = SampleData.letterRequest();
@@ -58,6 +64,7 @@ public class LetterServiceTest {
     @Test
     public void should_generate_final_pdf_from_embedded_pdfs_when_new_model_is_passed() throws Exception {
         // given
+        given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
         createLetterService(false, null);
 
         LetterWithPdfsRequest letter = SampleData.letterWithPdfsRequest();
@@ -73,6 +80,7 @@ public class LetterServiceTest {
     public void should_generate_final_pdf_from_template_when_old_model_is_passed_and_encryption_enabled()
         throws Exception {
         // given
+        given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
         createLetterService(true, new String(loadPublicKey()));
 
         LetterRequest letter = SampleData.letterRequest();
@@ -93,6 +101,7 @@ public class LetterServiceTest {
     public void should_generate_final_pdf_from_embedded_pdfs_when_new_model_is_passed_and_encryption_enabled()
         throws Exception {
         // given
+        given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
         createLetterService(true, new String(loadPublicKey()));
 
         LetterWithPdfsRequest letter = SampleData.letterWithPdfsRequest();
@@ -122,6 +131,23 @@ public class LetterServiceTest {
             .hasMessage("encryptionPublicKey is null");
     }
 
+    @Test
+    public void should_throw_an_exception_when_folder_for_given_service_is_not_configured() {
+        // given
+        final String serviceWithoutFolderConfigured = "some_invalid_service";
+        given(serviceFolderMapping.getFolderFor(serviceWithoutFolderConfigured)).willReturn(Optional.empty());
+        createLetterService(false, null);
+
+        // when
+        Throwable err =
+            catchThrowable(() -> service.send(SampleData.letterWithPdfsRequest(), serviceWithoutFolderConfigured));
+
+        // then
+        assertThat(err)
+            .isInstanceOf(ServiceNotConfiguredException.class)
+            .hasMessageContaining(serviceWithoutFolderConfigured);
+    }
+
     private void thereAreNoDuplicates() {
         given(letterRepository.findByMessageIdAndStatusOrderByCreatedAtDesc(any(), any()))
             .willReturn(Optional.empty());
@@ -134,7 +160,8 @@ public class LetterServiceTest {
             zipper,
             objectMapper,
             isEncryptionEnabled,
-            encryptionKey
+            encryptionKey,
+            serviceFolderMapping
         );
     }
 

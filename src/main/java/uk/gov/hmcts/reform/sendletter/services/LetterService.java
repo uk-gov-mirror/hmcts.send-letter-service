@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
+import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.sendletter.exception.UnsupportedLetterRequestTypeException;
 import uk.gov.hmcts.reform.sendletter.model.PdfDoc;
 import uk.gov.hmcts.reform.sendletter.model.in.ILetterRequest;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.encryption.PgpEncryptionUtil;
+import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
@@ -45,6 +47,7 @@ public class LetterService {
     private final boolean isEncryptionEnabled;
     private final String encryptionPublicKey;
     private final PGPPublicKey pgpPublicKey;
+    private final ServiceFolderMapping serviceFolderMapping;
 
     public LetterService(
         PdfCreator pdfCreator,
@@ -52,7 +55,8 @@ public class LetterService {
         Zipper zipper,
         ObjectMapper mapper,
         @Value("${encryption.enabled}") Boolean isEncryptionEnabled,
-        @Value("${encryption.publicKey}") String encryptionPublicKey
+        @Value("${encryption.publicKey}") String encryptionPublicKey,
+        ServiceFolderMapping serviceFolderMapping
     ) {
         this.pdfCreator = pdfCreator;
         this.letterRepository = letterRepository;
@@ -61,12 +65,17 @@ public class LetterService {
         this.isEncryptionEnabled = isEncryptionEnabled;
         this.encryptionPublicKey = encryptionPublicKey;
         this.pgpPublicKey = loadPgpPublicKey(encryptionPublicKey);
+        this.serviceFolderMapping = serviceFolderMapping;
     }
 
     @Transactional
     public UUID send(ILetterRequest letter, String serviceName) {
         String messageId = generateChecksum(letter);
         Asserts.notEmpty(serviceName, "serviceName");
+
+        if (!serviceFolderMapping.getFolderFor(serviceName).isPresent()) {
+            throw new ServiceNotConfiguredException("No configuration for service " + serviceName + " found");
+        }
 
         return letterRepository
             .findByMessageIdAndStatusOrderByCreatedAtDesc(messageId, Created)

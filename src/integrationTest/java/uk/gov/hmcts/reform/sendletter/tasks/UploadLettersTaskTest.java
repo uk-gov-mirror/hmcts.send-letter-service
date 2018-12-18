@@ -20,12 +20,14 @@ import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
+import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 import uk.gov.hmcts.reform.sendletter.services.pdf.DuplexPreparator;
 import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
 import java.io.File;
 import java.time.LocalTime;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 import javax.persistence.EntityManager;
@@ -51,6 +53,8 @@ public class UploadLettersTaskTest {
     @Mock
     private FtpAvailabilityChecker availabilityChecker;
 
+    @Mock ServiceFolderMapping serviceFolderMapping;
+
     @Mock
     private AppInsights insights;
 
@@ -59,13 +63,16 @@ public class UploadLettersTaskTest {
     @Before
     public void setUp() {
         when(availabilityChecker.isFtpAvailable(any(LocalTime.class))).thenReturn(true);
+        when(serviceFolderMapping.getFolderFor(any())).thenReturn(Optional.of("some_folder"));
+
         this.letterService = new LetterService(
             new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert),
             repository,
             new Zipper(),
             new ObjectMapper(),
             false,
-            null
+            null,
+            serviceFolderMapping
         );
     }
 
