@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
+import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.services.AuthService;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
@@ -23,6 +24,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
@@ -66,6 +68,15 @@ public class SendLetterWithPdfsControllerTest {
 
         // then
         verify(authService).authenticate(eq(authHeader));
+    }
+
+    @Test
+    public void should_return_403_if_service_throws_ServiceNotConfiguredException() throws Exception {
+        given(authService.authenticate(anyString())).willReturn("some_service_name");
+        given(letterService.save(any(), any())).willThrow(new ServiceNotConfiguredException("invalid service"));
+
+        sendLetter(validJson)
+            .andExpect(status().isForbidden());
     }
 
     private ResultActions sendLetter(String json) throws Exception {
