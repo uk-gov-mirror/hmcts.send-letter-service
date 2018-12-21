@@ -13,12 +13,14 @@ import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
+import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.time.LocalDateTime.now;
 
@@ -32,17 +34,20 @@ public class UploadLettersTask {
     private final LetterRepository repo;
     private final FtpClient ftp;
     private final IFtpAvailabilityChecker availabilityChecker;
+    private final ServiceFolderMapping serviceFolderMapping;
     private final AppInsights insights;
 
     public UploadLettersTask(
         LetterRepository repo,
         FtpClient ftp,
         IFtpAvailabilityChecker availabilityChecker,
+        ServiceFolderMapping serviceFolderMapping,
         AppInsights insights
     ) {
         this.repo = repo;
         this.ftp = ftp;
         this.availabilityChecker = availabilityChecker;
+        this.serviceFolderMapping = serviceFolderMapping;
         this.insights = insights;
     }
 
@@ -79,20 +84,25 @@ public class UploadLettersTask {
     }
 
     private void uploadToFtp(Letter letter) {
-        FileToSend file = new FileToSend(
-            FinalPackageFileNameHelper.generateName(letter),
-            letter.getFileContent()
-        );
+        Optional<String> serviceFolder = serviceFolderMapping.getFolderFor(letter.getService());
+        if (serviceFolder.isPresent()) {
+            FileToSend file = new FileToSend(
+                FinalPackageFileNameHelper.generateName(letter),
+                letter.getFileContent()
+            );
 
-        ftp.upload(file, isSmokeTest(letter), letter.getService());
+            ftp.upload(file, isSmokeTest(letter), serviceFolder.get());
 
-        logger.info(
-            "Uploaded letter id: {}, messageId: {}, file name: {}, additional data: {}",
-            letter.getId(),
-            letter.getMessageId(),
-            file.filename,
-            letter.getAdditionalData()
-        );
+            logger.info(
+                "Uploaded letter id: {}, messageId: {}, file name: {}, additional data: {}",
+                letter.getId(),
+                letter.getMessageId(),
+                file.filename,
+                letter.getAdditionalData()
+            );
+        } else {
+            logger.error("Folder for service {} not found. Skipping letter {}", letter.getService(), letter.getId());
+        }
     }
 
     private void markAsUploaded(Letter letter) {

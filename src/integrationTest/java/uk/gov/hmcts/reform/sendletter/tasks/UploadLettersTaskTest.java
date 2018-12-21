@@ -63,7 +63,7 @@ public class UploadLettersTaskTest {
     @Before
     public void setUp() {
         when(availabilityChecker.isFtpAvailable(any(LocalTime.class))).thenReturn(true);
-        when(serviceFolderMapping.getFolderFor(any())).thenReturn(Optional.of("some_folder"));
+        when(serviceFolderMapping.getFolderFor(any())).thenReturn(Optional.of(LocalSftpServer.SERVICE_FOLDER));
 
         this.letterService = new LetterService(
             new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert),
@@ -83,6 +83,7 @@ public class UploadLettersTaskTest {
             repository,
             FtpHelper.getSuccessfulClient(LocalSftpServer.port),
             availabilityChecker,
+            serviceFolderMapping,
             insights
         );
 
@@ -121,6 +122,7 @@ public class UploadLettersTaskTest {
             repository,
             FtpHelper.getFailingClient(LocalSftpServer.port),
             availabilityChecker,
+            serviceFolderMapping,
             insights
         );
 
@@ -157,6 +159,7 @@ public class UploadLettersTaskTest {
             repository,
             FtpHelper.getSuccessfulClient(LocalSftpServer.port),
             availabilityChecker,
+            serviceFolderMapping,
             insights
         );
 

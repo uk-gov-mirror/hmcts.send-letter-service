@@ -5,14 +5,12 @@ import net.schmizz.sshj.sftp.RemoteResourceInfo;
 import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.sftp.SFTPFileTransfer;
 import net.schmizz.sshj.xfer.LocalSourceFile;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
-import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.InMemoryDownloadedFile;
 import uk.gov.hmcts.reform.sendletter.model.Report;
@@ -51,15 +49,13 @@ public class FtpClient {
     }
     // endregion
 
-    public void upload(LocalSourceFile file, boolean isSmokeTestFile, String service) {
+    public void upload(LocalSourceFile file, boolean isSmokeTestFile, String serviceFolder) {
         Instant now = Instant.now();
 
         runWith(sftp -> {
             boolean isSuccess = false;
 
             try {
-                String serviceFolder = getServiceFolderMapping(service);
-
                 String folder = isSmokeTestFile
                     ? configProperties.getSmokeTestTargetFolder()
                     : String.join("/", configProperties.getTargetFolder(), serviceFolder);
@@ -178,14 +174,4 @@ public class FtpClient {
             && resourceInfo.getName().toLowerCase(Locale.getDefault()).endsWith(".csv");
     }
 
-    private String getServiceFolderMapping(String service) {
-        String serviceFolder = configProperties.getServiceFolders().getOrDefault(service, null);
-
-        if (StringUtils.isEmpty(serviceFolder)) {
-            throw new ServiceNotConfiguredException(
-                String.format("Service %s is not configured to use bulk-print", service)
-            );
-        }
-        return serviceFolder;
-    }
 }
