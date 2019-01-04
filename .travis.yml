@@ -24,7 +24,7 @@ cache:
 
 before_install:
   - sudo pip install pgsanity
-  - curl https://raw.githubusercontent.com/hmcts/reform-api-docs/master/bin/publish-swagger-docs.sh > publish-swagger-docs.sh
+  - curl https://raw.githubusercontent.com/hmcts/reform-api-docs/master/bin/publish-swagger-docs-dockerless.sh > publish-swagger-docs.sh
 
 script:
   - pgsanity --add-semicolon src/main/resources/db/migration/*.sql

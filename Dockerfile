@@ -1,13 +1,12 @@
-FROM openjdk:8-jre
+FROM hmcts/cnp-java-base:openjdk-jre-8-alpine-1.4
 
-COPY build/bootScripts/send-letter-service /opt/app/bin/
+ENV APP send-letter-service.jar
+ENV APPLICATION_TOTAL_MEMORY 1024M
+ENV APPLICATION_SIZE_ON_DISK_IN_MB 80
+ENV JAVA_OPTS ""
 
-COPY build/libs/send-letter-service.jar /opt/app/lib/
+COPY build/libs/$APP /opt/app/
 
-WORKDIR /opt/app
+HEALTHCHECK --interval=10s --timeout=10s --retries=10 CMD http_proxy="" wget -q --spider http://localhost:8485/health || exit 1
 
-HEALTHCHECK --interval=10s --timeout=10s --retries=10 CMD http_proxy="" curl --silent --fail http://localhost:8485/health
-
-EXPOSE 8485
-
-ENTRYPOINT ["/opt/app/bin/send-letter-service"]
+EXPOSE 8581
