@@ -40,7 +40,6 @@ public class MarkLettersPostedTest {
 
     @Before
     public void setup() {
-        given(availabilityChecker.isFtpAvailable(any())).willReturn(true);
         task = new MarkLettersPostedTask(repo, ftpClient, availabilityChecker, parser, insights);
     }
 
@@ -49,6 +48,8 @@ public class MarkLettersPostedTest {
         String filePath = "a.csv";
         UUID known = UUID.randomUUID();
         UUID unknown = UUID.randomUUID();
+
+        given(availabilityChecker.isFtpAvailable(any())).willReturn(true);
         given(ftpClient.downloadReports())
             .willReturn(singletonList(new Report(filePath, null)));
         given(parser.parse(any()))
@@ -70,6 +71,8 @@ public class MarkLettersPostedTest {
         final String reportName = "report.csv";
         final boolean allParsed = true;
 
+        given(availabilityChecker.isFtpAvailable(any())).willReturn(true);
+
         given(ftpClient.downloadReports())
             .willReturn(singletonList(new Report(reportName, null)));
 
@@ -89,6 +92,8 @@ public class MarkLettersPostedTest {
         final String reportName = "report.csv";
         final boolean allParsed = false;
 
+        given(availabilityChecker.isFtpAvailable(any())).willReturn(true);
+
         given(ftpClient.downloadReports())
             .willReturn(singletonList(new Report(reportName, null)));
 
@@ -101,5 +106,16 @@ public class MarkLettersPostedTest {
 
         // then
         verify(ftpClient, never()).deleteReport(anyString());
+    }
+
+    @Test
+    public void should_not_attempt_to_download_reports_during_ftp_downtime() {
+        given(availabilityChecker.isFtpAvailable(any())).willReturn(false);
+
+        // when
+        task.run();
+
+        // then
+        verify(ftpClient, never()).downloadReports();
     }
 }
