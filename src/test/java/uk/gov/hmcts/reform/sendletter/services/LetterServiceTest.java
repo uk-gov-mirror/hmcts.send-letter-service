@@ -10,7 +10,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
+import uk.gov.hmcts.reform.sendletter.exception.UnsupportedLetterRequestTypeException;
 import uk.gov.hmcts.reform.sendletter.model.PdfDoc;
+import uk.gov.hmcts.reform.sendletter.model.in.ILetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.services.encryption.UnableToLoadPgpPublicKeyException;
@@ -19,6 +21,9 @@ import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.io.Resources.getResource;
@@ -148,6 +153,21 @@ public class LetterServiceTest {
             .hasMessageContaining(serviceWithoutFolderConfigured);
     }
 
+    @Test
+    public void should_throw_an_exception_when_unsupported_letter_request_is_received() {
+        // given
+        given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
+        createLetterService(false, null);
+
+        // when
+        Throwable throwable = catchThrowable(() -> service.save(new DummyLetterRequest(), "some_service"));
+
+        // then
+        assertThat(throwable)
+            .isInstanceOf(UnsupportedLetterRequestTypeException.class)
+            .hasMessage("Unsupported letter request type");
+    }
+
     private void thereAreNoDuplicates() {
         given(letterRepository.findByMessageIdAndStatusOrderByCreatedAtDesc(any(), any()))
             .willReturn(Optional.empty());
@@ -167,5 +187,19 @@ public class LetterServiceTest {
 
     private byte[] loadPublicKey() throws IOException {
         return Resources.toByteArray(getResource("encryption/pubkey.asc"));
+    }
+
+    private static class DummyLetterRequest implements ILetterRequest, Serializable {
+        private static final long serialVersionUID = -7737087336283080071L;
+
+        @Override
+        public String getType() {
+            return "dummy";
+        }
+
+        @Override
+        public Map<String, Object> getAdditionalData() {
+            return Collections.emptyMap();
+        }
     }
 }
