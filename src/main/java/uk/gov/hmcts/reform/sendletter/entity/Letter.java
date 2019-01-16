@@ -123,19 +123,11 @@ public class Letter {
         return isFailed;
     }
 
-    public void setAdditionalData(JsonNode additionalData) {
-        this.additionalData = additionalData;
-    }
-
     public JsonNode getAdditionalData() {
         return additionalData;
     }
 
     public Boolean isEncrypted() {
         return isEncrypted;
-    }
-
-    public void setIsEncrypted(Boolean encrypted) {
-        isEncrypted = encrypted;
     }
 }
