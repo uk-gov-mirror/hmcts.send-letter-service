@@ -1,0 +1,2 @@
+ALTER TABLE letters
+ADD COLUMN checksum VARCHAR(256) NULL;
