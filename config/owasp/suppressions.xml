@@ -7,6 +7,11 @@
         <cve>CVE-2018-10237</cve>
     </suppress>
 
+    <suppress>
+        <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-databind:.*$</gav>
+        <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
+    </suppress>
+
     <!-- PGP! -->
 
     <suppress>
