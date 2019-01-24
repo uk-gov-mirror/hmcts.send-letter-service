@@ -28,19 +28,16 @@ public class PdfMergerTest {
         byte[] actualMergedPdf = PdfMerger.mergeDocuments(asList(test1Pdf, test2Pdf));
 
         // then
-        InputStream actualPdfPage1 = getPdfPageContents(actualMergedPdf, 0);
-        InputStream actualPdfPage2 = getPdfPageContents(actualMergedPdf, 1);
+        try (
+            InputStream actualPdfPage1 = getPdfPageContents(actualMergedPdf, 0);
+            InputStream actualPdfPage2 = getPdfPageContents(actualMergedPdf, 1);
 
-        InputStream expectedPdfPage1 = getPdfPageContents(expectedMergedPdf, 0);
-        InputStream expectedPdfPage2 = getPdfPageContents(expectedMergedPdf, 1);
-
-        assertThat(actualPdfPage1).hasSameContentAs(expectedPdfPage1);
-        assertThat(actualPdfPage2).hasSameContentAs(expectedPdfPage2);
-
-        actualPdfPage1.close();
-        actualPdfPage2.close();
-        expectedPdfPage1.close();
-        expectedPdfPage2.close();
+            InputStream expectedPdfPage1 = getPdfPageContents(expectedMergedPdf, 0);
+            InputStream expectedPdfPage2 = getPdfPageContents(expectedMergedPdf, 1)
+        ) {
+            assertThat(actualPdfPage1).hasSameContentAs(expectedPdfPage1);
+            assertThat(actualPdfPage2).hasSameContentAs(expectedPdfPage2);
+        }
     }
 
     @Test

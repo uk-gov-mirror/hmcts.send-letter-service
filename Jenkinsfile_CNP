@@ -29,13 +29,29 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type , product, component) {
-   after('test') {
-     builder.gradle('integration')
-   }
+  before('smoketest:aks') {
+    withAksClient('nonprod') {
+      // vars needed for AKS testing
+      env.TEST_S2S_NAME = 'send_letter_tests'
+      env.TEST_S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
+      env.TEST_FTP_HOSTNAME = 'cmseft.services.xerox.com'
+      env.TEST_FTP_PORT = 22
+      env.TEST_FTP_FINGERPRINT = 'SHA256:gYzreAtWAraVRFsOrcP9SPJq9atn7QxXh9pAauKud2U'
+      env.FTP_TARGET_FOLDER = 'TO_XEROX'
+      env.TEST_FTP_REPORTS_FOLDER = 'FROM_XEROX'
+      env.TEST_ENCRYPTION_ENABLED = false
+      env.RESOURCE_GROUP = "${product}-${component}-aks"
+    }
+  }
+
+  after('test') {
+    builder.gradle('integration')
+  }
 
   enableDbMigration()
   enableSlackNotifications(channel)
   enableDockerBuild()
+  enableDeployToAKS()
 
   onPR {
     loadVaultSecrets(secrets + [
@@ -46,4 +62,6 @@ withPipeline(type , product, component) {
   onNonPR {
     loadVaultSecrets(secrets)
   }
+
+  setVaultName("rpe-send-letter")
 }
