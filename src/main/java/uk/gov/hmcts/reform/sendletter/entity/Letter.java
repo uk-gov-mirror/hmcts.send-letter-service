@@ -25,6 +25,7 @@ public class Letter {
     private UUID id;
 
     private String messageId;
+    private String checksum;
     private String service;
     // The following Type annotation instructs jpa to JSON serialize this field.
     // The column annotation instructs jpa that this field is stored as a json column
@@ -58,6 +59,7 @@ public class Letter {
     ) {
         this.id = id;
         this.messageId = messageId;
+        this.checksum = messageId;
         this.service = service;
         this.additionalData = additionalData;
         this.type = type;
@@ -73,6 +75,10 @@ public class Letter {
 
     public String getMessageId() {
         return messageId;
+    }
+
+    public String getChecksum() {
+        return checksum;
     }
 
     public String getService() {
