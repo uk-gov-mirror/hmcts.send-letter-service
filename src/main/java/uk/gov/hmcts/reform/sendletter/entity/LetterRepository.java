@@ -25,7 +25,7 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
         @Param("before") Timestamp before
     );
 
-    Optional<Letter> findByMessageIdAndStatusOrderByCreatedAtDesc(String messageId, LetterStatus status);
+    Optional<Letter> findByChecksumAndStatusOrderByCreatedAtDesc(String checksum, LetterStatus status);
 
     Optional<Letter> findById(UUID id);
 

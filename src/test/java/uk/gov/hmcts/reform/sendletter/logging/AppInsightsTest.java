@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class AppInsightsTest {
 
-    private static final String MESSAGE_ID = "some-message-id";
+    private static final String CHECKSUM = "some-checksum";
 
     private static final String SERVICE_NAME = "some-service-name";
 
@@ -134,7 +134,7 @@ public class AppInsightsTest {
     public void should_track_event_of_not_printed_letter() {
         Letter letter = new Letter(
             UUID.randomUUID(),
-            MESSAGE_ID,
+            CHECKSUM,
             SERVICE_NAME,
             null,
             TYPE,
@@ -150,7 +150,7 @@ public class AppInsightsTest {
 
         Map<String, String> expectedProperties = new HashMap<>();
         expectedProperties.put("letterId", letter.getId().toString());
-        expectedProperties.put("messageId", MESSAGE_ID);
+        expectedProperties.put("checksum", CHECKSUM);
         expectedProperties.put("service", SERVICE_NAME);
         expectedProperties.put("type", TYPE);
         expectedProperties.put("sentToPrintDayOfWeek", sentToPrint.getDayOfWeek().name());

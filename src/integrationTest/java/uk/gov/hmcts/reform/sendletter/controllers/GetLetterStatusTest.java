@@ -77,7 +77,7 @@ public class GetLetterStatusTest {
             new LetterStatus(
                 letter.getId(),
                 letter.getStatus().name(),
-                letter.getMessageId(),
+                letter.getChecksum(),
                 ZonedDateTime.ofInstant(letter.getCreatedAt().toInstant(), ZoneOffset.UTC),
                 null,
                 null,

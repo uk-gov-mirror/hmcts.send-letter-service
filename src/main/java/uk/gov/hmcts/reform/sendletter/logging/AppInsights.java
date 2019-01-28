@@ -56,7 +56,7 @@ public class AppInsights extends AbstractAppInsights {
         Map<String, String> properties = new HashMap<>();
 
         properties.put("letterId", staleLetter.getId().toString());
-        properties.put("messageId", staleLetter.getMessageId());
+        properties.put("checksum", staleLetter.getChecksum());
         properties.put("service", staleLetter.getService());
         properties.put("type", staleLetter.getType());
         properties.put("sentToPrintDayOfWeek", sentToPrint.getDayOfWeek().name());

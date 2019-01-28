@@ -169,7 +169,7 @@ public class LetterServiceTest {
     }
 
     private void thereAreNoDuplicates() {
-        given(letterRepository.findByMessageIdAndStatusOrderByCreatedAtDesc(any(), any()))
+        given(letterRepository.findByChecksumAndStatusOrderByCreatedAtDesc(any(), any()))
             .willReturn(Optional.empty());
     }
 

@@ -70,7 +70,7 @@ public class LetterService {
 
     @Transactional
     public UUID save(ILetterRequest letter, String serviceName) {
-        String messageId = generateChecksum(letter);
+        String checksum = generateChecksum(letter);
         Asserts.notEmpty(serviceName, "serviceName");
 
         if (!serviceFolderMapping.getFolderFor(serviceName).isPresent()) {
@@ -78,13 +78,13 @@ public class LetterService {
         }
 
         return letterRepository
-            .findByMessageIdAndStatusOrderByCreatedAtDesc(messageId, Created)
+            .findByChecksumAndStatusOrderByCreatedAtDesc(checksum, Created)
             .map(duplicate -> {
                 UUID id = duplicate.getId();
                 log.info("Same message found already created. Returning letter id {} instead", id);
                 return id;
             })
-            .orElseGet(() -> saveNewLetter(letter, messageId, serviceName));
+            .orElseGet(() -> saveNewLetter(letter, checksum, serviceName));
     }
 
     private UUID saveNewLetter(ILetterRequest letter, String messageId, String serviceName) {
@@ -167,7 +167,7 @@ public class LetterService {
             .map(letter -> new LetterStatus(
                 id,
                 letter.getStatus().name(),
-                letter.getMessageId(),
+                letter.getChecksum(),
                 toDateTime(letter.getCreatedAt()),
                 toDateTime(letter.getSentToPrintAt()),
                 toDateTime(letter.getPrintedAt()),
