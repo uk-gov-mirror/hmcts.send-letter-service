@@ -60,6 +60,7 @@ public class GetLetterStatusControllerTest {
                 "{"
                     + "\"id\":\"" + letterStatus.id.toString() + "\","
                     + "\"message_id\":\"" + letterStatus.messageId + "\","
+                    + "\"checksum\":\"" + letterStatus.checksum + "\","
                     + "\"created_at\":\"2000-02-12T01:02:03.123Z\","
                     + "\"sent_to_print_at\":\"2000-02-12T01:02:03.123Z\","
                     + "\"printed_at\":\"2000-02-12T01:02:03.123Z\","

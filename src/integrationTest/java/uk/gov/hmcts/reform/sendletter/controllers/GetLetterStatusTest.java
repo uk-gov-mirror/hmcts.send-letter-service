@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sendletter.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,27 +8,23 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.authorisation.validators.AuthTokenValidator;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -42,9 +37,6 @@ public class GetLetterStatusTest {
 
     @Autowired
     private MockMvc mvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private LetterRepository letterRepository;
@@ -66,26 +58,15 @@ public class GetLetterStatusTest {
         Letter letter = SampleData.letterEntity("some-service");
         letterRepository.saveAndFlush(letter);
 
-        // when
-        MvcResult result = getLetterStatus(letter.getId())
+        getLetterStatus(letter.getId())
             .andExpect(status().isOk())
-            .andReturn();
-
-        // then
-        String actualStatus = result.getResponse().getContentAsString();
-        String expectedStatus = objectMapper.writeValueAsString(
-            new LetterStatus(
-                letter.getId(),
-                letter.getStatus().name(),
-                letter.getChecksum(),
-                ZonedDateTime.ofInstant(letter.getCreatedAt().toInstant(), ZoneOffset.UTC),
-                null,
-                null,
-                false
-            )
-        );
-
-        assertThat(actualStatus).isEqualTo(expectedStatus);
+            .andExpect(jsonPath("$.id").value(letter.getId().toString()))
+            .andExpect(jsonPath("$.status").value(letter.getStatus().name()))
+            .andExpect(jsonPath("$.checksum").value(letter.getChecksum()))
+            .andExpect(jsonPath("$.created_at").value(toIso(letter.getCreatedAt())))
+            .andExpect(jsonPath("$.sent_to_print_at").isEmpty())
+            .andExpect(jsonPath("$.printed_at").isEmpty())
+            .andExpect(jsonPath("$.has_failed").value(false));
     }
 
     @Test
@@ -94,11 +75,13 @@ public class GetLetterStatusTest {
     }
 
     private ResultActions getLetterStatus(UUID letterId) throws Exception {
-        MockHttpServletRequestBuilder request =
+        return mvc.perform(
             get("/letters/" + letterId.toString())
                 .header("ServiceAuthorization", "auth-header-value")
-                .contentType(MediaType.APPLICATION_JSON);
+        );
+    }
 
-        return mvc.perform(request);
+    private String toIso(Timestamp timestamp) {
+        return DateTimeFormatter.ISO_INSTANT.format(timestamp.toInstant());
     }
 }

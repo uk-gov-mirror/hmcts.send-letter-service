@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.model.out;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -11,8 +12,12 @@ public class LetterStatus {
 
     public final String status;
 
+    @ApiModelProperty(notes = "This field is deprecated, please use `checksum` instead")
     @JsonProperty("message_id")
     public final String messageId;
+
+    @JsonProperty("checksum")
+    public final String checksum;
 
     @JsonProperty("created_at")
     public final ZonedDateTime createdAt;
@@ -29,7 +34,7 @@ public class LetterStatus {
     public LetterStatus(
         final UUID id,
         final String status,
-        final String messageId,
+        final String checksum,
         final ZonedDateTime createdAt,
         final ZonedDateTime sentToPrintAt,
         final ZonedDateTime printedAt,
@@ -37,7 +42,8 @@ public class LetterStatus {
     ) {
         this.id = id;
         this.status = status;
-        this.messageId = messageId;
+        this.checksum = checksum;
+        this.messageId = checksum;
         this.createdAt = createdAt;
         this.sentToPrintAt = sentToPrintAt;
         this.printedAt = printedAt;
