@@ -23,8 +23,6 @@ import javax.persistence.Table;
 public class Letter {
     @Id
     private UUID id;
-
-    private String messageId;
     private String checksum;
     private String service;
     // The following Type annotation instructs jpa to JSON serialize this field.
@@ -49,7 +47,7 @@ public class Letter {
 
     public Letter(
         UUID id,
-        String messageId,
+        String checksum,
         String service,
         JsonNode additionalData,
         String type,
@@ -58,8 +56,7 @@ public class Letter {
         Timestamp createdAt
     ) {
         this.id = id;
-        this.messageId = messageId;
-        this.checksum = messageId;
+        this.checksum = checksum;
         this.service = service;
         this.additionalData = additionalData;
         this.type = type;
@@ -71,10 +68,6 @@ public class Letter {
 
     public UUID getId() {
         return id;
-    }
-
-    public String getMessageId() {
-        return messageId;
     }
 
     public String getChecksum() {
