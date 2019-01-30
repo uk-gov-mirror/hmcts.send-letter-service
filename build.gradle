@@ -216,7 +216,7 @@ dependencies {
 
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
-  integrationTestCompile group: 'org.testcontainers', name: 'postgresql', version: '1.10.5'
+  integrationTestCompile group: 'org.testcontainers', name: 'postgresql', version: '1.10.6'
   integrationTestCompile group: 'org.awaitility', name: 'awaitility', version: '3.1.6'
 
   smokeTestCompile sourceSets.main.runtimeClasspath
