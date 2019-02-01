@@ -7,9 +7,14 @@
         <cve>CVE-2018-10237</cve>
     </suppress>
 
+    <!-- spring security -->
     <suppress>
-        <gav regex="true">^com\.fasterxml\.jackson\.core:jackson-databind:.*$</gav>
-        <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
+        <notes><![CDATA[No fix is available]]></notes>
+        <gav regex="true">^org\.springframework\.security:spring-security-rsa:1\.0\.7\.RELEASE$</gav>
+        <cve>CVE-2011-2731</cve>
+        <cve>CVE-2011-2732</cve>
+        <cve>CVE-2012-5055</cve>
+        <cve>CVE-2018-1260</cve>
     </suppress>
 
     <!-- PGP! -->
@@ -28,26 +33,9 @@
     <!-- not used by server -->
 
     <suppress>
-        <notes><![CDATA[Used only for testing not used in prod]]></notes>
-        <gav regex="true">^org\.testcontainers:postgresql:.*$</gav>
-        <cpe>cpe:/a:postgresql:postgresql</cpe>
-    </suppress>
-
-    <suppress>
         <notes><![CDATA[Related to Groovy LDAP API which is not used by the service]]></notes>
-        <gav regex="true">^org\.codehaus\.groovy:groovy-(json|xml):.*$</gav>
+        <gav regex="true">^org\.codehaus\.groovy:groovy-(json|xml):2\.5\.5$</gav>
         <cve>CVE-2016-6497</cve>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[ Only referenced from tests]]></notes>
-        <gav regex="true">^dom4j:dom4j:.*$</gav>
-        <cve>CVE-2018-1000632</cve>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[ slf4j ]]></notes>
-        <cve>CVE-2018-8088</cve>
     </suppress>
 
 </suppressions>
