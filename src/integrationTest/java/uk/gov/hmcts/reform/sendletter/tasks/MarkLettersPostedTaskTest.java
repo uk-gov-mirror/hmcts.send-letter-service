@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.ReportParser;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
-import uk.gov.hmcts.reform.sendletter.util.XeroxReportWriter;
+import uk.gov.hmcts.reform.sendletter.util.CsvReportWriter;
 
 import java.time.LocalTime;
 import java.util.stream.Stream;
@@ -56,8 +56,8 @@ public class MarkLettersPostedTaskTest {
             FtpClient client = FtpHelper.getSuccessfulClient(LocalSftpServer.port);
             MarkLettersPostedTask task = new MarkLettersPostedTask(repository, client, checker, parser, insights);
 
-            // Prepare the response CSV from Xerox and run the task.
-            XeroxReportWriter.writeReport(Stream.of(letter.getId()), server.reportFolder);
+            // Prepare the CSV report and run the task.
+            CsvReportWriter.writeReport(Stream.of(letter.getId()), server.reportFolder);
             task.run();
         }
 

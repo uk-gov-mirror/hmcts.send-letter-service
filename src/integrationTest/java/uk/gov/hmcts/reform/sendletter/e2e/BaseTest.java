@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.sendletter.helper.FakeFtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.encryption.PgpDecryptionHelper;
 import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
-import uk.gov.hmcts.reform.sendletter.util.XeroxReportWriter;
+import uk.gov.hmcts.reform.sendletter.util.CsvReportWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,18 +78,18 @@ public class BaseTest {
                       .as("No letters uploaded!").isTrue()
             );
 
-            // Generate Xerox report.
-            createXeroxReport(server);
+            // Generate csv report.
+            createCsvReport(server);
 
             // The report should be processed and the letter marked posted.
             await().atMost(15, SECONDS).untilAsserted(
                 () -> assertThat(letterHasBeenPosted()).as("Letter not posted").isTrue()
             );
 
-            // Wait for the Xerox report to be deleted so that we don't stop the FTP server before the send letters
+            // Wait for the csv report to be deleted so that we don't stop the FTP server before the send letters
             // task has finished using it.
             await().atMost(15, SECONDS).untilAsserted(
-                () -> assertThat(server.reportFolder.listFiles()).as("Xerox reports not deleted!").isEmpty()
+                () -> assertThat(server.reportFolder.listFiles()).as("CSV reports not deleted!").isEmpty()
             );
 
             assertThat(ThreadPoolConfig.getUnhandledTaskExceptionCount())
@@ -106,11 +106,11 @@ public class BaseTest {
         return letters.size() == 1 && letters.get(0).getStatus() == LetterStatus.Posted;
     }
 
-    private void createXeroxReport(LocalSftpServer server) throws IOException {
+    private void createCsvReport(LocalSftpServer server) throws IOException {
         try (Stream<UUID> letterIds = Arrays.stream(server.lettersFolder.list())
             .map(FileNameHelper::extractIdFromPdfName)) {
 
-            XeroxReportWriter.writeReport(letterIds, server.reportFolder);
+            CsvReportWriter.writeReport(letterIds, server.reportFolder);
         }
     }
 

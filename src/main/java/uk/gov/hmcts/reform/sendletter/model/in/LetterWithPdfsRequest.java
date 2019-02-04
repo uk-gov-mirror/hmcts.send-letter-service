@@ -21,7 +21,7 @@ public class LetterWithPdfsRequest implements Serializable, ILetterRequest {
     @Size(min = 1, max = 10)
     public final List<byte[]> documents;
 
-    @ApiModelProperty(value = "Type to be used by Xerox to print documents", required = true)
+    @ApiModelProperty(value = "Type to be used to print documents", required = true)
     @NotEmpty
     public final String type;
 

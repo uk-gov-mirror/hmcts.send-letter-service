@@ -19,7 +19,7 @@ public class LetterRequest implements Serializable, ILetterRequest {
     @Valid
     public final List<Document> documents;
 
-    @ApiModelProperty(value = "Type to be used by Xerox to print documents", required = true)
+    @ApiModelProperty(value = "Type to be used to print documents", required = true)
     @NotEmpty
     public final String type;
 

@@ -21,17 +21,17 @@ public final class LocalSftpServer implements AutoCloseable {
 
     public static final int port = 46043;
 
-    // These determine where our pdfs and xerox reports are stored.
+    // These determine where our pdfs and reports are stored.
     public static final String LETTERS_FOLDER_NAME = "letters";
     public static final String REPORT_FOLDER_NAME = "reports";
     public static final String SERVICE_FOLDER = "BULKPRINT";
 
     public final File rootFolder;
 
-    // This is the folder where xerox expects pdf uploads.
+    // This is the folder where pdfs should be uploaded.
     public final File lettersFolder;
 
-    // Xerox CSV reports are put here.
+    // CSV reports are put here.
     public final File reportFolder;
 
     public static LocalSftpServer create() throws IOException {

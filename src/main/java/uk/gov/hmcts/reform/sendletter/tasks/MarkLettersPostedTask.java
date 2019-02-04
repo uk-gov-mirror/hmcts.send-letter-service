@@ -21,7 +21,7 @@ import java.time.LocalTime;
 import java.util.Optional;
 
 /**
- * Fetches reports from Xerox SFTP concerning posted
+ * Fetches reports from SFTP concerning posted
  * letters and sets posted letters as Posted in the database.
  */
 @Component
@@ -79,7 +79,7 @@ public class MarkLettersPostedTask {
 
             logger.info("Completed '{}' task", TASK_NAME);
         } catch (FtpException f) {
-            logger.warn("Error fetching Xerox reports", f);
+            logger.warn("Error fetching csv reports", f);
         }
     }
 

@@ -13,9 +13,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class XeroxReportWriter {
+public final class CsvReportWriter {
     public static void writeReport(Stream<UUID> letterIds, File reportFolder) throws IOException {
-        // We expect these fields in Xerox reports
+        // We expect these columns in csv reports
         CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(
             "StartDate",
             "StartTime",
@@ -37,6 +37,6 @@ public final class XeroxReportWriter {
     }
 
     // Prevent instantiation
-    private XeroxReportWriter() {
+    private CsvReportWriter() {
     }
 }
