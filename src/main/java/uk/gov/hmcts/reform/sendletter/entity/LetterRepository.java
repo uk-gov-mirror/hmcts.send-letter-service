@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,7 +22,7 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
         + "' and l.sentToPrintAt < :before")
     Stream<Letter> findByStatusAndSentToPrintAtBefore(
         @Param("status") LetterStatus status,
-        @Param("before") Timestamp before
+        @Param("before") LocalDateTime before
     );
 
     Optional<Letter> findByChecksumAndStatusOrderByCreatedAtDesc(String checksum, LetterStatus status);

@@ -16,8 +16,6 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -107,7 +105,7 @@ public class UploadLettersTask {
 
     private void markAsUploaded(Letter letter) {
         letter.setStatus(LetterStatus.Uploaded);
-        letter.setSentToPrintAt(Timestamp.from(Instant.now()));
+        letter.setSentToPrintAt(now());
 
         // remove pdf content, as it's no longer needed
         letter.setFileContent(null);

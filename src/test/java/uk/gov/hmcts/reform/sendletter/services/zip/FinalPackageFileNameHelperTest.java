@@ -4,10 +4,9 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
+import static java.time.LocalDateTime.now;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,10 +23,8 @@ public class FinalPackageFileNameHelperTest {
             "type",
             null,
             false,
-            Timestamp.valueOf(LocalDateTime.now())
+            now()
         );
-
-        LocalDateTime createdAt = letter.getCreatedAt().toLocalDateTime();
 
         // when
         String name = FinalPackageFileNameHelper.generateName(letter);
@@ -35,7 +32,7 @@ public class FinalPackageFileNameHelperTest {
         // then
         assertThat(name).isEqualTo(
             "type_cmc_"
-                + createdAt.format(FinalPackageFileNameHelper.dateTimeFormatter)
+                + letter.getCreatedAt().format(FinalPackageFileNameHelper.dateTimeFormatter)
                 + "_"
                 + letter.getId()
                 + ".zip"
@@ -44,14 +41,13 @@ public class FinalPackageFileNameHelperTest {
 
     @Test
     public void should_generate_expected_file_name_with_explicit_parameters_as_input() {
-        LocalDateTime createdAt = LocalDateTime.now();
         UUID letterId = randomUUID();
 
-        String name = FinalPackageFileNameHelper.generateName("type", "cmc", LocalDateTime.now(), letterId,true);
+        String name = FinalPackageFileNameHelper.generateName("type", "cmc", now(), letterId,true);
 
         assertThat(name).isEqualTo(
             "type_cmc_"
-                + createdAt.format(FinalPackageFileNameHelper.dateTimeFormatter)
+                + now().format(FinalPackageFileNameHelper.dateTimeFormatter)
                 + "_"
                 + letterId
                 + ".pgp"
@@ -69,7 +65,7 @@ public class FinalPackageFileNameHelperTest {
             "type",
             null,
             false,
-            Timestamp.valueOf(LocalDateTime.now())
+            now()
         );
 
         // when
@@ -90,7 +86,7 @@ public class FinalPackageFileNameHelperTest {
             "some_type",
             null,
             false,
-            Timestamp.valueOf(LocalDateTime.now())
+            now()
         );
 
         // when
@@ -110,7 +106,7 @@ public class FinalPackageFileNameHelperTest {
             "type",
             null,
             false,
-            Timestamp.valueOf(LocalDateTime.now())
+            now()
         );
 
         Letter encryptedLetter = new Letter(
@@ -121,7 +117,7 @@ public class FinalPackageFileNameHelperTest {
             "type",
             null,
             true,
-            Timestamp.valueOf(LocalDateTime.now())
+            now()
         );
 
         assertThat(FinalPackageFileNameHelper.generateName(zippedLetter)).endsWith(".zip");

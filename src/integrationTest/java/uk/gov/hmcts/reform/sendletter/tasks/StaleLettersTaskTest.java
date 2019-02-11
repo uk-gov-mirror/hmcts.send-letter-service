@@ -15,12 +15,10 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -125,7 +123,7 @@ public class StaleLettersTaskTest {
         // given
         Letter letter = createLetterWithSentToPrintTime(secondBeforeCutOff);
         letter.setStatus(LetterStatus.Posted);
-        letter.setPrintedAt(Timestamp.from(Instant.now()));
+        letter.setPrintedAt(now());
 
         // when
         repository.save(letter);
@@ -144,16 +142,14 @@ public class StaleLettersTaskTest {
             type,
             null,
             false,
-            Timestamp.valueOf(LocalDateTime.now())
+            now()
         );
 
         if (sentToPrintAtTime != null) {
             letter.setStatus(LetterStatus.Uploaded);
-            letter.setSentToPrintAt(
-                Timestamp.valueOf(LocalDateTime.now()
-                    .minusDays(1)
-                    .with(sentToPrintAtTime)
-                )
+            letter.setSentToPrintAt(now()
+                .minusDays(1)
+                .with(sentToPrintAtTime)
             );
         }
 

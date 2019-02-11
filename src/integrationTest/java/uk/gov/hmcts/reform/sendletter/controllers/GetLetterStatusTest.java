@@ -18,7 +18,8 @@ import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -81,7 +82,7 @@ public class GetLetterStatusTest {
         );
     }
 
-    private String toIso(Timestamp timestamp) {
-        return DateTimeFormatter.ISO_INSTANT.format(timestamp.toInstant());
+    private String toIso(LocalDateTime dateTime) {
+        return dateTime.atZone(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_INSTANT);
     }
 }

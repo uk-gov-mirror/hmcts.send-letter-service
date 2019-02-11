@@ -17,7 +17,7 @@ public final class FinalPackageFileNameHelper {
         return generateName(
             letter.getType(),
             letter.getService(),
-            letter.getCreatedAt().toLocalDateTime(),
+            letter.getCreatedAt(),
             letter.getId(),
             letter.isEncrypted()
         );

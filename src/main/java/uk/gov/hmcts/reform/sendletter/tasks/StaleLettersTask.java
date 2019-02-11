@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.stream.Stream;
@@ -45,11 +44,9 @@ public class StaleLettersTask {
     @SchedulerLock(name = TASK_NAME)
     @Scheduled(cron = "${tasks.stale-letters-report}")
     public void run() {
-        Timestamp staleCutOff = Timestamp.valueOf(
-            LocalDateTime.now()
-                .minusDays(1)
-                .with(staleCutOffTime)
-        );
+        LocalDateTime staleCutOff = LocalDateTime.now()
+            .minusDays(1)
+            .with(staleCutOffTime);
 
         logger.info("Started '{}' task with cut-off of {}", TASK_NAME, staleCutOff);
 

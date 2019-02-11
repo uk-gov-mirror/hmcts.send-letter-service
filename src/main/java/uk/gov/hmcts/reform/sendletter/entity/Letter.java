@@ -6,7 +6,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,9 +31,9 @@ public class Letter {
     @Type(type = "json")
     @Column(columnDefinition = "json")
     private JsonNode additionalData;
-    private Timestamp createdAt;
-    private Timestamp sentToPrintAt;
-    private Timestamp printedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime sentToPrintAt;
+    private LocalDateTime printedAt;
     private boolean isFailed;
     private String type;
     @Enumerated(EnumType.STRING)
@@ -53,7 +53,7 @@ public class Letter {
         String type,
         byte[] fileContent,
         Boolean isEncrypted,
-        Timestamp createdAt
+        LocalDateTime createdAt
     ) {
         this.id = id;
         this.checksum = checksum;
@@ -98,23 +98,23 @@ public class Letter {
         this.fileContent = fileContent;
     }
 
-    public Timestamp getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public Timestamp getSentToPrintAt() {
+    public LocalDateTime getSentToPrintAt() {
         return sentToPrintAt;
     }
 
-    public void setSentToPrintAt(Timestamp value) {
+    public void setSentToPrintAt(LocalDateTime value) {
         this.sentToPrintAt = value;
     }
 
-    public Timestamp getPrintedAt() {
+    public LocalDateTime getPrintedAt() {
         return printedAt;
     }
 
-    public void setPrintedAt(Timestamp value) {
+    public void setPrintedAt(LocalDateTime value) {
         this.printedAt = value;
     }
 

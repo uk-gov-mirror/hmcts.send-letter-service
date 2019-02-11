@@ -14,13 +14,12 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.time.LocalDateTime.now;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -113,7 +112,7 @@ public class UploadLettersTaskTest {
             type,
             "hello".getBytes(),
             true,
-            Timestamp.valueOf(LocalDateTime.now())
+            now()
         );
     }
 
@@ -126,7 +125,7 @@ public class UploadLettersTaskTest {
             "type",
             "hello".getBytes(),
             true,
-            Timestamp.valueOf(LocalDateTime.now())
+            now()
         );
     }
 

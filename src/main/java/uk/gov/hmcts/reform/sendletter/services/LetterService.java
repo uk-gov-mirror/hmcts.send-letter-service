@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -107,7 +106,7 @@ public class LetterService {
             letter.getType(),
             zipContent,
             isEncryptionEnabled,
-            Timestamp.valueOf(createdAtTime)
+            createdAtTime
         );
 
         if (isEncryptionEnabled) {
@@ -176,10 +175,11 @@ public class LetterService {
             .orElseThrow(() -> new LetterNotFoundException(id));
     }
 
-    public static ZonedDateTime toDateTime(Timestamp stamp) {
-        if (null == stamp) {
+    static ZonedDateTime toDateTime(LocalDateTime dateTime) {
+        if (null == dateTime) {
             return null;
         }
-        return stamp.toInstant().atZone(ZoneId.of("UTC"));
+
+        return dateTime.atZone(ZoneId.of("UTC"));
     }
 }

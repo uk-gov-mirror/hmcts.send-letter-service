@@ -16,10 +16,8 @@ import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -140,11 +139,11 @@ public class AppInsightsTest {
             TYPE,
             null,
             false,
-            Timestamp.valueOf(LocalDateTime.now())
+            now()
         );
 
-        ZonedDateTime sentToPrint = ZonedDateTime.now(ZoneOffset.UTC);
-        letter.setSentToPrintAt(Timestamp.from(sentToPrint.toInstant()));
+        LocalDateTime sentToPrint = now();
+        letter.setSentToPrintAt(sentToPrint);
 
         insights.trackStaleLetter(letter);
 

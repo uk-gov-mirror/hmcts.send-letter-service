@@ -11,8 +11,6 @@ import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Base64;
@@ -21,6 +19,7 @@ import java.util.UUID;
 
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.LocalDateTime.now;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
@@ -66,7 +65,7 @@ public final class SampleData {
                 "a type",
                 new byte[1],
                 false,
-                Timestamp.valueOf(LocalDateTime.now())
+                now()
             );
         } catch (IOException e) {
             throw new RuntimeException(e);

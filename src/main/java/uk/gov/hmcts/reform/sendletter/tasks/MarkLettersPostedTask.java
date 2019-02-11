@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.sendletter.services.ReportParser;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 
-import java.sql.Timestamp;
 import java.time.LocalTime;
 import java.util.Optional;
 
@@ -88,7 +87,7 @@ public class MarkLettersPostedTask {
         if (optional.isPresent()) {
             Letter letter = optional.get();
             if (letter.getStatus() == LetterStatus.Uploaded) {
-                letter.setPrintedAt(Timestamp.from(letterPrintStatus.printedAt.toInstant()));
+                letter.setPrintedAt(letterPrintStatus.printedAt.toLocalDateTime());
                 letter.setStatus(LetterStatus.Posted);
                 repo.save(letter);
                 logger.info("Marked letter {} as posted", letter.getId());

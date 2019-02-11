@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.logging.appinsights.AbstractAppInsights;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,15 +50,14 @@ public class AppInsights extends AbstractAppInsights {
     // events
 
     public void trackStaleLetter(Letter staleLetter) {
-        LocalDateTime sentToPrint = LocalDateTime.ofInstant(staleLetter.getSentToPrintAt().toInstant(), ZoneOffset.UTC);
         Map<String, String> properties = new HashMap<>();
 
         properties.put("letterId", staleLetter.getId().toString());
         properties.put("checksum", staleLetter.getChecksum());
         properties.put("service", staleLetter.getService());
         properties.put("type", staleLetter.getType());
-        properties.put("sentToPrintDayOfWeek", sentToPrint.getDayOfWeek().name());
-        properties.put("sentToPrintAt", sentToPrint.format(TIME_FORMAT));
+        properties.put("sentToPrintDayOfWeek", staleLetter.getSentToPrintAt().getDayOfWeek().name());
+        properties.put("sentToPrintAt", staleLetter.getSentToPrintAt().format(TIME_FORMAT));
 
         telemetry.trackEvent(LETTER_NOT_PRINTED, properties, null);
     }
