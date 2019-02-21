@@ -53,15 +53,7 @@ withPipeline(type , product, component) {
   enableDockerBuild()
   enableDeployToAKS()
 
-  onPR {
-    loadVaultSecrets(secrets + [
-      secret('send-letter-failure-email', 'TEST_FAILURE_EMAIL')
-    ])
-  }
-
-  onNonPR {
-    loadVaultSecrets(secrets)
-  }
+  loadVaultSecrets(secrets)
 
   setVaultName("rpe-send-letter")
 }

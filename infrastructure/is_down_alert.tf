@@ -3,7 +3,8 @@ module "send-letter-up-alert" {
   location          = "${azurerm_application_insights.appinsights.location}"
   app_insights_name = "${azurerm_application_insights.appinsights.name}"
 
-  alert_name = "Send Letter is DOWN - RPE"
+  enabled    = "${var.env == "prod"}"
+  alert_name = "Send_Letter_is_DOWN_-_BSP"
   alert_desc = "Triggers when send letter service looks like being down within a 15 minutes timeframe."
 
   app_insights_query = <<EOF
@@ -36,7 +37,7 @@ EOF
   // window no longer matters as it is defined in the query. but it is a requirement for module
   time_window_in_minutes     = 30
   severity_level             = "2"
-  action_group_name          = "${module.is-down-action-group.action_group_name}"
+  action_group_name          = "${data.terraform_remote_state.bulk_scan_shared_infra.action_group_name}"
   custom_email_subject       = "Send Letter is DOWN"
   trigger_threshold_operator = "GreaterThan"
   trigger_threshold          = 3
