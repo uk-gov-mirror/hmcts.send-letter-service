@@ -5,7 +5,6 @@ import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.core.dependencies.apachecommons.lang3.BooleanUtils;
 import com.microsoft.applicationinsights.telemetry.Duration;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.logging.appinsights.AbstractAppInsights;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
 
@@ -14,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class AppInsights extends AbstractAppInsights {
+public class AppInsights {
 
     static final String LETTER_NOT_PRINTED = "LetterNotPrinted";
 
@@ -24,27 +23,28 @@ public class AppInsights extends AbstractAppInsights {
 
     static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    public AppInsights(TelemetryClient telemetry) {
-        super(telemetry);
+    private final TelemetryClient telemetry;
 
+    public AppInsights(TelemetryClient telemetry) {
+        this.telemetry = telemetry;
     }
 
     // dependencies
 
-    private void trackDependency(String dependency, String command, java.time.Duration duration, boolean success) {
-        telemetry.trackDependency(dependency, command, new Duration(duration.toMillis()), success);
+    private void trackDependency(String command, java.time.Duration duration, boolean success) {
+        telemetry.trackDependency(AppDependency.FTP_CLIENT, command, new Duration(duration.toMillis()), success);
     }
 
     public void trackFtpUpload(java.time.Duration duration, boolean success) {
-        trackDependency(AppDependency.FTP_CLIENT, AppDependencyCommand.FTP_FILE_UPLOADED, duration, success);
+        trackDependency(AppDependencyCommand.FTP_FILE_UPLOADED, duration, success);
     }
 
     public void trackFtpReportDeletion(java.time.Duration duration, boolean success) {
-        trackDependency(AppDependency.FTP_CLIENT, AppDependencyCommand.FTP_REPORT_DELETED, duration, success);
+        trackDependency(AppDependencyCommand.FTP_REPORT_DELETED, duration, success);
     }
 
     public void trackFtpReportDownload(java.time.Duration duration, boolean success) {
-        trackDependency(AppDependency.FTP_CLIENT, AppDependencyCommand.FTP_REPORT_DOWNLOADED, duration, success);
+        trackDependency(AppDependencyCommand.FTP_REPORT_DOWNLOADED, duration, success);
     }
 
     // events

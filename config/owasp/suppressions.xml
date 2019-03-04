@@ -3,8 +3,9 @@
 
     <suppress>
         <notes><![CDATA[Shadowed dependency from AppInsights]]></notes>
-        <gav regex="true">^com.google.guava:guava:20\.0$</gav>
-        <cve>CVE-2018-10237</cve>
+        <gav regex="true">^io\.netty:netty-tcnative-boringssl-static:2\.0\.17\.Final$</gav>
+        <cve>CVE-2014-3488</cve>
+        <cve>CVE-2015-2156</cve>
     </suppress>
 
     <!-- spring security -->

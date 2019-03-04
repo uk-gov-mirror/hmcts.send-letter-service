@@ -159,7 +159,7 @@ def versions = [
   bouncycastle: '1.61',
   flywayV: plugins.getPlugin('org.flywaydb.flyway').class.package.implementationVersion,
   pdfbox: '2.0.14',
-  reformLogging: '4.0.1',
+  reformLogging: '5.0.1',
   restAssured: '3.3.0',
   shedlock: '2.3.0',
   springBoot: plugins.getPlugin('org.springframework.boot').class.package.implementationVersion,
