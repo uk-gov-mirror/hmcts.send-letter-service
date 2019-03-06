@@ -9,7 +9,7 @@ resource "azurerm_resource_group" "rg" {
 }
 
 locals {
-  ase_name               = "${data.terraform_remote_state.core_apps_compute.ase_name[0]}"
+  ase_name               = "core-compute-${var.env}"
 
   ftp_private_key        = "${data.azurerm_key_vault_secret.ftp_private_key.value}"
   ftp_public_key         = "${data.azurerm_key_vault_secret.ftp_public_key.value}"
