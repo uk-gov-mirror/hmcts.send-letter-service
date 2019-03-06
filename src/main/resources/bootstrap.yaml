@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    propertiesvolume:
+      enabled: true
+      prefixed: true
+      paths: /mnt/secrets/rpe-send-letter
+      aliases:
+        rpe-send-letter.test-s2s-secret: S2S_SECRET
+        rpe-send-letter.test-ftp-user: FTP_USER
+        rpe-send-letter.test-ftp-private-key: FTP_PRIVATE_KEY
+        rpe-send-letter.test-ftp-public-key: FTP_PUBLIC_KEY
