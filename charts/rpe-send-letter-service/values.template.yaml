@@ -50,3 +50,5 @@ postgresql:
   postgresqlDatabase: letter_tracking
   service:
     port: 5432
+  persistence:
+    enabled: false
