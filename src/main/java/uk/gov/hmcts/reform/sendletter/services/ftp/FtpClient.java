@@ -131,6 +131,36 @@ public class FtpClient {
         });
     }
 
+    public List<FileInfo> listLetters(String serviceFolder) {
+        return runWith(sftp -> {
+            try {
+                String path = String.join("/", configProperties.getTargetFolder(), serviceFolder);
+                return sftp
+                    .ls(path)
+                    .stream()
+                    .map(it -> new FileInfo(
+                            it.getPath(),
+                            Instant.ofEpochSecond(it.getAttributes().getMtime())
+                        )
+                    )
+                    .collect(toList());
+            } catch (Exception exc) {
+                throw new FtpException("Error while listing files for: " + serviceFolder, exc);
+            }
+        });
+    }
+
+    public void deleteFile(String filePath) {
+        runWith(sftp -> {
+            try {
+                sftp.rm(filePath);
+                return null;
+            } catch (Exception exc) {
+                throw new FtpException("Error while deleting file: " + filePath, exc);
+            }
+        });
+    }
+
     public void testConnection() {
         runWith(sftpClient -> null);
     }
