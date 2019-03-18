@@ -69,6 +69,11 @@ variable scheduling_enabled {
   default = "false"
 }
 
+variable "file_cleanup_enabled" {
+  default = "false"
+  description = "Determines whether old files should be deleted from the FTP server. Should only be enabled on AAT."
+}
+
 variable scheduling_lock_at_most_for {
   default = "PT10M"
   description = "For how long to keep the lock of the specific task"

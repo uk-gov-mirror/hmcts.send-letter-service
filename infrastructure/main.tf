@@ -96,6 +96,8 @@ module "send-letter-service" {
     ENCRYPTION_ENABLED              = "${var.encyption_enabled}"
     SCHEDULING_ENABLED              = "${var.scheduling_enabled}"
     SCHEDULING_LOCK_AT_MOST_FOR     = "${var.scheduling_lock_at_most_for}"
+    FILE_CLEANUP_ENABLED            = "${var.file_cleanup_enabled}"
+
     // ftp
     FTP_HOSTNAME                    = "${var.ftp_hostname}"
     FTP_PORT                        = "${var.ftp_port}"
