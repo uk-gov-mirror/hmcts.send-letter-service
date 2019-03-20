@@ -103,10 +103,6 @@ pmd {
   ruleSetFiles = files("config/pmd/ruleset.xml")
 }
 
-jacoco {
-  toolVersion = "0.8.2"
-}
-
 jacocoTestReport {
   executionData(test, integration)
   reports {
@@ -161,7 +157,7 @@ def versions = [
   pdfbox: '2.0.14',
   reformLogging: '5.0.1',
   restAssured: '3.3.0',
-  shedlock: '2.3.0',
+  shedlock: '2.4.0',
   springBoot: plugins.getPlugin('org.springframework.boot').class.package.implementationVersion,
   springfoxSwagger: '2.9.2'
 ]
