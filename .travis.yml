@@ -9,9 +9,6 @@ addons:
     packages:
       - libecpg-dev
 
-services:
-  - docker
-
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
 - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -28,8 +25,8 @@ before_install:
 
 script:
   - pgsanity --add-semicolon src/main/resources/db/migration/*.sql
-  - ./gradlew test -i
-  - ./gradlew integration -i
+  - ./gradlew test
+  - ./gradlew integration
 
 after_success:
   - ./gradlew jacocoTestReport

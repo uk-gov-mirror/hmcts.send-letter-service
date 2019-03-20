@@ -5,91 +5,58 @@
 
 ![Diagram](/doc/arch/diagram.png)
 
-## Building and deploying the application
+[Swagger API Specs](https://hmcts.github.io/reform-api-docs/swagger.html?url=https://hmcts.github.io/reform-api-docs/specs/send-letter-service.json)
 
-### Building the application
+## Running the application
 
-The project uses [Gradle](https://gradle.org) as a build tool. It already contains
-`./gradlew` wrapper script, so there's no need to install gradle.
+### Locally
 
-To build the project execute the following command:
-
-```bash
-  ./gradlew build
-```
-
-### Running the application
-
-Create the image of the application by executing the following command:
+Follow list of required environment variables defined in `./docker/env.list` in order to be able to run application.
+Additionally local application will require configured database so add/amend `LETTER_TRACKING_DB_*` variables as needed.
+Once everything is set up, run application by simply
 
 ```bash
-  ./gradlew installDist
+$ ./gradlew bootRun
 ```
 
-Create docker image:
+### Docker environment
+
+Be sure DB configuration is accommodated for application defaults otherwise - change as needed via `./docker/env.list`.
+In case `send-letter-database` does not exist in your docker environment, follow these steps:
 
 ```bash
-  docker-compose build
+$ docker build -t send-letter-database ./docker/database/
+
+$ docker run -d -i -t --name bsp-send-letter-database --hostname send-letter-database --env-file ./docker/env.list send-letter-database
 ```
 
-Run the distribution (created in `build/install/send-letter-producer-service` directory)
-by executing the following command:
+Important note: `--hostname send-letter-database` will be used to link it to service `run` command and also used with default value provided in application config.
+There is no need to provide full `--env-file` for the DB container. Only `LETTER_TRACKING_DB_PASSWORD=password` is required
+
+Launch the service from image hosted in Azure Container Registry:
 
 ```bash
-  docker-compose up
+$ docker run -t -i --name bsp-send-letter-service -p 8485:8485 --link bsp-send-letter-database --env-file ./docker/env.list hmcts/send-letter-service
 ```
 
-This will start the API container exposing the application's port
-(set to `8485` in this app).
-
-In order to test if the application is up, you can call its health endpoint:
+After successful completion of last 2 `run` steps you should be able to see similar output
 
 ```bash
-  curl http://localhost:4550/health
+$ docker ps -a
 ```
 
-You should get a response similar to this:
+CONTAINER ID | IMAGE | COMMAND | CREATED | STATUS | PORTS | NAMES
+------------ | ----- | ------- | ------- | ------ | ----- | -----
+9e3fc00c1824 | hmcts/send-letter-service | "/usr/bin/java -jar …" | 4 minutes ago | Up 4 minutes (healthy) | 0.0.0.0:8485->8485/tcp | bsp-send-letter-service
+e68f86e63c93 | send-letter-database | "docker-entrypoint.s…" | 36 minutes ago | Up 36 minutes (healthy) | 5432/tcp | bsp-send-letter-database
 
-```
-  {"status":"UP","diskSpace":{"status":"UP","total":249644974080,"free":137188298752,"threshold":10485760}}
-```
-
-### Alternative script to run application
-
-To skip all the setting up and building, just execute the following command:
+Test:
 
 ```bash
-./bin/run-in-docker.sh
+$ curl http://localhost:8485/health
 ```
-
-For more information:
-
-```bash
-./bin/run-in-docker.sh -h
-```
-
-Script includes bare minimum environment variables necessary to start api instance. Whenever any variable is changed or any other script regarding docker image/container build, the suggested way to ensure all is cleaned up properly is by this command:
-
-```bash
-docker-compose rm
-```
-
-It clears stopped containers correctly. Might consider removing clutter of images too, especially the ones fiddled with:
-
-```bash
-docker images
-
-docker image rm <image-id>
-```
-
-There is no need to remove postgres and java or similar core images.
-
-## Migration
-
-To run migration gradle task expects `FLYWAY_URL` to be present. In case db requires username/password: `FLYWAY_USER` and `FLYWAY_PASSWORD`. Once those variables are exported all flyway tasks are available.
-
-```bash
-./gradlew flywayMigrate
+```json
+{"status":"UP","details":{"diskSpace":{"status":"UP","details":{"total":62725623808,"free":57405022208,"threshold":10485760}},"db":{"status":"UP","details":{"database":"PostgreSQL","hello":1}},"liveness":{"status":"UP"},"refreshScope":{"status":"UP"},"hystrix":{"status":"UP"}}}
 ```
 
 ## Onboarding new services
