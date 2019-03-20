@@ -1,11 +1,6 @@
 java:
   applicationPort: 8485
   environment:
-    POSTGRES_DB: letter_tracking
-    POSTGRES_USER: letterservice
-    POSTGRES_PASSWORD: letterpassword
-    # logging
-    APPINSIGHTS_INSTRUMENTATIONKEY: "00000000-0000-0000-0000-000000000000"
     # db
     LETTER_TRACKING_DB_NAME: letter_tracking
     LETTER_TRACKING_DB_HOST: ${SERVICE_NAME}-postgresql
@@ -14,8 +9,6 @@ java:
     LETTER_TRACKING_DB_PASSWORD: letterpassword
     # db - migration
     FLYWAY_URL: "jdbc:postgresql://${SERVICE_NAME}-postgresql:5432/letter_tracking"
-    FLYWAY_USER: letterservice
-    FLYWAY_PASSWORD: letterpassword
     FLYWAY_NOOP_STRATEGY: "false"
     # encryption
     ENCRYPTION_ENABLED: "false"

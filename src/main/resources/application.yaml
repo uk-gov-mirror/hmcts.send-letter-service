@@ -37,7 +37,9 @@ spring:
           lob:
             # silence the 'wall-of-text' - unnecessary exception throw about blob types
             non_contextual_creation: true
-
+flyway:
+  user: ${LETTER_TRACKING_DB_USER_NAME}
+  password: ${LETTER_TRACKING_DB_PASSWORD}
 ftp:
   hostname: ${FTP_HOSTNAME}
   port: ${FTP_PORT}
