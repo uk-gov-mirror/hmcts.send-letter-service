@@ -17,8 +17,8 @@ public class LetterWithPdfsRequest implements Serializable, ILetterRequest {
     /**
      * Base64 encoded pdfs.
      */
-    @ApiModelProperty(value = "List of base64 encoded pdfs to be printed. Maximum allowed is 10", required = true)
-    @Size(min = 1, max = 10)
+    @ApiModelProperty(value = "List of base64 encoded pdfs to be printed. Maximum allowed is 30", required = true)
+    @Size(min = 1, max = 30)
     public final List<byte[]> documents;
 
     @ApiModelProperty(value = "Type to be used to print documents", required = true)

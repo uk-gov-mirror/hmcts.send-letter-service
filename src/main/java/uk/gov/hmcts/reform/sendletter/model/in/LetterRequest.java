@@ -14,8 +14,8 @@ public class LetterRequest implements Serializable, ILetterRequest {
 
     private static final long serialVersionUID = -7737087336283080072L;
 
-    @ApiModelProperty(value = "List of documents to be printed. Maximum allowed is 10", required = true)
-    @Size(min = 1, max = 10)
+    @ApiModelProperty(value = "List of documents to be printed. Maximum allowed is 30", required = true)
+    @Size(min = 1, max = 30)
     @Valid
     public final List<Document> documents;
 

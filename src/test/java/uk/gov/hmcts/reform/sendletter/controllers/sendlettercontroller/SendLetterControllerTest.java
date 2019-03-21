@@ -75,7 +75,7 @@ public class SendLetterControllerTest {
         sendLetter(readResource("controller/letter/v1/letter-without-doc.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
-                .json("{\"errors\":[{\"field_name\":\"documents\",\"message\":\"size must be between 1 and 10\"}]}"));
+                .json("{\"errors\":[{\"field_name\":\"documents\",\"message\":\"size must be between 1 and 30\"}]}"));
 
         verify(letterService, never()).save(any(LetterRequest.class), anyString());
     }
@@ -112,12 +112,12 @@ public class SendLetterControllerTest {
     }
 
     @Test
-    public void should_return_400_client_error_when_letter_is_with_more_than_10_documents()
+    public void should_return_400_client_error_when_letter_is_with_more_than_30_documents()
         throws Exception {
         sendLetter(readResource("controller/letter/v1/letter-with-multiple-docs.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
-                .json("{\"errors\":[{\"field_name\":\"documents\",\"message\":\"size must be between 1 and 10\"}]}"));
+                .json("{\"errors\":[{\"field_name\":\"documents\",\"message\":\"size must be between 1 and 30\"}]}"));
 
         verify(letterService, never()).save(any(LetterRequest.class), anyString());
     }
