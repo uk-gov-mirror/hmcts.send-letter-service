@@ -1,13 +1,11 @@
 package uk.gov.hmcts.reform.sendletter.controllers.sendlettercontroller;
 
 import com.google.common.io.Resources;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
@@ -26,9 +24,8 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest
-public class SendLetterWithPdfsControllerTest {
+class SendLetterWithPdfsControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
@@ -37,13 +34,13 @@ public class SendLetterWithPdfsControllerTest {
 
     private String validJson;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         this.validJson = Resources.toString(getResource("controller/letter/v2/letter.json"), UTF_8);
     }
 
     @Test
-    public void should_call_new_service_method() throws Exception {
+    void should_call_new_service_method() throws Exception {
         given(authService.authenticate(anyString())).willReturn("some_service_name");
 
         // when
@@ -54,7 +51,7 @@ public class SendLetterWithPdfsControllerTest {
     }
 
     @Test
-    public void should_authenticate_calls() throws Exception {
+    void should_authenticate_calls() throws Exception {
         given(authService.authenticate(anyString())).willReturn("some_service_name");
         final String authHeader = "auth-header-value";
 
@@ -71,7 +68,7 @@ public class SendLetterWithPdfsControllerTest {
     }
 
     @Test
-    public void should_return_403_if_service_throws_ServiceNotConfiguredException() throws Exception {
+    void should_return_403_if_service_throws_ServiceNotConfiguredException() throws Exception {
         given(authService.authenticate(anyString())).willReturn("some_service_name");
         given(letterService.save(any(), any())).willThrow(new ServiceNotConfiguredException("invalid service"));
 

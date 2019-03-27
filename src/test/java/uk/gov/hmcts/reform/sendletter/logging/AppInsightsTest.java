@@ -4,14 +4,14 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.telemetry.Duration;
 import com.microsoft.applicationinsights.telemetry.TelemetryContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
@@ -34,8 +34,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AppInsightsTest {
+@ExtendWith(MockitoExtension.class)
+class AppInsightsTest {
 
     private static final String CHECKSUM = "some-checksum";
 
@@ -53,15 +53,15 @@ public class AppInsightsTest {
 
     private final TelemetryContext context = new TelemetryContext();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         context.setInstrumentationKey("some-key");
         when(telemetry.getContext()).thenReturn(context);
         insights = new AppInsights(telemetry);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         reset(telemetry);
     }
 
@@ -69,7 +69,7 @@ public class AppInsightsTest {
 
     // doing all dependencies in one go as they are not requiring any logic whatsoever
     @Test
-    public void should_track_all_ftp_dependencies() {
+    void should_track_all_ftp_dependencies() {
         Instant now = ZonedDateTime.now().toInstant();
         java.time.Duration duration = java.time.Duration.between(now, now.plusSeconds(1));
 
@@ -130,7 +130,7 @@ public class AppInsightsTest {
     // events
 
     @Test
-    public void should_track_event_of_not_printed_letter() {
+    void should_track_event_of_not_printed_letter() {
         Letter letter = new Letter(
             UUID.randomUUID(),
             CHECKSUM,
@@ -164,7 +164,7 @@ public class AppInsightsTest {
     }
 
     @Test
-    public void should_track_events_of_letter_being_printed_from_ftp_report() {
+    void should_track_events_of_letter_being_printed_from_ftp_report() {
         List<LetterPrintStatus> statuses = Collections.singletonList(new LetterPrintStatus(
             UUID.randomUUID(),
             ZonedDateTime.now()
@@ -195,7 +195,7 @@ public class AppInsightsTest {
     }
 
     @Test
-    public void should_track_metric_of_letter_amount_sent_to_print() {
+    void should_track_metric_of_letter_amount_sent_to_print() {
         insights.trackUploadedLetters(123);
 
         verify(telemetry).trackMetric(AppInsights.LETTER_UPLOAD_FOR_PRINT, 123.0);

@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.services.zip;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
@@ -10,10 +10,10 @@ import static java.time.LocalDateTime.now;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FinalPackageFileNameHelperTest {
+class FinalPackageFileNameHelperTest {
 
     @Test
-    public void should_generate_expected_file_name() {
+    void should_generate_expected_file_name() {
         // given
         Letter letter = new Letter(
             randomUUID(),
@@ -40,7 +40,7 @@ public class FinalPackageFileNameHelperTest {
     }
 
     @Test
-    public void should_generate_expected_file_name_with_explicit_parameters_as_input() {
+    void should_generate_expected_file_name_with_explicit_parameters_as_input() {
         UUID letterId = randomUUID();
 
         String name = FinalPackageFileNameHelper.generateName("type", "cmc", now(), letterId,true);
@@ -55,7 +55,7 @@ public class FinalPackageFileNameHelperTest {
     }
 
     @Test
-    public void should_remove_underscores_from_service_name() {
+    void should_remove_underscores_from_service_name() {
         // given
         Letter letter = new Letter(
             randomUUID(),
@@ -76,7 +76,7 @@ public class FinalPackageFileNameHelperTest {
     }
 
     @Test
-    public void should_remove_underscores_from_letter_type() {
+    void should_remove_underscores_from_letter_type() {
         // given
         Letter letter = new Letter(
             randomUUID(),
@@ -97,7 +97,7 @@ public class FinalPackageFileNameHelperTest {
     }
 
     @Test
-    public void should_set_file_extension_based_on_whether_letter_is_encrypted() {
+    void should_set_file_extension_based_on_whether_letter_is_encrypted() {
         Letter zippedLetter = new Letter(
             randomUUID(),
             randomUUID().toString(),

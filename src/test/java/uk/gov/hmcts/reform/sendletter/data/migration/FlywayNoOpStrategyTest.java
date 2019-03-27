@@ -4,11 +4,11 @@ import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationInfo;
 import org.flywaydb.core.api.MigrationInfoService;
 import org.flywaydb.core.api.MigrationState;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import uk.gov.hmcts.reform.sendletter.exception.PendingMigrationScriptException;
 
@@ -17,8 +17,8 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.reset;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FlywayNoOpStrategyTest {
+@ExtendWith(MockitoExtension.class)
+class FlywayNoOpStrategyTest {
 
     @Mock
     private Flyway flyway;
@@ -31,13 +31,13 @@ public class FlywayNoOpStrategyTest {
 
     private final FlywayMigrationStrategy strategy = new FlywayNoOpStrategy();
 
-    @After
-    public void tearUp() {
+    @AfterEach
+    void tearUp() {
         reset(flyway, infoService, info);
     }
 
     @Test
-    public void should_not_throw_exception_when_all_migrations_are_applied() {
+    void should_not_throw_exception_when_all_migrations_are_applied() {
         MigrationInfo[] infos = { info, info };
         given(flyway.info()).willReturn(infoService);
         given(infoService.all()).willReturn(infos);
@@ -48,7 +48,7 @@ public class FlywayNoOpStrategyTest {
     }
 
     @Test
-    public void should_throw_exception_when_one_migration_is_pending() {
+    void should_throw_exception_when_one_migration_is_pending() {
         MigrationInfo[] infos = { info, info };
         given(flyway.info()).willReturn(infoService);
         given(infoService.all()).willReturn(infos);

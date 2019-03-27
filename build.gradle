@@ -59,6 +59,10 @@ tasks.withType(JavaCompile) {
   options.compilerArgs << "-Xlint:unchecked" << "-Werror"
 }
 
+test {
+  useJUnitPlatform()
+}
+
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
@@ -154,6 +158,7 @@ repositories {
 def versions = [
   bouncycastle: '1.61',
   flywayV: plugins.getPlugin('org.flywaydb.flyway').class.package.implementationVersion,
+  mockitoJupiter: '2.25.1',
   pdfbox: '2.0.14',
   reformLogging: '5.0.1',
   restAssured: '3.3.0',
@@ -167,6 +172,10 @@ dependencyManagement {
     // CVE-2018-10237 - Unbounded memory allocation
     dependencySet(group: 'com.google.guava', version: '27.1-jre') {
       entry 'guava'
+    }
+    // align with jupiter
+    dependencySet(group: 'org.mockito', version: versions.mockitoJupiter) {
+      entry 'mockito-core'
     }
   }
 }
@@ -209,6 +218,8 @@ dependencies {
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
   testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
   testCompile group: 'org.apache.pdfbox', name: 'preflight', version: versions.pdfbox
+  testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockitoJupiter
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.4.1'
 
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath

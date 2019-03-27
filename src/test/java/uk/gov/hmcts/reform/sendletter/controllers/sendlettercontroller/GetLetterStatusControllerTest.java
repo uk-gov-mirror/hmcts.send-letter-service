@@ -1,13 +1,11 @@
 package uk.gov.hmcts.reform.sendletter.controllers.sendlettercontroller;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
@@ -31,9 +29,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest
-public class GetLetterStatusControllerTest {
+class GetLetterStatusControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
@@ -42,14 +39,14 @@ public class GetLetterStatusControllerTest {
 
     private LetterStatus letterStatus;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ZonedDateTime now = ZonedDateTime.of(2000, 2, 12, 1, 2, 3, 123_000_000, ZoneId.systemDefault());
         letterStatus = new LetterStatus(UUID.randomUUID(), "Created", "some-message-id", now, now, now, false);
     }
 
     @Test
-    public void should_return_letter_status_when_it_is_found_in_database() throws Exception {
+    void should_return_letter_status_when_it_is_found_in_database() throws Exception {
 
         given(authService.authenticate("auth-header-value")).willReturn("service-name");
         given(service.getStatus(letterStatus.id, "service-name")).willReturn(letterStatus);
@@ -70,7 +67,7 @@ public class GetLetterStatusControllerTest {
     }
 
     @Test
-    public void should_return_404_client_error_when_letter_is_not_found_in_database() throws Exception {
+    void should_return_404_client_error_when_letter_is_not_found_in_database() throws Exception {
         given(authService.authenticate("auth-header-value")).willReturn("service-name");
         willThrow(LetterNotFoundException.class).given(service).getStatus(letterStatus.id, "service-name");
 
@@ -78,7 +75,7 @@ public class GetLetterStatusControllerTest {
     }
 
     @Test
-    public void should_return_404_client_error_when_invalid_uuid_is_provided() throws Exception {
+    void should_return_404_client_error_when_invalid_uuid_is_provided() throws Exception {
         getLetter("0987654321").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
         getLetter("X558ff55-37R0-4p6e-80fo-5Lb05b650c44").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
 
@@ -87,7 +84,7 @@ public class GetLetterStatusControllerTest {
     }
 
     @Test
-    public void should_return_401_client_error_when_authorisation_header_is_invalid() throws Exception {
+    void should_return_401_client_error_when_authorisation_header_is_invalid() throws Exception {
         willThrow(InvalidTokenException.class).given(authService).authenticate("auth-header-value");
 
         getLetter(letterStatus.id).andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));

@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.exception.UnableToExtractIdFromFileNameException;
 import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
@@ -13,10 +13,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class FileNameHelperTest {
+class FileNameHelperTest {
 
     @Test
-    public void should_generate_file_name_in_expected_format() {
+    void should_generate_file_name_in_expected_format() {
         // given
         UUID letterId = UUID.randomUUID();
         Letter letter = createLetter(letterId, "typeA", "cmc");
@@ -29,7 +29,7 @@ public class FileNameHelperTest {
     }
 
     @Test
-    public void should_always_generate_the_same_name_for_same_letter() {
+    void should_always_generate_the_same_name_for_same_letter() {
         // given
         UUID letterId = UUID.randomUUID();
         Letter letter1 = createLetter(letterId, "A", "B");
@@ -43,7 +43,7 @@ public class FileNameHelperTest {
     }
 
     @Test
-    public void should_generate_different_names_for_different_letters() {
+    void should_generate_different_names_for_different_letters() {
         // given
         Letter letter1 = createLetter(UUID.randomUUID(), "A", "B");
         Letter letter2 = createLetter(UUID.randomUUID(), "C", "D");
@@ -56,7 +56,7 @@ public class FileNameHelperTest {
     }
 
     @Test
-    public void should_generate_different_names_for_same_letters_with_different_id() {
+    void should_generate_different_names_for_same_letters_with_different_id() {
         // given
         Letter letter1 = createLetter(UUID.randomUUID(), "A", "B");
         Letter letter2 = createLetter(UUID.randomUUID(), "A", "B");
@@ -69,7 +69,7 @@ public class FileNameHelperTest {
     }
 
     @Test
-    public void should_strip_out_underscores_from_service_name() {
+    void should_strip_out_underscores_from_service_name() {
         UUID letterId = UUID.randomUUID();
         Letter letter = createLetter(letterId, "typeA", "cmc_claim_store");
 
@@ -79,7 +79,7 @@ public class FileNameHelperTest {
     }
 
     @Test
-    public void should_extract_letter_id_from_file_name() {
+    void should_extract_letter_id_from_file_name() {
         asList(
             createLetter(UUID.randomUUID(), "type", "cmc"),
             createLetter(UUID.randomUUID(), "smoke_test", "cmc"),
@@ -94,14 +94,14 @@ public class FileNameHelperTest {
     }
 
     @Test
-    public void should_throw_custom_exception_when_id_cannot_be_extracted_from_file_name() {
+    void should_throw_custom_exception_when_id_cannot_be_extracted_from_file_name() {
         assertThatThrownBy(
             () -> FileNameHelper.extractIdFromPdfName("a_b.pdf")
         ).isInstanceOf(UnableToExtractIdFromFileNameException.class);
     }
 
     @Test
-    public void should_throw_custom_exception_when_uuid_invalid() {
+    void should_throw_custom_exception_when_uuid_invalid() {
         assertThatThrownBy(
             () -> FileNameHelper.extractIdFromPdfName("a_b_notauuid.pdf")
         ).isInstanceOf(UnableToExtractIdFromFileNameException.class);

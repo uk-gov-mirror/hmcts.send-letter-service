@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.sendletter.exception.ReportParsingException;
 import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
@@ -15,7 +15,7 @@ import static com.google.common.io.Resources.toByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-public class ReportParserTest {
+class ReportParserTest {
 
     private static final UUID UUID_1 = UUID.fromString("edcc9e2d-eddb-4d87-9a16-61f4499f524c");
     private static final UUID UUID_2 = UUID.fromString("edcc9e2d-eddb-4d87-9a16-61f4499f524d");
@@ -24,7 +24,7 @@ public class ReportParserTest {
         ZoneId.of("Z"));
 
     @Test
-    public void should_parse_valid_csv_report() {
+    void should_parse_valid_csv_report() {
         String report = formatReport(UUID_1, UUID_2);
         ParsedReport result = new ReportParser().parse(new Report("a.csv", report.getBytes()));
 
@@ -38,7 +38,7 @@ public class ReportParserTest {
     }
 
     @Test
-    public void should_filter_out_rows_with_invalid_file_name() {
+    void should_filter_out_rows_with_invalid_file_name() {
         String report = formatReport("invalidID", UUID_1);
         ParsedReport result = new ReportParser().parse(new Report("a.csv", report.getBytes()));
 
@@ -50,7 +50,7 @@ public class ReportParserTest {
     }
 
     @Test
-    public void should_filter_out_rows_with_invalid_date() {
+    void should_filter_out_rows_with_invalid_date() {
         String report =
             "\"StartDate\",\"StartTime\",\"InputFileName\"\n"
                 + "20180101,16:38,CMC001_cmcclaimstore_ff99f8ad-7ab8-43f8-9671-5397cbfa96a6.pdf\n"
@@ -66,7 +66,7 @@ public class ReportParserTest {
     }
 
     @Test
-    public void should_parse_sample_report() throws Exception {
+    void should_parse_sample_report() throws Exception {
         byte[] report = toByteArray(getResource("report.csv"));
 
         ParsedReport result = new ReportParser().parse(new Report("a.csv", report));
@@ -76,7 +76,7 @@ public class ReportParserTest {
     }
 
     @Test
-    public void should_throw_report_parsing_exception_when_csv_contains_semicolon_delimiter() {
+    void should_throw_report_parsing_exception_when_csv_contains_semicolon_delimiter() {
         String report =
             "\"StartDate\";\"StartTime\";\"InputFileName\"\n"
                 + "27-03-2018;16:38;CMC001_cmcclaimstore_ff99f8ad-7ab8-43f8-9671-5397cbfa96a6.pdf\n"

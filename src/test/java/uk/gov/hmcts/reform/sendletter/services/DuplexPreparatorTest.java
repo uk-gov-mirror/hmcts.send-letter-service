@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.sendletter.exception.DuplexException;
 import uk.gov.hmcts.reform.sendletter.services.pdf.DuplexPreparator;
 
@@ -10,10 +10,10 @@ import static com.google.common.io.Resources.toByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class DuplexPreparatorTest {
+class DuplexPreparatorTest {
 
     @Test
-    public void should_add_blank_page_if_total_number_of_pages_is_odd() throws Exception {
+    void should_add_blank_page_if_total_number_of_pages_is_odd() throws Exception {
         // given
         byte[] before = toByteArray(getResource("single_page.pdf"));
 
@@ -28,7 +28,7 @@ public class DuplexPreparatorTest {
     }
 
     @Test
-    public void should_not_add_a_blank_page_if_total_number_of_pages_is_even() throws Exception {
+    void should_not_add_a_blank_page_if_total_number_of_pages_is_even() throws Exception {
         // given
         byte[] before = toByteArray(getResource("two_pages.pdf"));
 
@@ -40,7 +40,7 @@ public class DuplexPreparatorTest {
     }
 
     @Test
-    public void should_throw_duplex_exception_when_stream_is_not_pdf() {
+    void should_throw_duplex_exception_when_stream_is_not_pdf() {
         assertThatThrownBy(() -> new DuplexPreparator().prepare("corruptedStream".getBytes()))
             .isInstanceOf(DuplexException.class);
     }

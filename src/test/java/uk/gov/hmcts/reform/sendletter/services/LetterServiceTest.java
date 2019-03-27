@@ -2,11 +2,10 @@ package uk.gov.hmcts.reform.sendletter.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
@@ -35,8 +34,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class LetterServiceTest {
+@ExtendWith(MockitoExtension.class)
+class LetterServiceTest {
 
     @Mock PdfCreator pdfCreator;
     @Mock LetterRepository letterRepository;
@@ -46,14 +45,12 @@ public class LetterServiceTest {
 
     private LetterService service;
 
-    @Before
-    public void setUp() {
+    @Test
+    void should_generate_final_pdf_from_template_when_old_model_is_passed() throws Exception {
+        // given
         thereAreNoDuplicates();
-    }
 
-    @Test
-    public void should_generate_final_pdf_from_template_when_old_model_is_passed() throws Exception {
-        // given
+        // and
         given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
         createLetterService(false, null);
 
@@ -67,8 +64,11 @@ public class LetterServiceTest {
     }
 
     @Test
-    public void should_generate_final_pdf_from_embedded_pdfs_when_new_model_is_passed() throws Exception {
+    void should_generate_final_pdf_from_embedded_pdfs_when_new_model_is_passed() throws Exception {
         // given
+        thereAreNoDuplicates();
+
+        // and
         given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
         createLetterService(false, null);
 
@@ -82,9 +82,12 @@ public class LetterServiceTest {
     }
 
     @Test
-    public void should_generate_final_pdf_from_template_when_old_model_is_passed_and_encryption_enabled()
+    void should_generate_final_pdf_from_template_when_old_model_is_passed_and_encryption_enabled()
         throws Exception {
         // given
+        thereAreNoDuplicates();
+
+        // and
         given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
         createLetterService(true, new String(loadPublicKey()));
 
@@ -103,9 +106,12 @@ public class LetterServiceTest {
     }
 
     @Test
-    public void should_generate_final_pdf_from_embedded_pdfs_when_new_model_is_passed_and_encryption_enabled()
+    void should_generate_final_pdf_from_embedded_pdfs_when_new_model_is_passed_and_encryption_enabled()
         throws Exception {
         // given
+        thereAreNoDuplicates();
+
+        // and
         given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
         createLetterService(true, new String(loadPublicKey()));
 
@@ -124,7 +130,7 @@ public class LetterServiceTest {
     }
 
     @Test
-    public void should_throw_unable_to_load_pgp_pub_key_exc_on_init_when_enc_enabled_and_invalid_pub_key_is_passed() {
+    void should_throw_unable_to_load_pgp_pub_key_exc_on_init_when_enc_enabled_and_invalid_pub_key_is_passed() {
         assertThatThrownBy(() -> createLetterService(true, "This is not a proper pgp public key"))
             .isInstanceOf(UnableToLoadPgpPublicKeyException.class);
     }
@@ -154,8 +160,11 @@ public class LetterServiceTest {
     }
 
     @Test
-    public void should_throw_an_exception_when_unsupported_letter_request_is_received() {
+    void should_throw_an_exception_when_unsupported_letter_request_is_received() {
         // given
+        thereAreNoDuplicates();
+
+        // and
         given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
         createLetterService(false, null);
 

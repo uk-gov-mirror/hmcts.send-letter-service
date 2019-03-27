@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.authorisation.validators.AuthTokenValidator;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
@@ -19,8 +19,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AuthServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AuthServiceTest {
 
     private static final String SERVICE_HEADER = "some-header";
 
@@ -29,18 +29,18 @@ public class AuthServiceTest {
 
     private AuthService service;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         service = new AuthService(validator);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         reset(validator);
     }
 
     @Test
-    public void should_throw_missing_header_exception_when_it_is_null() {
+    void should_throw_missing_header_exception_when_it_is_null() {
         // when
         Throwable exception = catchThrowable(() -> service.authenticate(null));
 
@@ -54,7 +54,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void should_track_failure_in_service_dependency_when_invalid_token_received() {
+    void should_track_failure_in_service_dependency_when_invalid_token_received() {
         // given
         willThrow(InvalidTokenException.class).given(validator).getServiceName(anyString());
 
@@ -66,7 +66,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void should_track_successful_service_dependency_when_valid_token_received() {
+    void should_track_successful_service_dependency_when_valid_token_received() {
         // given
         given(validator.getServiceName(SERVICE_HEADER)).willReturn("some-service");
 

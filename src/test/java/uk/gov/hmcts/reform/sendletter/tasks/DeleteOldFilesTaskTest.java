@@ -2,10 +2,10 @@ package uk.gov.hmcts.reform.sendletter.tasks;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileInfo;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
@@ -22,14 +22,14 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DeleteOldFilesTaskTest {
+@ExtendWith(MockitoExtension.class)
+class DeleteOldFilesTaskTest {
 
     @Mock private FtpClient ftp;
     @Mock private ServiceFolderMapping serviceFolderMapping;
 
     @Test
-    public void should_remove_only_files_that_are_old_enough() throws Exception {
+    void should_remove_only_files_that_are_old_enough() throws Exception {
         // given
         Duration ttl = Duration.ofMinutes(1);
 
@@ -53,7 +53,7 @@ public class DeleteOldFilesTaskTest {
     }
 
     @Test
-    public void should_delete_files_for_all_known_services() throws Exception {
+    void should_delete_files_for_all_known_services() throws Exception {
         // given
         given(serviceFolderMapping.getFolders())
             .willReturn(ImmutableSet.of(
@@ -73,7 +73,7 @@ public class DeleteOldFilesTaskTest {
     }
 
     @Test
-    public void should_try_to_delete_next_file_if_previous_failed() throws Exception {
+    void should_try_to_delete_next_file_if_previous_failed() throws Exception {
         // given
         given(serviceFolderMapping.getFolders())
             .willReturn(ImmutableSet.of("SERVICE"));

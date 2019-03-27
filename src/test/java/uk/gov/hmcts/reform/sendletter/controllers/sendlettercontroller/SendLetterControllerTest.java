@@ -2,13 +2,11 @@ package uk.gov.hmcts.reform.sendletter.controllers.sendlettercontroller;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -37,9 +35,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest
-public class SendLetterControllerTest {
+class SendLetterControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
@@ -48,7 +45,7 @@ public class SendLetterControllerTest {
 
 
     @Test
-    public void should_return_message_id_when_letter_is_successfully_sent() throws Exception {
+    void should_return_message_id_when_letter_is_successfully_sent() throws Exception {
         UUID letterId = UUID.randomUUID();
 
         given(authService.authenticate("auth-header-value")).willReturn("service-name");
@@ -64,14 +61,14 @@ public class SendLetterControllerTest {
     }
 
     @Test
-    public void should_return_400_client_error_when_invalid_letter_is_sent() throws Exception {
+    void should_return_400_client_error_when_invalid_letter_is_sent() throws Exception {
         sendLetter("").andExpect(status().isBadRequest());
 
         verify(letterService, never()).save(any(LetterRequest.class), anyString());
     }
 
     @Test
-    public void should_return_400_client_error_when_letter_is_sent_without_documents() throws Exception {
+    void should_return_400_client_error_when_letter_is_sent_without_documents() throws Exception {
         sendLetter(readResource("controller/letter/v1/letter-without-doc.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
@@ -81,7 +78,7 @@ public class SendLetterControllerTest {
     }
 
     @Test
-    public void should_return_400_client_error_when_letter_is_sent_without_type() throws Exception {
+    void should_return_400_client_error_when_letter_is_sent_without_type() throws Exception {
         sendLetter(readResource("controller/letter/v1/letter-without-type.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
@@ -91,7 +88,7 @@ public class SendLetterControllerTest {
     }
 
     @Test
-    public void should_return_400_client_error_when_letter_is_sent_without_template_in_document() throws Exception {
+    void should_return_400_client_error_when_letter_is_sent_without_template_in_document() throws Exception {
         sendLetter(readResource("controller/letter/v1/letter-without-template.json"))
             .andExpect(status().isBadRequest())
             .andExpect(content()
@@ -101,7 +98,7 @@ public class SendLetterControllerTest {
     }
 
     @Test
-    public void should_return_400_client_error_when_letter_is_sent_without_template_values_in_document()
+    void should_return_400_client_error_when_letter_is_sent_without_template_values_in_document()
         throws Exception {
         sendLetter(readResource("controller/letter/v1/letter-without-template-values.json"))
             .andExpect(status().isBadRequest())
@@ -112,7 +109,7 @@ public class SendLetterControllerTest {
     }
 
     @Test
-    public void should_return_400_client_error_when_letter_is_with_more_than_30_documents()
+    void should_return_400_client_error_when_letter_is_with_more_than_30_documents()
         throws Exception {
         sendLetter(readResource("controller/letter/v1/letter-with-multiple-docs.json"))
             .andExpect(status().isBadRequest())
@@ -123,7 +120,7 @@ public class SendLetterControllerTest {
     }
 
     @Test
-    public void should_return_401_if_service_auth_header_is_missing() throws Exception {
+    void should_return_401_if_service_auth_header_is_missing() throws Exception {
         given(authService.authenticate(null)).willThrow(new UnauthenticatedException("Hello"));
 
         MvcResult result = sendLetterWithoutAuthHeader(readResource("controller/letter/v1/letter.json")).andReturn();
@@ -132,7 +129,7 @@ public class SendLetterControllerTest {
     }
 
     @Test
-    public void should_return_403_if_service_throws_ServiceNotConfiguredException() throws Exception {
+    void should_return_403_if_service_throws_ServiceNotConfiguredException() throws Exception {
         given(authService.authenticate("auth-header-value")).willReturn("service-name");
         given(letterService.save(any(), any())).willThrow(new ServiceNotConfiguredException("invalid service"));
 
@@ -141,7 +138,7 @@ public class SendLetterControllerTest {
     }
 
     @Test
-    public void should_support_two_content_types() throws Exception {
+    void should_support_two_content_types() throws Exception {
         given(authService.authenticate(anyString())).willReturn("my_service");
 
         List<String> supportedContentTypes = asList(
