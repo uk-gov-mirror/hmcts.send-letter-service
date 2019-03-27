@@ -60,6 +60,7 @@ tasks.withType(JavaCompile) {
 }
 
 test {
+  failFast = true
   useJUnitPlatform()
 }
 
@@ -80,6 +81,9 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   environment("FTP_PRIVATE_KEY", file('src/integrationTest/resources/keypair').text)
   environment("FTP_PUBLIC_KEY", file('src/integrationTest/resources/keypair.pub').text)
   environment("ENCRYPTION_PUBLIC_KEY", file('src/integrationTest/resources/encryption/pubkey.asc').text)
+
+  failFast = true
+  useJUnitPlatform()
 
   testLogging {
     exceptionFormat = 'full'
@@ -158,6 +162,7 @@ repositories {
 def versions = [
   bouncycastle: '1.61',
   flywayV: plugins.getPlugin('org.flywaydb.flyway').class.package.implementationVersion,
+  junit: '5.4.1',
   mockitoJupiter: '2.25.1',
   pdfbox: '2.0.14',
   reformLogging: '5.0.1',
@@ -219,7 +224,7 @@ dependencies {
   testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
   testCompile group: 'org.apache.pdfbox', name: 'preflight', version: versions.pdfbox
   testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockitoJupiter
-  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.4.1'
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: versions.junit
 
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
@@ -227,6 +232,7 @@ dependencies {
   integrationTestCompile group: 'org.apache.sshd', name: 'sshd-sftp', version: '2.2.0'
   integrationTestCompile group: 'org.testcontainers', name: 'postgresql', version: '1.11.1'
   integrationTestCompile group: 'org.awaitility', name: 'awaitility', version: '3.1.6'
+  integrationTestImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: versions.junit
 
   smokeTestCompile sourceSets.main.runtimeClasspath
   smokeTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured

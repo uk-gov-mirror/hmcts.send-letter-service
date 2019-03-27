@@ -2,8 +2,7 @@ package uk.gov.hmcts.reform.sendletter.controllers;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,7 +10,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -29,10 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ComponentScan(basePackages = "...", lazyInit = true)
 @ContextConfiguration
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-public class SendLetterTest {
+class SendLetterTest {
 
     @Autowired
     private MockMvc mvc;
@@ -41,7 +38,7 @@ public class SendLetterTest {
     private AppInsights insights;
 
     @Test
-    public void should_return_200_when_single_letter_is_sent() throws Throwable {
+    void should_return_200_when_single_letter_is_sent() throws Throwable {
         MvcResult result = send(readResource("letter.json"))
             .andExpect(status().isOk())
             .andReturn();
@@ -50,7 +47,7 @@ public class SendLetterTest {
     }
 
     @Test
-    public void should_return_400_when_bad_letter_is_sent() throws Exception {
+    void should_return_400_when_bad_letter_is_sent() throws Exception {
         send("").andExpect(status().isBadRequest());
 
         verifyNoMoreInteractions(insights);

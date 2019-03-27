@@ -1,16 +1,14 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.PdfHelper;
 import uk.gov.hmcts.reform.sendletter.SampleData;
@@ -37,11 +35,10 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Uploaded;
 
-@RunWith(SpringRunner.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 @ImportAutoConfiguration(SpyOnJpaConfig.class)
-public class LetterServiceTest {
+class LetterServiceTest {
 
     private static final String SERVICE_NAME = "bulkprint";
 
@@ -50,8 +47,8 @@ public class LetterServiceTest {
     @Autowired
     private LetterRepository letterRepository;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ServiceFolderMapping serviceFolderMapping = mock(ServiceFolderMapping.class);
         BDDMockito.given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder_name"));
 
@@ -66,13 +63,13 @@ public class LetterServiceTest {
         );
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         reset(letterRepository);
     }
 
     @Test
-    public void generates_and_saves_zipped_pdf() throws IOException {
+    void generates_and_saves_zipped_pdf() throws IOException {
         UUID id = service.save(SampleData.letterRequest(), SERVICE_NAME);
 
         Letter result = letterRepository.findById(id).get();
@@ -80,7 +77,7 @@ public class LetterServiceTest {
     }
 
     @Test
-    public void returns_same_id_on_resubmit() throws IOException {
+    void returns_same_id_on_resubmit() {
         // given
         LetterRequest sampleRequest = SampleData.letterRequest();
         UUID id1 = service.save(sampleRequest, SERVICE_NAME);
@@ -100,7 +97,7 @@ public class LetterServiceTest {
     }
 
     @Test
-    public void saves_an_new_letter_if_previous_one_has_been_sent_to_print() throws IOException {
+    void saves_an_new_letter_if_previous_one_has_been_sent_to_print() {
         // given
         LetterRequest sampleRequest = SampleData.letterRequest();
         UUID id1 = service.save(sampleRequest, SERVICE_NAME);
@@ -122,19 +119,19 @@ public class LetterServiceTest {
     }
 
     @Test
-    public void should_not_allow_null_service_name() {
+    void should_not_allow_null_service_name() {
         assertThatThrownBy(() -> service.save(SampleData.letterRequest(), null))
             .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void should_not_allow_empty_service_name() {
+    void should_not_allow_empty_service_name() {
         assertThatThrownBy(() -> service.save(SampleData.letterRequest(), ""))
             .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void handles_null_timestamps() {
+    void handles_null_timestamps() {
         assertThat(LetterService.toDateTime(null)).isNull();
     }
 }

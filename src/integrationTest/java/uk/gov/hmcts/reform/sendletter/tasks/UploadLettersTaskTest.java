@@ -1,14 +1,12 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
@@ -39,10 +37,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
-public class UploadLettersTaskTest {
+class UploadLettersTaskTest {
 
     @Autowired
     LetterRepository repository;
@@ -60,8 +57,8 @@ public class UploadLettersTaskTest {
 
     private LetterService letterService;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         when(availabilityChecker.isFtpAvailable(any(LocalTime.class))).thenReturn(true);
         when(serviceFolderMapping.getFolderFor(any())).thenReturn(Optional.of(LocalSftpServer.SERVICE_FOLDER));
 
@@ -77,7 +74,7 @@ public class UploadLettersTaskTest {
     }
 
     @Test
-    public void uploads_file_to_sftp_and_sets_letter_status_to_uploaded() throws Exception {
+    void uploads_file_to_sftp_and_sets_letter_status_to_uploaded() throws Exception {
         UUID id = letterService.save(SampleData.letterRequest(), "bulkprint");
         UploadLettersTask task = new UploadLettersTask(
             repository,
@@ -111,7 +108,7 @@ public class UploadLettersTaskTest {
     }
 
     @Test
-    public void should_fail_to_upload_to_sftp_and_stop_from_uploading_any_other_letters() throws Exception {
+    void should_fail_to_upload_to_sftp_and_stop_from_uploading_any_other_letters() throws Exception {
         // given
         UUID id = letterService.save(SampleData.letterRequest(), "bulkprint");
         // additional letter to verify upload loop broke and zipper was never called again
@@ -149,7 +146,7 @@ public class UploadLettersTaskTest {
     }
 
     @Test
-    public void should_process_all_letter_batches() throws Exception {
+    void should_process_all_letter_batches() throws Exception {
         // Twice the batch size.
         int letterCount = 20;
         IntStream.rangeClosed(1, letterCount).forEach(

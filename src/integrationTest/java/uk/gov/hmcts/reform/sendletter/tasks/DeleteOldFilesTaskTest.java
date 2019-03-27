@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
 import com.google.common.collect.ImmutableSet;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
@@ -16,13 +16,13 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
-@RunWith(SpringRunner.class)
-public class DeleteOldFilesTaskTest {
+@ExtendWith(SpringExtension.class)
+class DeleteOldFilesTaskTest {
 
     @Mock ServiceFolderMapping serviceFolderMapping;
 
     @Test
-    public void should_delete_files() throws Exception {
+    void should_delete_files() throws Exception {
         try (LocalSftpServer server = LocalSftpServer.create()) {
             // given
             given(serviceFolderMapping.getFolders())

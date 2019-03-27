@@ -3,10 +3,9 @@ package uk.gov.hmcts.reform.sendletter.e2e;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.bouncycastle.openpgp.PGPException;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,9 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ComponentScan(basePackages = "...", lazyInit = true)
 @ContextConfiguration
-@SpringBootTest
 @DirtiesContext
-public class BaseTest {
+class BaseTest {
 
     @Autowired
     private MockMvc mvc;
@@ -52,14 +50,14 @@ public class BaseTest {
     @Autowired
     private FakeFtpAvailabilityChecker fakeFtpAvailabilityChecker;
 
-    @After
+    @AfterEach
     public void cleanUp() {
         // This test commits transactions to the database
         // so we must clean up afterwards.
         repository.deleteAll();
     }
 
-    protected void should_upload_letter_and_mark_posted(
+    void should_upload_letter_and_mark_posted(
         MockHttpServletRequestBuilder request,
         Boolean isEncryptionEnabled
     ) throws Throwable {
@@ -97,7 +95,7 @@ public class BaseTest {
         }
     }
 
-    protected String readResource(final String fileName) throws IOException {
+    String readResource(final String fileName) throws IOException {
         return Resources.toString(Resources.getResource(fileName), Charsets.UTF_8);
     }
 

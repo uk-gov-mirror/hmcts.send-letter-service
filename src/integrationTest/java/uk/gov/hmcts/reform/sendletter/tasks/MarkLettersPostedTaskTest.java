@@ -1,11 +1,9 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
@@ -29,10 +27,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
-public class MarkLettersPostedTaskTest {
+class MarkLettersPostedTaskTest {
 
     @Autowired
     LetterRepository repository;
@@ -45,7 +42,7 @@ public class MarkLettersPostedTaskTest {
     AppInsights insights = mock(AppInsights.class);
 
     @Test
-    public void marks_uploaded_letters_as_posted() throws Exception {
+    void marks_uploaded_letters_as_posted() throws Exception {
         // Create a letter in the Uploaded state.
         Letter letter = SampleData.letterEntity("bulkprint");
         letter.setStatus(LetterStatus.Uploaded);

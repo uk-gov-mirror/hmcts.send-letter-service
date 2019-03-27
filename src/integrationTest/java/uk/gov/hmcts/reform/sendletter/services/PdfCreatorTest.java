@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.exception.DuplexException;
 import uk.gov.hmcts.reform.sendletter.services.pdf.DuplexPreparator;
@@ -15,17 +15,17 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-public class PdfCreatorTest {
+class PdfCreatorTest {
 
     private PdfCreator pdfCreator;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         this.pdfCreator = new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert);
     }
 
     @Test
-    public void should_handle_base64_encoded_pdfs() throws Exception {
+    void should_handle_base64_encoded_pdfs() throws Exception {
         // given
 
         List<byte[]> pdfs = asList(
@@ -42,7 +42,7 @@ public class PdfCreatorTest {
     }
 
     @Test
-    public void should_throw_an_exception_if_bytes_do_not_represent_pdf() {
+    void should_throw_an_exception_if_bytes_do_not_represent_pdf() {
         // given
         List<byte[]> pdfs = asList(
             "clearly not a pdf".getBytes()

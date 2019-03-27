@@ -1,15 +1,14 @@
 package uk.gov.hmcts.reform.sendletter.e2e;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-@RunWith(SpringRunner.class)
+@SpringBootTest
 @TestPropertySource(properties = {
     "scheduling.enabled=true",
     "tasks.upload-letters-interval-ms=1000",
@@ -18,12 +17,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
     "ftp.service-folders[0].service=some_service_name",
     "ftp.service-folders[0].folder=BULKPRINT"
 })
-public class EndToEndTest extends BaseTest {
+class EndToEndTest extends BaseTest {
 
     private static final Boolean IS_ENCRYPTION_ENABLED = false;
 
     @Test
-    public void should_handle_old_letter_model() throws Throwable {
+    void should_handle_old_letter_model() throws Throwable {
         should_upload_letter_and_mark_posted(
             post("/letters")
                 .header("ServiceAuthorization", "auth-header-value")
@@ -34,7 +33,7 @@ public class EndToEndTest extends BaseTest {
     }
 
     @Test
-    public void should_handle_new_letter_model() throws Throwable {
+    void should_handle_new_letter_model() throws Throwable {
         should_upload_letter_and_mark_posted(
             post("/letters")
                 .header("ServiceAuthorization", "auth-header-value")
