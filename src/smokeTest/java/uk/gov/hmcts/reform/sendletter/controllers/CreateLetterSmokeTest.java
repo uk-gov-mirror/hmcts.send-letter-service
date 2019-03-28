@@ -2,15 +2,18 @@ package uk.gov.hmcts.reform.sendletter.controllers;
 
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.logging.appinsights.SyntheticHeaders;
 
-public class CreateLetterSmokeTest extends SmokeTestSuite {
+@ExtendWith(SpringExtension.class)
+class CreateLetterSmokeTest extends SmokeTestSuite {
 
     @Test
-    public void should_create_letter_successfully() throws Exception {
+    void should_create_letter_successfully() throws Exception {
 
         String jwt = signIn();
 

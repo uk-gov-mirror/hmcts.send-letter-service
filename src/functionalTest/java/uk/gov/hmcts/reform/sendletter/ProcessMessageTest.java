@@ -4,7 +4,9 @@ import net.schmizz.sshj.sftp.RemoteFile;
 import net.schmizz.sshj.sftp.RemoteResourceInfo;
 import net.schmizz.sshj.sftp.SFTPClient;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
 
 import java.io.IOException;
@@ -18,10 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.util.DateUtil.now;
 
-public class ProcessMessageTest extends FunctionalTestSuite {
+@ExtendWith(SpringExtension.class)
+class ProcessMessageTest extends FunctionalTestSuite {
 
     @Test
-    public void should_send_letter_and_upload_file_on_sftp_server_when_letter_contains_one_document_with_even_pages()
+    void should_send_letter_and_upload_file_on_sftp_server_when_letter_contains_one_document_with_even_pages()
         throws Exception {
         String letterId = sendPrintLetterRequest(
             signIn(),
@@ -40,7 +43,7 @@ public class ProcessMessageTest extends FunctionalTestSuite {
     }
 
     @Test
-    public void should_send_letter_and_upload_file_on_sftp_server_when_letter_contains_one_document_with_odd_pages()
+    void should_send_letter_and_upload_file_on_sftp_server_when_letter_contains_one_document_with_odd_pages()
         throws Exception {
         String letterId = sendPrintLetterRequest(
             signIn(),
@@ -59,7 +62,7 @@ public class ProcessMessageTest extends FunctionalTestSuite {
     }
 
     @Test
-    public void should_send_letter_and_upload_file_on_sftp_server_when_letter_contains_two_documents_with_even_pages()
+    void should_send_letter_and_upload_file_on_sftp_server_when_letter_contains_two_documents_with_even_pages()
         throws Exception {
         String letterId = sendPrintLetterRequest(
             signIn(),
@@ -78,7 +81,7 @@ public class ProcessMessageTest extends FunctionalTestSuite {
     }
 
     @Test
-    public void should_send_letter_and_upload_file_on_sftp_server_when_letter_contains_two_documents_with_odd_pages()
+    void should_send_letter_and_upload_file_on_sftp_server_when_letter_contains_two_documents_with_odd_pages()
         throws Exception {
         String letterId = sendPrintLetterRequest(
             signIn(),
@@ -154,15 +157,5 @@ public class ProcessMessageTest extends FunctionalTestSuite {
     @Override
     String getContentType() {
         return MediaTypes.LETTER_V1;
-    }
-
-    private static class PdfFile {
-        public final String name;
-        public final byte[] content;
-
-        public PdfFile(String name, byte[] content) {
-            this.name = name;
-            this.content = content;
-        }
     }
 }

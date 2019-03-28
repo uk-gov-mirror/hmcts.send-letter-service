@@ -61,19 +61,20 @@ tasks.withType(JavaCompile) {
 
 test {
   failFast = true
-  useJUnitPlatform()
 }
 
-task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
+task functional(type: Test) {
+  description = 'Runs functional tests.'
+  group = 'Verification'
+
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
-
-  testLogging {
-    exceptionFormat = 'full'
-  }
 }
 
-task integration(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
+task integration(type: Test) {
+  description = 'Runs integration tests.'
+  group = 'Verification'
+
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
 
@@ -83,17 +84,21 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   environment("ENCRYPTION_PUBLIC_KEY", file('src/integrationTest/resources/encryption/pubkey.asc').text)
 
   failFast = true
+}
+
+task smoke(type: Test) {
+  description = 'Runs Smoke tests.'
+  group = 'Verification'
+  testClassesDirs = sourceSets.smokeTest.output.classesDirs
+  classpath = sourceSets.smokeTest.runtimeClasspath
+}
+
+tasks.withType(Test) {
   useJUnitPlatform()
 
   testLogging {
     exceptionFormat = 'full'
   }
-}
-
-task smoke(type: Test) {
-  description = "Runs Smoke Tests"
-  testClassesDirs = sourceSets.smokeTest.output.classesDirs
-  classpath = sourceSets.smokeTest.runtimeClasspath
 }
 
 checkstyle {
@@ -237,10 +242,12 @@ dependencies {
   smokeTestCompile sourceSets.main.runtimeClasspath
   smokeTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
   smokeTestCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
+  smokeTestImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: versions.junit
 
   functionalTestCompile sourceSets.main.runtimeClasspath
   functionalTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
   functionalTestCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot
+  functionalTestImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: versions.junit
 }
 
 mainClassName = 'uk.gov.hmcts.reform.sendletter.Application'

@@ -12,10 +12,8 @@ import net.schmizz.sshj.sftp.SFTPClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,55 +30,54 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@RunWith(SpringRunner.class)
 @TestPropertySource("classpath:application.properties")
-public abstract class FunctionalTestSuite {
+abstract class FunctionalTestSuite {
 
     @Value("${s2s-url}")
-    protected String s2sUrl;
+    private String s2sUrl;
 
     @Value("${s2s-name}")
-    protected String s2sName;
+    private String s2sName;
 
     @Value("${s2s-secret}")
-    protected String s2sSecret;
+    private String s2sSecret;
 
     @Value("${send-letter-service-url}")
-    protected String sendLetterServiceUrl;
+    private String sendLetterServiceUrl;
 
     @Value("${ftp-hostname}")
-    protected String ftpHostname;
+    private String ftpHostname;
 
     @Value("${ftp-port}")
-    protected Integer ftpPort;
+    private Integer ftpPort;
 
     @Value("${ftp-fingerprint}")
-    protected String ftpFingerprint;
+    private String ftpFingerprint;
 
     @Value("${ftp-target-folder}")
-    protected String ftpTargetFolder;
+    String ftpTargetFolder;
 
     @Value("${ftp-user}")
-    protected String ftpUser;
+    private String ftpUser;
 
     @Value("${ftp-private-key}")
-    protected String ftpPrivateKey;
+    private String ftpPrivateKey;
 
     @Value("${ftp-public-key}")
-    protected String ftpPublicKey;
+    private String ftpPublicKey;
 
     @Value("${max-wait-for-ftp-file-in-ms}")
-    protected int maxWaitForFtpFileInMs;
+    int maxWaitForFtpFileInMs;
 
     @Value("${encryption.enabled}")
-    protected Boolean isEncryptionEnabled;
+    Boolean isEncryptionEnabled;
 
     /**
      * Sign in to s2s.
      *
      * @return s2s JWT token.
      */
-    protected String signIn() {
+    String signIn() {
         Map<String, Object> params = ImmutableMap.of(
             "microservice", this.s2sName,
             "oneTimePassword", new GoogleAuthenticator().getTotpPassword(this.s2sSecret)
@@ -103,7 +100,7 @@ public abstract class FunctionalTestSuite {
             .print();
     }
 
-    protected String sendPrintLetterRequest(String jwt, String jsonBody) {
+    String sendPrintLetterRequest(String jwt, String jsonBody) {
         return RestAssured
             .given()
             .relaxedHTTPSValidation()
@@ -121,7 +118,7 @@ public abstract class FunctionalTestSuite {
             .get("letter_id");
     }
 
-    protected String sampleLetterRequestJson(
+    String sampleLetterRequestJson(
         String requestBodyFilename,
         String templateFilename
     ) throws IOException, JSONException {
@@ -137,14 +134,14 @@ public abstract class FunctionalTestSuite {
         return object.toString();
     }
 
-    protected String samplePdfLetterRequestJson(String requestBodyFilename) throws IOException {
+    String samplePdfLetterRequestJson(String requestBodyFilename) throws IOException {
         String requestBody = Resources.toString(getResource(requestBodyFilename), Charsets.UTF_8);
         byte[] pdf = toByteArray(getResource("test.pdf"));
 
         return requestBody.replace("{{pdf}}", new String(Base64.getEncoder().encode(pdf)));
     }
 
-    protected SFTPClient getSftpClient() throws IOException {
+    SFTPClient getSftpClient() throws IOException {
         SSHClient ssh = new SSHClient();
 
         ssh.addHostKeyVerifier(ftpFingerprint);
@@ -158,7 +155,7 @@ public abstract class FunctionalTestSuite {
         return ssh.newSFTPClient();
     }
 
-    protected ZipInputStream getZipInputStream(RemoteFile zipFile) throws IOException {
+    ZipInputStream getZipInputStream(RemoteFile zipFile) throws IOException {
         byte[] fileContent = new byte[(int) zipFile.length()];
         zipFile.read(0, fileContent, 0, (int) zipFile.length());
 
@@ -168,7 +165,7 @@ public abstract class FunctionalTestSuite {
         return new ZipInputStream(inputStream);
     }
 
-    protected byte[] readAllBytes(InputStream input) throws IOException {
+    byte[] readAllBytes(InputStream input) throws IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         byte[] buffer = new byte[10000];
         int len;
@@ -180,7 +177,7 @@ public abstract class FunctionalTestSuite {
         return output.toByteArray();
     }
 
-    protected String getPdfFileNamePattern(String letterId) {
+    String getPdfFileNamePattern(String letterId) {
         return String.format(
             "%s_%s_%s.pdf",
             Pattern.quote("BPS001"),
@@ -189,7 +186,7 @@ public abstract class FunctionalTestSuite {
         );
     }
 
-    protected String getFileNamePattern(String letterId) {
+    String getFileNamePattern(String letterId) {
         String format = isEncryptionEnabled ? "%s_%s_\\d{14}_%s.pgp" : "%s_%s_\\d{14}_%s.zip";
 
         return String.format(
@@ -198,6 +195,16 @@ public abstract class FunctionalTestSuite {
             Pattern.quote(s2sName.replace("_", "")),
             Pattern.quote(letterId)
         );
+    }
+
+    static class PdfFile {
+        final String name;
+        final byte[] content;
+
+        PdfFile(String name, byte[] content) {
+            this.name = name;
+            this.content = content;
+        }
     }
 
     abstract String getContentType();
