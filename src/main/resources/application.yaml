@@ -63,6 +63,8 @@ ftp:
       folder: DIVORCE
     - service: probate_backend
       folder: PROBATE
+    - service: sscs
+      folder: SSCS
 
 scheduling:
   enabled: ${SCHEDULING_ENABLED:false}
