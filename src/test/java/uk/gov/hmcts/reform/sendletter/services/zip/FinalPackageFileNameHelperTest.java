@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
@@ -42,12 +43,13 @@ class FinalPackageFileNameHelperTest {
     @Test
     void should_generate_expected_file_name_with_explicit_parameters_as_input() {
         UUID letterId = randomUUID();
+        LocalDateTime created = now();
 
-        String name = FinalPackageFileNameHelper.generateName("type", "cmc", now(), letterId,true);
+        String name = FinalPackageFileNameHelper.generateName("type", "cmc", created, letterId,true);
 
         assertThat(name).isEqualTo(
             "type_cmc_"
-                + now().format(FinalPackageFileNameHelper.dateTimeFormatter)
+                + created.format(FinalPackageFileNameHelper.dateTimeFormatter)
                 + "_"
                 + letterId
                 + ".pgp"
