@@ -104,7 +104,7 @@ variable "ftp_reports_folder" {
 }
 
 variable "ftp_reports_cron" {
-  default = "0 30 0 * * *"
+  default = "0 30 10 * * *"
 }
 
 variable "deployment_namespace" {
