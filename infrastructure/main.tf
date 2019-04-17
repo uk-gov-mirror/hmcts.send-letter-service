@@ -69,18 +69,19 @@ module "db" {
 }
 
 module "send-letter-service" {
-  source              = "git@github.com:hmcts/moj-module-webapp?ref=master"
-  product             = "${var.product}-${var.component}"
-  location            = "${var.location_app}"
-  env                 = "${var.env}"
-  ilbIp               = "${var.ilbIp}"
-  resource_group_name = "${azurerm_resource_group.rg.name}"
-  subscription        = "${var.subscription}"
-  capacity            = "${var.capacity}"
-  common_tags         = "${var.common_tags}"
-  asp_name            = "${var.product}-${var.component}-${var.env}"
-  asp_rg              = "${var.product}-${var.component}-${var.env}"
-  instance_size       = "${local.sku_size}"
+  source                 = "git@github.com:hmcts/moj-module-webapp?ref=master"
+  product                = "${var.product}-${var.component}"
+  location               = "${var.location_app}"
+  env                    = "${var.env}"
+  ilbIp                  = "${var.ilbIp}"
+  resource_group_name    = "${azurerm_resource_group.rg.name}"
+  subscription           = "${var.subscription}"
+  capacity               = "${var.capacity}"
+  common_tags            = "${var.common_tags}"
+  asp_name               = "${var.product}-${var.component}-${var.env}"
+  asp_rg                 = "${var.product}-${var.component}-${var.env}"
+  instance_size          = "${local.sku_size}"
+  java_container_version = "9.0"
 
   app_settings = {
     S2S_URL                         = "${local.s2s_url}"
