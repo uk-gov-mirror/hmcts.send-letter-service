@@ -141,6 +141,10 @@ sonarqube {
   }
 }
 
+pitest {
+  pitestVersion = '1.4.7'
+}
+
 dependencyUpdates.resolutionStrategy = {
   componentSelection { rules ->
     rules.all { ComponentSelection selection ->
@@ -178,8 +182,8 @@ repositories {
 def versions = [
   bouncycastle: '1.61',
   flywayV: plugins.getPlugin('org.flywaydb.flyway').class.package.implementationVersion,
-  junit: '5.4.1',
-  mockitoJupiter: '2.25.1',
+  junit: '5.4.2',
+  mockitoJupiter: '2.27.0',
   pdfbox: '2.0.15',
   reformLogging: '5.0.1',
   restAssured: '3.3.0',
