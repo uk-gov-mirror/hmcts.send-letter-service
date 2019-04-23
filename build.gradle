@@ -180,7 +180,7 @@ def versions = [
   flywayV: plugins.getPlugin('org.flywaydb.flyway').class.package.implementationVersion,
   junit: '5.4.1',
   mockitoJupiter: '2.25.1',
-  pdfbox: '2.0.14',
+  pdfbox: '2.0.15',
   reformLogging: '5.0.1',
   restAssured: '3.3.0',
   shedlock: '2.4.0',
