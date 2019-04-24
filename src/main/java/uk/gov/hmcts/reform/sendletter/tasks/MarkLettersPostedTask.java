@@ -69,7 +69,15 @@ public class MarkLettersPostedTask {
                 .map(parser::parse)
                 .forEach(parsedReport -> {
                     insights.trackPrintReportReceived(parsedReport);
-                    parsedReport.statuses.forEach(this::markAsPosted);
+                    logger.info(
+                        "Updating letters from report {}. Letter count: {}",
+                        parsedReport.path,
+                        parsedReport.statuses.size()
+                    );
+
+                    parsedReport
+                        .statuses
+                        .forEach(status -> markAsPosted(status, parsedReport.path));
 
                     if (parsedReport.allRowsParsed) {
                         logger.info("Report {} successfully parsed, deleting", parsedReport.path);
@@ -85,7 +93,7 @@ public class MarkLettersPostedTask {
         }
     }
 
-    private void markAsPosted(LetterPrintStatus letterPrintStatus) {
+    private void markAsPosted(LetterPrintStatus letterPrintStatus, String reportFileName) {
         Optional<Letter> optional = repo.findById(letterPrintStatus.id);
         if (optional.isPresent()) {
             Letter letter = optional.get();
@@ -96,15 +104,17 @@ public class MarkLettersPostedTask {
                 logger.info("Marked letter {} as posted", letter.getId());
             } else {
                 logger.warn(
-                    "Failed to mark letter as posted {} - unexpected status: {}",
+                    "Failed to mark letter {} as posted - unexpected status: {}. Report file name: {}",
                     letter.getId(),
-                    letter.getStatus()
+                    letter.getStatus(),
+                    reportFileName
                 );
             }
         } else {
-            logger.warn(
-                "Failed to mark letter {} as posted - unknown letter",
-                letterPrintStatus.id
+            logger.error(
+                "Failed to mark letter {} as posted - unknown letter. Report file name: {}",
+                letterPrintStatus.id,
+                reportFileName
             );
         }
     }
