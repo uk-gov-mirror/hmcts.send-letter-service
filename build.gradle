@@ -123,11 +123,11 @@ jacocoTestReport {
     csv.enabled = false
   }
   afterEvaluate {
-    classDirectories = files(classDirectories.files.collect {
+    getClassDirectories().from = getClassDirectories().files.collect {
       fileTree(dir: it, exclude: [
         'uk/gov/hmcts/reform/sendletter/config/**'
       ])
-    })
+    }
   }
 }
 
@@ -276,7 +276,9 @@ dependencies {
 mainClassName = 'uk.gov.hmcts.reform.sendletter.Application'
 
 bootJar {
-  archiveName = 'send-letter-service.jar'
+  getArchiveFileName().set(provider {
+    'send-letter-service.jar'
+  })
 
   manifest {
     attributes('Implementation-Version': project.version.toString())
