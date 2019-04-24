@@ -16,11 +16,13 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static java.time.LocalDateTime.now;
+import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
 
 @Component
 @ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
@@ -52,7 +54,7 @@ public class UploadLettersTask {
     @SchedulerLock(name = TASK_NAME)
     @Scheduled(fixedDelayString = "${tasks.upload-letters-interval-ms}")
     public void run() {
-        if (!availabilityChecker.isFtpAvailable(now().toLocalTime())) {
+        if (!availabilityChecker.isFtpAvailable(now(ZoneId.of(EUROPE_LONDON)).toLocalTime())) {
             logger.info("Not processing '{}' task due to FTP downtime window", TASK_NAME);
             return;
         }

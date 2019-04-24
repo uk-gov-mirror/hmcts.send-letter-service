@@ -17,7 +17,10 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Optional;
+
+import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
 
 /**
  * Fetches reports from SFTP concerning posted
@@ -51,9 +54,9 @@ public class MarkLettersPostedTask {
     }
 
     @SchedulerLock(name = TASK_NAME)
-    @Scheduled(cron = "${tasks.mark-letters-posted}")
+    @Scheduled(cron = "${tasks.mark-letters-posted}", zone = EUROPE_LONDON)
     public void run() {
-        if (!ftpAvailabilityChecker.isFtpAvailable(LocalTime.now())) {
+        if (!ftpAvailabilityChecker.isFtpAvailable(LocalTime.now(ZoneId.of(EUROPE_LONDON)))) {
             logger.info("Not processing '{}' task due to FTP downtime window", TASK_NAME);
             return;
         }

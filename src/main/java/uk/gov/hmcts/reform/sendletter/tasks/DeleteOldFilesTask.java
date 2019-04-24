@@ -17,6 +17,7 @@ import java.util.List;
 
 import static java.time.Instant.now;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
 
 /**
  * Deletes old files from SFTP.
@@ -46,7 +47,7 @@ public class DeleteOldFilesTask {
     // endregion
 
     @SchedulerLock(name = TASK_NAME)
-    @Scheduled(cron = "${file-cleanup.cron}")
+    @Scheduled(cron = "${file-cleanup.cron}", zone = EUROPE_LONDON)
     public void run() {
         serviceFolderMapping
             .getFolders()

@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.stream.Stream;
 
+import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
+
 /**
  * Task to run report on unprinted letters and report them to AppInsights.
  */
@@ -42,7 +44,7 @@ public class StaleLettersTask {
 
     @Transactional
     @SchedulerLock(name = TASK_NAME)
-    @Scheduled(cron = "${tasks.stale-letters-report}")
+    @Scheduled(cron = "${tasks.stale-letters-report}", zone = EUROPE_LONDON)
     public void run() {
         LocalDateTime staleCutOff = LocalDateTime.now()
             .minusDays(1)
