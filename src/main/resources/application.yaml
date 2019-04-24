@@ -15,7 +15,7 @@ idam:
 
 spring:
   application:
-    name: Send Letter Provider
+    name: Send Letter Service
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${LETTER_TRACKING_DB_HOST:send-letter-database}:${LETTER_TRACKING_DB_PORT:5432}/${LETTER_TRACKING_DB_NAME:letter_tracking}${LETTER_TRACKING_DB_CONN_OPTIONS:}
