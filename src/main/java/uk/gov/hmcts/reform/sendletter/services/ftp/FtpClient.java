@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.sendletter.model.Report;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
@@ -49,7 +50,7 @@ public class FtpClient {
     // endregion
 
     public void upload(FileToSend file, String serviceFolder) {
-        Instant now = Instant.now();
+        Instant start = Instant.now();
 
         runWith(sftp -> {
             boolean isSuccess = false;
@@ -62,13 +63,20 @@ public class FtpClient {
                 String path = String.join("/", folder, file.getName());
                 sftp.getFileTransfer().upload(file, path);
 
+                logger.info(
+                    "File uploaded. Time: {}, Size: {}, Folder: {}",
+                    ChronoUnit.MILLIS.between(start, Instant.now()) + "ms",
+                    file.content.length / 1024 + "KB",
+                    serviceFolder
+                );
+
                 isSuccess = true;
 
                 return null;
             } catch (IOException exc) {
                 throw new FtpException("Unable to upload file.", exc);
             } finally {
-                insights.trackFtpUpload(Duration.between(now, Instant.now()), isSuccess);
+                insights.trackFtpUpload(Duration.between(start, Instant.now()), isSuccess);
             }
         });
     }
