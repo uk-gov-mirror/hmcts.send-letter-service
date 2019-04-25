@@ -236,6 +236,8 @@ dependencies {
 
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.1.1.RELEASE'
 
+  compile group: 'io.github.openfeign', name: 'feign-httpclient', version: '10.2.0'
+
   compile group: 'com.hierynomus', name: 'sshj', version: '0.27.0'
   compile group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   compile group: 'org.apache.commons', name: 'commons-csv', version: '1.6'

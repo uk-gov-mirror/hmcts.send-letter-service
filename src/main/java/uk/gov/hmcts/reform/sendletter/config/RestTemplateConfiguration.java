@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.config;
 
+import feign.Client;
+import feign.httpclient.ApacheHttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -12,17 +14,18 @@ import org.springframework.web.client.RestTemplate;
 public class RestTemplateConfiguration {
 
     @Bean
+    public Client getFeignHttpClient() {
+        return new ApacheHttpClient(getHttpClient());
+    }
+
+    @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate(clientHttpRequestFactory());
     }
 
     @Bean
     public HttpComponentsClientHttpRequestFactory clientHttpRequestFactory() {
-        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
-
-        clientHttpRequestFactory.setHttpClient(getHttpClient());
-
-        return clientHttpRequestFactory;
+        return new HttpComponentsClientHttpRequestFactory(getHttpClient());
     }
 
     private CloseableHttpClient getHttpClient() {
