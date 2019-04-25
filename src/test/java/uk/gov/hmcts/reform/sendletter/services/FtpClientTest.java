@@ -89,7 +89,7 @@ class FtpClientTest {
         given(ftpProps.getTargetFolder()).willReturn("regular");
 
         // when
-        client.upload(new FileToSend("hello.zip", "hello".getBytes()), true, "cmc");
+        client.upload(new FileToSend("hello.zip", "hello".getBytes(), true), "cmc");
 
         // then
         verify(sftpFileTransfer)
@@ -99,7 +99,7 @@ class FtpClientTest {
             );
 
         // when
-        client.upload(new FileToSend("hello.zip", "hello".getBytes()), false, "cmc");
+        client.upload(new FileToSend("hello.zip", "hello".getBytes(), false), "cmc");
 
         // then
         verify(sftpFileTransfer)
@@ -117,7 +117,7 @@ class FtpClientTest {
 
         // when
         Throwable exception = catchThrowable(() ->
-            client.upload(new FileToSend("goodbye.zip", "goodbye".getBytes()), false, "cmc")
+            client.upload(new FileToSend("goodbye.zip", "goodbye".getBytes(), false), "cmc")
         );
 
         // then

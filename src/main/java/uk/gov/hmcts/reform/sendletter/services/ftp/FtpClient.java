@@ -4,7 +4,6 @@ import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.sftp.RemoteResourceInfo;
 import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.sftp.SFTPFileTransfer;
-import net.schmizz.sshj.xfer.LocalSourceFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -49,14 +48,14 @@ public class FtpClient {
     }
     // endregion
 
-    public void upload(LocalSourceFile file, boolean isSmokeTestFile, String serviceFolder) {
+    public void upload(FileToSend file, String serviceFolder) {
         Instant now = Instant.now();
 
         runWith(sftp -> {
             boolean isSuccess = false;
 
             try {
-                String folder = isSmokeTestFile
+                String folder = file.isSmokeTest
                     ? configProperties.getSmokeTestTargetFolder()
                     : String.join("/", configProperties.getTargetFolder(), serviceFolder);
 

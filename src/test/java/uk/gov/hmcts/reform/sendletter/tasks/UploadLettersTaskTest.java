@@ -5,11 +5,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
+import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
@@ -20,11 +22,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
@@ -35,14 +39,20 @@ class UploadLettersTaskTest {
 
     @Mock
     private LetterRepository repo;
+
     @Mock
     private FtpClient ftpClient;
+
     @Mock
     private FtpAvailabilityChecker availabilityChecker;
+
     @Mock
     private ServiceFolderMapping serviceFolderMapping;
+
     @Mock
     private AppInsights insights;
+
+    private ArgumentCaptor<FileToSend> captureFileToSend = ArgumentCaptor.forClass(FileToSend.class);
 
     private UploadLettersTask task;
 
@@ -59,14 +69,28 @@ class UploadLettersTaskTest {
 
     @Test
     void should_handle_smoke_test_letters() {
+        // given
         given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
         givenDbContains(letterOfType(SMOKE_TEST_LETTER_TYPE));
-        task.run();
-        verify(ftpClient).upload(any(), eq(true), any());
 
-        givenDbContains(letterOfType("not_" + SMOKE_TEST_LETTER_TYPE));
+        // when
         task.run();
-        verify(ftpClient).upload(any(), eq(false), any());
+
+        // and
+        // given
+        givenDbContains(letterOfType("not_" + SMOKE_TEST_LETTER_TYPE));
+
+        // when
+        task.run();
+
+        // then
+        verify(ftpClient, times(2)).upload(captureFileToSend.capture(), any());
+        assertThat(
+            captureFileToSend
+                .getAllValues()
+                .stream()
+                .map(file -> file.isSmokeTest)
+        ).containsExactlyInAnyOrder(false, true);
     }
 
     @Test
@@ -95,8 +119,8 @@ class UploadLettersTaskTest {
         task.run();
 
         // then
-        verify(ftpClient).upload(any(), eq(false), eq("folder_A"));
-        verify(ftpClient).upload(any(), eq(false), eq("folder_C"));
+        verify(ftpClient).upload(any(), eq("folder_A"));
+        verify(ftpClient).upload(any(), eq("folder_C"));
         verifyNoMoreInteractions(ftpClient);
     }
 

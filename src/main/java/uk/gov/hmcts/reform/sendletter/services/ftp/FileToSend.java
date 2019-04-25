@@ -9,10 +9,12 @@ public class FileToSend extends InMemorySourceFile {
 
     public final String filename;
     public final byte[] content;
+    public final boolean isSmokeTest;
 
-    public FileToSend(String filename, byte[] content) {
+    public FileToSend(String filename, byte[] content, boolean isSmokeTest) {
         this.filename = filename;
         this.content = content;
+        this.isSmokeTest = isSmokeTest;
     }
 
     @Override

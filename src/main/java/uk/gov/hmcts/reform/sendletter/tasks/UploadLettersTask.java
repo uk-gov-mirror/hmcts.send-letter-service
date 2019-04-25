@@ -88,10 +88,11 @@ public class UploadLettersTask {
         if (serviceFolder.isPresent()) {
             FileToSend file = new FileToSend(
                 FinalPackageFileNameHelper.generateName(letter),
-                letter.getFileContent()
+                letter.getFileContent(),
+                isSmokeTest(letter)
             );
 
-            ftp.upload(file, isSmokeTest(letter), serviceFolder.get());
+            ftp.upload(file, serviceFolder.get());
 
             logger.info(
                 "Uploaded letter id: {}, checksum: {}, file name: {}, additional data: {}",

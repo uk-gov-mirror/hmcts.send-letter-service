@@ -31,8 +31,7 @@ class DeleteOldFilesTaskTest {
             FtpClient ftp = FtpHelper.getSuccessfulClient(LocalSftpServer.port);
 
             ftp.upload(
-                new FileToSend("hello.zip", "some content".getBytes()),
-                false,
+                new FileToSend("hello.zip", "some content".getBytes(), false),
                 LocalSftpServer.SERVICE_FOLDER
             );
 

@@ -21,10 +21,10 @@ class FtpUploadTest {
 
     @Test
     void uploads_file() throws Exception {
-        FileToSend doc = new FileToSend("hello.zip", "world".getBytes());
+        FileToSend doc = new FileToSend("hello.zip", "world".getBytes(), false);
         try (LocalSftpServer server = LocalSftpServer.create()) {
             FtpClient client = FtpHelper.getSuccessfulClient(LocalSftpServer.port);
-            client.upload(doc, false, LocalSftpServer.SERVICE_FOLDER);
+            client.upload(doc, LocalSftpServer.SERVICE_FOLDER);
             File[] files = server.lettersFolder.listFiles();
             assertThat(files.length).isEqualTo(1);
             String content = new String(Files.toByteArray(files[0]));
