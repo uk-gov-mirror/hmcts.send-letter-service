@@ -29,7 +29,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type , product, component) {
-  before('smoketest:aks') {
+  before('smoketest:preview') {
     withAksClient('nonprod') {
       // vars needed for AKS testing
       env.TEST_S2S_NAME = 'send_letter_tests'
@@ -40,7 +40,6 @@ withPipeline(type , product, component) {
       env.FTP_TARGET_FOLDER = 'TO_XEROX'
       env.TEST_FTP_REPORTS_FOLDER = 'FROM_XEROX'
       env.TEST_ENCRYPTION_ENABLED = false
-      env.RESOURCE_GROUP = "${product}-${component}-aks"
     }
   }
 
