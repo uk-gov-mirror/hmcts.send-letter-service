@@ -115,7 +115,7 @@ public class LetterService {
 
         letterRepository.save(dbLetter);
 
-        log.info("Created new letter {}", id);
+        log.info("Created new letter {} for service {}", id, serviceName);
 
         return id;
     }

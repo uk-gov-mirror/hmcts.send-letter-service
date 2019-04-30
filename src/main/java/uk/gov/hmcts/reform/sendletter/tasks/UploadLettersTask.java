@@ -80,7 +80,7 @@ public class UploadLettersTask {
             insights.trackUploadedLetters(counter);
         }
 
-        logger.info("Completed '{}' task", TASK_NAME);
+        logger.info("Completed '{}' task. Uploaded {} letters", TASK_NAME, counter);
     }
 
     private void uploadToFtp(Letter letter) {

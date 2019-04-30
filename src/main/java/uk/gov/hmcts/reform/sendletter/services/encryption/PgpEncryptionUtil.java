@@ -66,7 +66,7 @@ public final class PgpEncryptionUtil {
 
             return writeEncryptedDataToOutputStream(byteArrayOutputStream, encryptedDataGenerator);
         } catch (IOException | PGPException exc) {
-            log.error("Error encrypting file", exc);
+            log.error("Error encrypting file {}", inputFileName, exc);
             throw new UnableToPgpEncryptZipFileException(exc);
         }
     }

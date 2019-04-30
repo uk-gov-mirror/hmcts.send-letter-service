@@ -24,7 +24,7 @@ import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
 
 /**
  * Fetches reports from SFTP concerning posted
- * letters and sets posted letters as Posted in the database.
+ * letters and sets status as Posted in the database.
  */
 @Component
 @ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
