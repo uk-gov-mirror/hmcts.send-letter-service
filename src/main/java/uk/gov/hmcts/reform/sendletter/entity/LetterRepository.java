@@ -25,6 +25,14 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
         @Param("before") LocalDateTime before
     );
 
+    @Query("select l from Letter l where l.status not in ('Posted', 'Aborted')"
+        + " and l.createdAt < :createdBefore and l.type <> '"
+        + UploadLettersTask.SMOKE_TEST_LETTER_TYPE
+        + "' order by l.createdAt asc")
+    Stream<Letter> findStaleLetters(
+        @Param("createdBefore") LocalDateTime createdBefore
+    );
+
     Optional<Letter> findByChecksumAndStatusOrderByCreatedAtDesc(String checksum, LetterStatus status);
 
     Optional<Letter> findById(UUID id);

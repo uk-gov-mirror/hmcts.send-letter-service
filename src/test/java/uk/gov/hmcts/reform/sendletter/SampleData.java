@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Base64;
@@ -56,16 +57,28 @@ public final class SampleData {
     }
 
     public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(String service) {
+        return letterEntity(service, now());
+    }
+
+    public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(String service, LocalDateTime createdAt) {
+        return letterEntity(service, createdAt, "letterType1");
+    }
+
+    public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(
+        String service,
+        LocalDateTime createdAt,
+        String type
+    ) {
         try {
             return new uk.gov.hmcts.reform.sendletter.entity.Letter(
                 UUID.randomUUID(),
                 "messageId",
                 service,
                 new ObjectMapper().readTree("{}"),
-                "a type",
+                type,
                 new byte[1],
                 false,
-                now()
+                createdAt
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
