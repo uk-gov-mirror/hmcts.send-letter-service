@@ -49,36 +49,31 @@ public class FtpClient {
     }
     // endregion
 
-    public void upload(FileToSend file, String serviceFolder) {
+    public void upload(FileToSend file, String serviceFolder, SFTPClient sftpClient) {
+        String folder = file.isSmokeTest
+            ? configProperties.getSmokeTestTargetFolder()
+            : String.join("/", configProperties.getTargetFolder(), serviceFolder);
+
+        String path = String.join("/", folder, file.getName());
         Instant start = Instant.now();
+        boolean isSuccess = false;
 
-        runWith(sftp -> {
-            boolean isSuccess = false;
+        try {
+            sftpClient.getFileTransfer().upload(file, path);
 
-            try {
-                String folder = file.isSmokeTest
-                    ? configProperties.getSmokeTestTargetFolder()
-                    : String.join("/", configProperties.getTargetFolder(), serviceFolder);
+            logger.info(
+                "File uploaded. Time: {}, Size: {}, Folder: {}",
+                ChronoUnit.MILLIS.between(start, Instant.now()) + "ms",
+                file.content.length / 1024 + "KB",
+                serviceFolder
+            );
 
-                String path = String.join("/", folder, file.getName());
-                sftp.getFileTransfer().upload(file, path);
-
-                logger.info(
-                    "File uploaded. Time: {}, Size: {}, Folder: {}",
-                    ChronoUnit.MILLIS.between(start, Instant.now()) + "ms",
-                    file.content.length / 1024 + "KB",
-                    serviceFolder
-                );
-
-                isSuccess = true;
-
-                return null;
-            } catch (IOException exc) {
-                throw new FtpException("Unable to upload file.", exc);
-            } finally {
-                insights.trackFtpUpload(Duration.between(start, Instant.now()), isSuccess);
-            }
-        });
+            isSuccess = true;
+        } catch (IOException exc) {
+            throw new FtpException("Unable to upload file.", exc);
+        } finally {
+            insights.trackFtpUpload(Duration.between(start, Instant.now()), isSuccess);
+        }
     }
 
     /**
@@ -172,7 +167,7 @@ public class FtpClient {
         runWith(sftpClient -> null);
     }
 
-    private <T> T runWith(Function<SFTPClient, T> action) {
+    public <T> T runWith(Function<SFTPClient, T> action) {
         SSHClient ssh = null;
 
         try {

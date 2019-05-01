@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
 import net.javacrumbs.shedlock.core.SchedulerLock;
+import net.schmizz.sshj.sftp.SFTPClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -63,27 +64,40 @@ public class UploadLettersTask {
 
         // Upload the letters in batches.
         // With each batch we mark them Uploaded so they no longer appear in the query.
-        List<Letter> letters;
+        List<Letter> lettersToUpload = repo.findFirst10ByStatus(LetterStatus.Created);
         int counter = 0;
 
-        do {
-            letters = repo.findFirst10ByStatus(LetterStatus.Created);
-            letters
-                .forEach(letter -> {
-                    uploadToFtp(letter);
-                    markAsUploaded(letter);
-                });
-            counter += letters.size();
-        } while (!letters.isEmpty());
+        if (!lettersToUpload.isEmpty()) {
+            counter = ftp.runWith(sftpClient -> {
+                int uploaded = uploadLetters(lettersToUpload, sftpClient);
+                List<Letter> letters;
 
-        if (counter > 0) {
-            insights.trackUploadedLetters(counter);
+                do {
+                    letters = repo.findFirst10ByStatus(LetterStatus.Created);
+                    uploaded += uploadLetters(letters, sftpClient);
+                } while (!letters.isEmpty());
+
+                return uploaded;
+            });
+
+            if (counter > 0) {
+                insights.trackUploadedLetters(counter);
+            }
         }
 
         logger.info("Completed '{}' task. Uploaded {} letters", TASK_NAME, counter);
     }
 
-    private void uploadToFtp(Letter letter) {
+    private int uploadLetters(List<Letter> lettersToUpload, SFTPClient sftpClient) {
+        lettersToUpload.forEach(letter -> {
+            uploadToFtp(letter, sftpClient);
+            markAsUploaded(letter);
+        });
+
+        return lettersToUpload.size();
+    }
+
+    private void uploadToFtp(Letter letter, SFTPClient sftpClient) {
         Optional<String> serviceFolder = serviceFolderMapping.getFolderFor(letter.getService());
         if (serviceFolder.isPresent()) {
             FileToSend file = new FileToSend(
@@ -92,7 +106,7 @@ public class UploadLettersTask {
                 isSmokeTest(letter)
             );
 
-            ftp.upload(file, serviceFolder.get());
+            ftp.upload(file, serviceFolder.get(), sftpClient);
 
             logger.info(
                 "Uploaded letter id: {}, checksum: {}, file name: {}, additional data: {}",

@@ -30,10 +30,14 @@ class DeleteOldFilesTaskTest {
 
             FtpClient ftp = FtpHelper.getSuccessfulClient(LocalSftpServer.port);
 
-            ftp.upload(
-                new FileToSend("hello.zip", "some content".getBytes(), false),
-                LocalSftpServer.SERVICE_FOLDER
-            );
+            ftp.runWith(sftpClient -> {
+                ftp.upload(
+                    new FileToSend("hello.zip", "some content".getBytes(), false),
+                    LocalSftpServer.SERVICE_FOLDER,
+                    sftpClient
+                );
+                return null;
+            });
 
             assertThat(ftp.listLetters(LocalSftpServer.SERVICE_FOLDER)).hasSize(1); // sanity check
 

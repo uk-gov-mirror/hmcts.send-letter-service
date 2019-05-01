@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
+import net.schmizz.sshj.sftp.SFTPClient;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
@@ -20,6 +22,7 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,6 +47,9 @@ class UploadLettersTaskTest {
     private FtpClient ftpClient;
 
     @Mock
+    private SFTPClient sftpClient;
+
+    @Mock
     private FtpAvailabilityChecker availabilityChecker;
 
     @Mock
@@ -54,11 +60,16 @@ class UploadLettersTaskTest {
 
     private ArgumentCaptor<FileToSend> captureFileToSend = ArgumentCaptor.forClass(FileToSend.class);
 
+    @Captor
+    private ArgumentCaptor<Function<SFTPClient, Integer>> captureRunWith;
+
     private UploadLettersTask task;
 
     @BeforeEach
     void setUp() {
         given(availabilityChecker.isFtpAvailable(any(LocalTime.class))).willReturn(true);
+        given(ftpClient.runWith(any())).willReturn(0);// otherwise you'll face infinite loop
+
         this.task = new UploadLettersTask(repo, ftpClient, availabilityChecker, serviceFolderMapping, insights);
     }
 
@@ -71,20 +82,29 @@ class UploadLettersTaskTest {
     void should_handle_smoke_test_letters() {
         // given
         given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
-        givenDbContains(letterOfType(SMOKE_TEST_LETTER_TYPE));
+        givenDbContains(
+            letterOfType(SMOKE_TEST_LETTER_TYPE),
+            letterOfType("not_" + SMOKE_TEST_LETTER_TYPE)
+        );
 
         // when
         task.run();
 
         // and
-        // given
-        givenDbContains(letterOfType("not_" + SMOKE_TEST_LETTER_TYPE));
+        verify(ftpClient).runWith(captureRunWith.capture());
 
         // when
-        task.run();
+        int uploadAttempts = captureRunWith
+            .getAllValues()
+            .stream()
+            .mapToInt(function -> function.apply(sftpClient))
+            .sum();
 
         // then
-        verify(ftpClient, times(2)).upload(captureFileToSend.capture(), any());
+        assertThat(uploadAttempts).isEqualTo(2);
+
+        // and
+        verify(ftpClient, times(2)).upload(captureFileToSend.capture(), any(), any());
         assertThat(
             captureFileToSend
                 .getAllValues()
@@ -95,22 +115,25 @@ class UploadLettersTaskTest {
 
     @Test
     void should_not_start_process_if_ftp_is_not_available() {
-        reset(availabilityChecker);
+        reset(availabilityChecker, ftpClient);
         given(availabilityChecker.isFtpAvailable(any(LocalTime.class))).willReturn(false);
 
         task.run();
 
+        verify(ftpClient, never()).runWith(any());
         verify(repo, never()).findByStatus(eq(Created));
     }
 
     @Test
     void should_skip_letter_if_folder_for_its_service_is_not_configured() {
+        // given
         givenDbContains(
             letterForService("service_A"),
             letterForService("service_B"),
             letterForService("service_C")
         );
 
+        // and
         given(serviceFolderMapping.getFolderFor(eq("service_A"))).willReturn(Optional.of("folder_A"));
         given(serviceFolderMapping.getFolderFor(eq("service_B"))).willReturn(Optional.empty());
         given(serviceFolderMapping.getFolderFor(eq("service_C"))).willReturn(Optional.of("folder_C"));
@@ -118,9 +141,22 @@ class UploadLettersTaskTest {
         // when
         task.run();
 
+        // and
+        verify(ftpClient).runWith(captureRunWith.capture());
+
+        // when
+        int uploadAttempts = captureRunWith
+            .getAllValues()
+            .stream()
+            .mapToInt(function -> function.apply(sftpClient))
+            .sum();
+
         // then
-        verify(ftpClient).upload(any(), eq("folder_A"));
-        verify(ftpClient).upload(any(), eq("folder_C"));
+        assertThat(uploadAttempts).isEqualTo(3);
+
+        // and
+        verify(ftpClient).upload(any(), eq("folder_A"), any());
+        verify(ftpClient).upload(any(), eq("folder_C"), any());
         verifyNoMoreInteractions(ftpClient);
     }
 

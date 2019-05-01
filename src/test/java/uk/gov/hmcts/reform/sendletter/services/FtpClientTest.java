@@ -45,15 +45,14 @@ class FtpClientTest {
     @Mock private AppInsights insights;
 
     @BeforeEach
-    void setUp() throws Exception {
-        given(sshClient.newSFTPClient()).willReturn(sftpClient);
-
+    void setUp() {
         client = new FtpClient(() -> sshClient, ftpProps, insights);
     }
 
     @Test
     void download_should_not_include_non_csv_files() throws Exception {
         // given
+        given(sshClient.newSFTPClient()).willReturn(sftpClient);
         given(sftpClient.getFileTransfer()).willReturn(sftpFileTransfer);
         RemoteResourceInfo nonCsvFile = mock(RemoteResourceInfo.class);
         given(nonCsvFile.isRegularFile()).willReturn(true);
@@ -72,6 +71,7 @@ class FtpClientTest {
     @Test
     void should_track_failure_when_trying_to_download_report() throws IOException {
         // given
+        given(sshClient.newSFTPClient()).willReturn(sftpClient);
         given(sftpClient.getFileTransfer()).willReturn(sftpFileTransfer);
         willThrow(IOException.class).given(sftpClient).ls(eq(null));
 
@@ -89,7 +89,7 @@ class FtpClientTest {
         given(ftpProps.getTargetFolder()).willReturn("regular");
 
         // when
-        client.upload(new FileToSend("hello.zip", "hello".getBytes(), true), "cmc");
+        client.upload(new FileToSend("hello.zip", "hello".getBytes(), true), "cmc", sftpClient);
 
         // then
         verify(sftpFileTransfer)
@@ -99,7 +99,7 @@ class FtpClientTest {
             );
 
         // when
-        client.upload(new FileToSend("hello.zip", "hello".getBytes(), false), "cmc");
+        client.upload(new FileToSend("hello.zip", "hello".getBytes(), false), "cmc", sftpClient);
 
         // then
         verify(sftpFileTransfer)
@@ -117,7 +117,7 @@ class FtpClientTest {
 
         // when
         Throwable exception = catchThrowable(() ->
-            client.upload(new FileToSend("goodbye.zip", "goodbye".getBytes(), false), "cmc")
+            client.upload(new FileToSend("goodbye.zip", "goodbye".getBytes(), false), "cmc", sftpClient)
         );
 
         // then
@@ -127,6 +127,7 @@ class FtpClientTest {
     @Test
     void should_delete_report_from_ftp() throws IOException {
         // given
+        given(sshClient.newSFTPClient()).willReturn(sftpClient);
         doNothing().when(sftpClient).rm(anyString());
 
         // when
@@ -139,6 +140,7 @@ class FtpClientTest {
     @Test
     void should_track_failure_when_trying_to_delete_report_from_ftp() throws IOException {
         // given
+        given(sshClient.newSFTPClient()).willReturn(sftpClient);
         willThrow(IOException.class).given(sftpClient).rm(anyString());
 
         // when
