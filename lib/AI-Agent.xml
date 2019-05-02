@@ -8,10 +8,10 @@
             <JDBC enabled="true"/>
         </BuiltIn>
 
-        <Class name="uk.gov.hmcts.reform.sendletter.services.encryption.PgpEncryptionUtil" Type="Encryption">
+        <Class name="uk.gov.hmcts.reform.sendletter.services.encryption.PgpEncryptionUtil" type="Encryption">
             <Method name="encryptFile"/>
         </Class>
-        <Class name="uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator" Type="PdfCreator">
+        <Class name="uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator" type="PdfCreator">
             <Method name="createFromTemplates"/>
             <Method name="createFromBase64Pdfs"/>
         </Class>
