@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.core.dependencies.apachecommons.lang3.BooleanUtils;
 import com.microsoft.applicationinsights.telemetry.Duration;
+import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
@@ -14,6 +15,8 @@ import java.util.Map;
 
 @Component
 public class AppInsights {
+
+    static final String FTP_TYPE = "FTP";
 
     static final String LETTER_NOT_PRINTED = "LetterNotPrinted";
 
@@ -32,7 +35,14 @@ public class AppInsights {
     // dependencies
 
     private void trackDependency(String command, java.time.Duration duration, boolean success) {
-        telemetry.trackDependency(AppDependency.FTP_CLIENT, command, new Duration(duration.toMillis()), success);
+        RemoteDependencyTelemetry dependencyTelemetry = new RemoteDependencyTelemetry(
+            AppDependency.FTP_CLIENT,
+            command,
+            new Duration(duration.toMillis()),
+            success
+        );
+        dependencyTelemetry.setType(FTP_TYPE);
+        telemetry.trackDependency(dependencyTelemetry);
     }
 
     public void trackFtpUpload(java.time.Duration duration, boolean success) {

@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.sendletter.logging;
 
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.applicationinsights.telemetry.Duration;
+import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
 import com.microsoft.applicationinsights.telemetry.TelemetryContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,12 +27,18 @@ import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.sendletter.logging.AppDependency.FTP_CLIENT;
+import static uk.gov.hmcts.reform.sendletter.logging.AppDependencyCommand.FTP_FILE_UPLOADED;
+import static uk.gov.hmcts.reform.sendletter.logging.AppDependencyCommand.FTP_REPORT_DELETED;
+import static uk.gov.hmcts.reform.sendletter.logging.AppDependencyCommand.FTP_REPORT_DOWNLOADED;
+import static uk.gov.hmcts.reform.sendletter.logging.AppInsights.FTP_TYPE;
 
 @ExtendWith(MockitoExtension.class)
 class AppInsightsTest {
@@ -45,6 +51,9 @@ class AppInsightsTest {
 
     @Captor
     private ArgumentCaptor<Map<String, String>> properties;
+
+    @Captor
+    private ArgumentCaptor<RemoteDependencyTelemetry> dependencyTelemetryCaptor;
 
     @Mock
     private TelemetryClient telemetry;
@@ -80,24 +89,7 @@ class AppInsightsTest {
         insights.trackFtpReportDeletion(duration, true);
         insights.trackFtpReportDownload(duration, true);
 
-        verify(telemetry).trackDependency(
-            eq(AppDependency.FTP_CLIENT),
-            eq(AppDependencyCommand.FTP_FILE_UPLOADED),
-            any(Duration.class),
-            eq(true)
-        );
-        verify(telemetry).trackDependency(
-            eq(AppDependency.FTP_CLIENT),
-            eq(AppDependencyCommand.FTP_REPORT_DELETED),
-            any(Duration.class),
-            eq(true)
-        );
-        verify(telemetry).trackDependency(
-            eq(AppDependency.FTP_CLIENT),
-            eq(AppDependencyCommand.FTP_REPORT_DOWNLOADED),
-            any(Duration.class),
-            eq(true)
-        );
+        verify(telemetry, times(3)).trackDependency(dependencyTelemetryCaptor.capture());
         verifyNoMoreInteractions(telemetry);
 
         reset(telemetry);
@@ -106,25 +98,24 @@ class AppInsightsTest {
         insights.trackFtpReportDeletion(duration, false);
         insights.trackFtpReportDownload(duration, false);
 
-        verify(telemetry).trackDependency(
-            eq(AppDependency.FTP_CLIENT),
-            eq(AppDependencyCommand.FTP_FILE_UPLOADED),
-            any(Duration.class),
-            eq(false)
-        );
-        verify(telemetry).trackDependency(
-            eq(AppDependency.FTP_CLIENT),
-            eq(AppDependencyCommand.FTP_REPORT_DELETED),
-            any(Duration.class),
-            eq(false)
-        );
-        verify(telemetry).trackDependency(
-            eq(AppDependency.FTP_CLIENT),
-            eq(AppDependencyCommand.FTP_REPORT_DOWNLOADED),
-            any(Duration.class),
-            eq(false)
-        );
+        verify(telemetry, times(3)).trackDependency(dependencyTelemetryCaptor.capture());
         verifyNoMoreInteractions(telemetry);
+
+        assertThat(dependencyTelemetryCaptor.getAllValues())
+            .extracting(dependencyTelemetry -> tuple(
+                dependencyTelemetry.getName(),
+                dependencyTelemetry.getCommandName(),
+                dependencyTelemetry.getSuccess(),
+                dependencyTelemetry.getType()
+            ))
+            .containsOnly(
+                tuple(FTP_CLIENT, FTP_FILE_UPLOADED, true, FTP_TYPE),
+                tuple(FTP_CLIENT, FTP_REPORT_DELETED, true, FTP_TYPE),
+                tuple(FTP_CLIENT, FTP_REPORT_DOWNLOADED, true, FTP_TYPE),
+                tuple(FTP_CLIENT, FTP_FILE_UPLOADED, false, FTP_TYPE),
+                tuple(FTP_CLIENT, FTP_REPORT_DELETED, false, FTP_TYPE),
+                tuple(FTP_CLIENT, FTP_REPORT_DOWNLOADED, false, FTP_TYPE)
+            );
     }
 
     // events
