@@ -216,6 +216,7 @@ dependencies {
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-json', version: versions.springBoot
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: versions.springBoot
 
   compile group: 'org.flywaydb', name: 'flyway-core', version: versions.flywayV
   compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
@@ -251,6 +252,8 @@ dependencies {
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot, {
     exclude group: 'junit', module: 'junit'
   }
+  testCompile group: 'com.icegreen', name: 'greenmail', version: '1.5.10'
+  testCompile group: 'org.apache.commons', name: 'commons-email', version: '1.5'
   testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
   testCompile group: 'org.apache.pdfbox', name: 'preflight', version: versions.pdfbox
   testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockitoJupiter
