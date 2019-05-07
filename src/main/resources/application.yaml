@@ -54,6 +54,10 @@ spring:
             enable: true
     test-connection: false
 
+reports:
+  upload-summary:
+    recipients:
+
 flyway:
   user: ${LETTER_TRACKING_DB_USER_NAME}
   password: ${LETTER_TRACKING_DB_PASSWORD}
