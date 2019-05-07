@@ -10,6 +10,7 @@ import java.time.ZonedDateTime;
 public final class TimeZones {
 
     public static final String EUROPE_LONDON = "Europe/London";
+    public static final String UTC = "UTC";
 
     private TimeZones() {
         // utility class construct
