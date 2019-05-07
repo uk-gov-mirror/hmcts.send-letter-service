@@ -1,0 +1,21 @@
+{
+  "stale_letters": [
+    {
+      "id": "767cf17e-0ec0-452b-a457-bc173d51ff40",
+      "status": "status1",
+      "service": "service1",
+      "created_at": "2019-05-03T12:34:56.123",
+      "sent_to_print_at": "2019-05-03T13:00:00",
+      "has_failed": false
+    },
+    {
+      "id": "462a58fe-e9b7-494f-a719-5083f31c69cf",
+      "status": "status2",
+      "service": "service2",
+      "created_at": "2019-05-02T10:11:22.321",
+      "sent_to_print_at": null,
+      "has_failed": true
+    }
+  ],
+  "count": 2
+}
