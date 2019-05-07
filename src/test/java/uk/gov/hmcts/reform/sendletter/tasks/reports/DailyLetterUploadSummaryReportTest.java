@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,20 +69,15 @@ class DailyLetterUploadSummaryReportTest {
     }
 
     @Test
-    void should_attempt_to_send_a_report_when_no_recipients_are_configured() throws MessagingException {
+    void should_not_send_a_report_when_no_recipients_are_configured() {
         // given
-        given(reportService.getCountFor(LocalDate.now())).willReturn(Collections.emptyList());
-        given(mailSender.createMimeMessage()).willReturn(new JavaMailSenderImpl().createMimeMessage());
-        doNothing().when(mailSender).send(any(MimeMessage.class));
         DailyLetterUploadSummaryReport report = new DailyLetterUploadSummaryReport(reportService, emailSender, null);
 
         // when
         report.send();
 
         // then
-        verify(mailSender).send(mimeMessageCaptor.capture());
-
-        // and
-        assertThat(mimeMessageCaptor.getValue().getAllRecipients()).isNull(); // library doesn't assign empty arrays
+        verify(reportService, never()).getCountFor(any(LocalDate.class));
+        verify(mailSender, never()).send(any(MimeMessage.class));
     }
 }

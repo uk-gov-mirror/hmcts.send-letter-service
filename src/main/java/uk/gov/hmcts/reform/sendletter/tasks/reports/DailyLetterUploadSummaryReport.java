@@ -52,13 +52,17 @@ public class DailyLetterUploadSummaryReport {
         }
 
         if (this.recipients.length == 0) {
-            log.warn("No recipients configured for reports");
+            log.error("No recipients configured for '{}' report", EMAIL_SUBJECT);
         }
     }
 
     @SchedulerLock(name = "daily-letter-upload-summary")
     @Scheduled(cron = "${reports.upload-summary.cron}", zone = EUROPE_LONDON)
     public void send() {
+        if (recipients.length == 0) {
+            return;
+        }
+
         LocalDate today = LocalDate.now();
         log.info("Generating report '{}' for '{}'", EMAIL_SUBJECT, today);
 
