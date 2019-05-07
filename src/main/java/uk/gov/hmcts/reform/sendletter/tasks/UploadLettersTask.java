@@ -63,7 +63,7 @@ public class UploadLettersTask {
         logger.info("Started '{}' task", TASK_NAME);
 
         // Upload the letters in batches.
-        // With each batch we mark them Uploaded so they no longer appear in the query.
+        // With each batch we mark them Uploaded/Skipped so they no longer appear in the query.
         List<Letter> lettersToUpload = repo.findFirst10ByStatus(LetterStatus.Created);
         int counter = 0;
 
@@ -79,26 +79,35 @@ public class UploadLettersTask {
 
                 return uploaded;
             });
+        }
 
-            if (counter > 0) {
-                insights.trackUploadedLetters(counter);
-            }
+        if (counter > 0) {
+            insights.trackUploadedLetters(counter);
         }
 
         logger.info("Completed '{}' task. Uploaded {} letters", TASK_NAME, counter);
     }
 
     private int uploadLetters(List<Letter> lettersToUpload, SFTPClient sftpClient) {
-        lettersToUpload.forEach(letter -> {
-            uploadToFtp(letter, sftpClient);
-            markAsUploaded(letter);
-        });
+        return lettersToUpload
+            .stream()
+            .mapToInt(letter -> {
+                boolean isUploaded = uploadToFtp(letter, sftpClient);
 
-        return lettersToUpload.size();
+                if (isUploaded) {
+                    markAsUploaded(letter);
+                } else {
+                    markAsSkipped(letter);
+                }
+
+                return isUploaded ? 1 : 0;
+            })
+            .sum();
     }
 
-    private void uploadToFtp(Letter letter, SFTPClient sftpClient) {
+    private boolean uploadToFtp(Letter letter, SFTPClient sftpClient) {
         Optional<String> serviceFolder = serviceFolderMapping.getFolderFor(letter.getService());
+
         if (serviceFolder.isPresent()) {
             FileToSend file = new FileToSend(
                 FinalPackageFileNameHelper.generateName(letter),
@@ -118,6 +127,14 @@ public class UploadLettersTask {
         } else {
             logger.error("Folder for service {} not found. Skipping letter {}", letter.getService(), letter.getId());
         }
+
+        return serviceFolder.isPresent();
+    }
+
+    private void updateLetterInDb(Letter letter) {
+        repo.saveAndFlush(letter);
+
+        logger.info("Marked letter {} as {}", letter.getId(), letter.getStatus());
     }
 
     private void markAsUploaded(Letter letter) {
@@ -127,9 +144,13 @@ public class UploadLettersTask {
         // remove pdf content, as it's no longer needed
         letter.setFileContent(null);
 
-        repo.saveAndFlush(letter);
+        updateLetterInDb(letter);
+    }
 
-        logger.info("Marked letter {} as {}", letter.getId(), letter.getStatus());
+    private void markAsSkipped(Letter letter) {
+        letter.setStatus(LetterStatus.Skipped);
+
+        updateLetterInDb(letter);
     }
 
     private boolean isSmokeTest(Letter letter) {

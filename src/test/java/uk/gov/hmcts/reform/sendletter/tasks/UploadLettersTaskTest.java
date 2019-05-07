@@ -35,6 +35,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
+import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Skipped;
+import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Uploaded;
 import static uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask.SMOKE_TEST_LETTER_TYPE;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,7 +70,7 @@ class UploadLettersTaskTest {
     @BeforeEach
     void setUp() {
         given(availabilityChecker.isFtpAvailable(any(LocalTime.class))).willReturn(true);
-        given(ftpClient.runWith(any())).willReturn(0);// otherwise you'll face infinite loop
+        given(ftpClient.runWith(any())).willReturn(0);// value is a counter of uploaded letters
 
         this.task = new UploadLettersTask(repo, ftpClient, availabilityChecker, serviceFolderMapping, insights);
     }
@@ -127,16 +129,15 @@ class UploadLettersTaskTest {
     @Test
     void should_skip_letter_if_folder_for_its_service_is_not_configured() {
         // given
-        givenDbContains(
-            letterForService("service_A"),
-            letterForService("service_B"),
-            letterForService("service_C")
-        );
+        Letter letterA = letterForService("service_A");
+        Letter letterB = letterForService("service_B");
+        Letter letterC = letterForService("service_C");
+        givenDbContains(letterA, letterB, letterC);
 
         // and
-        given(serviceFolderMapping.getFolderFor(eq("service_A"))).willReturn(Optional.of("folder_A"));
-        given(serviceFolderMapping.getFolderFor(eq("service_B"))).willReturn(Optional.empty());
-        given(serviceFolderMapping.getFolderFor(eq("service_C"))).willReturn(Optional.of("folder_C"));
+        given(serviceFolderMapping.getFolderFor(letterA.getService())).willReturn(Optional.of("folder_A"));
+        given(serviceFolderMapping.getFolderFor(letterB.getService())).willReturn(Optional.empty());
+        given(serviceFolderMapping.getFolderFor(letterC.getService())).willReturn(Optional.of("folder_C"));
 
         // when
         task.run();
@@ -152,7 +153,10 @@ class UploadLettersTaskTest {
             .sum();
 
         // then
-        assertThat(uploadAttempts).isEqualTo(3);
+        assertThat(uploadAttempts).isEqualTo(2);
+        assertThat(letterA.getStatus()).isEqualTo(Uploaded);
+        assertThat(letterB.getStatus()).isEqualTo(Skipped);
+        assertThat(letterC.getStatus()).isEqualTo(Uploaded);
 
         // and
         verify(ftpClient).upload(any(), eq("folder_A"), any());
