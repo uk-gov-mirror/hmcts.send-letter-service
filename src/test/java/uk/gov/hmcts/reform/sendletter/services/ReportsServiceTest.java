@@ -1,19 +1,19 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.sendletter.config.ReportsServiceConfig;
 import uk.gov.hmcts.reform.sendletter.entity.LettersCountSummaryRepository;
 import uk.gov.hmcts.reform.sendletter.entity.reports.ServiceLettersCount;
 import uk.gov.hmcts.reform.sendletter.model.out.LettersCountSummary;
-import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,13 +32,13 @@ class ReportsServiceTest {
     private ZeroRowFiller zeroRowFiller;
 
     @Mock
-    private ServiceFolderMapping serviceFolderMapping;
+    private ReportsServiceConfig reportsServiceConfig;
 
     private ReportsService service;
 
     @BeforeEach
     void setUp() {
-        this.service = new ReportsService(this.repository, serviceFolderMapping, zeroRowFiller, "16:00", "17:00");
+        this.service = new ReportsService(this.repository, reportsServiceConfig, zeroRowFiller, "16:00", "17:00");
 
         when(this.zeroRowFiller.fill(any()))
             .thenAnswer(invocation -> invocation.getArgument(0)); // return data unchanged
@@ -59,8 +59,8 @@ class ReportsServiceTest {
             new ServiceLettersCount("bService", 20)
         ));
 
-        given(serviceFolderMapping.getFolderFor("aService")).willReturn(Optional.of("FolderA"));
-        given(serviceFolderMapping.getFolderFor("bService")).willReturn(Optional.of("FolderB"));
+        given(reportsServiceConfig.getServiceConfig())
+            .willReturn(ImmutableMap.of("aService", "FolderA", "bService", "FolderB"));
 
         //when
         List<LettersCountSummary> result = service.getCountFor(date);
@@ -89,8 +89,9 @@ class ReportsServiceTest {
             new ServiceLettersCount("aService", 10),
             new ServiceLettersCount("send_letter_tests", 20)
         ));
-        given(serviceFolderMapping.getFolderFor("aService")).willReturn(Optional.of("FolderA"));
-        given(serviceFolderMapping.getFolderFor("send_letter_tests")).willReturn(Optional.of("BULKPRINT"));
+
+        given(reportsServiceConfig.getServiceConfig())
+            .willReturn(ImmutableMap.of("aService", "FolderA", "send_letter_tests", "Bulk Print"));
 
         //when
         List<LettersCountSummary> result = service.getCountFor(date);
@@ -116,7 +117,7 @@ class ReportsServiceTest {
             new ServiceLettersCount("aService", 10),
             new ServiceLettersCount(null, 2)
         ));
-        given(serviceFolderMapping.getFolderFor("aService")).willReturn(Optional.of("FolderA"));
+        given(reportsServiceConfig.getServiceConfig()).willReturn(ImmutableMap.of("aService", "FolderA"));
 
         //when
         List<LettersCountSummary> result = service.getCountFor(date);

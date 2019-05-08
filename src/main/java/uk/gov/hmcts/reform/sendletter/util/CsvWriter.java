@@ -29,7 +29,7 @@ public final class CsvWriter {
 
         try (CSVPrinter printer = new CSVPrinter(fileWriter, csvFileHeader)) {
             for (LettersCountSummary summary : lettersCountSummary) {
-                printer.printRecord(summary.service, summary.uploaded);
+                printer.printRecord(summary.serviceName, summary.uploaded);
             }
         }
         return csvFile;

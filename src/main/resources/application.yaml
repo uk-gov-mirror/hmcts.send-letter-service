@@ -58,6 +58,17 @@ reports:
     cron: ${UPLOAD_SUMMARY_REPORT_CRON:0 0 19 * * *}
     enabled: ${UPLOAD_SUMMARY_REPORT_ENABLED:false}
     recipients: ${UPLOAD_SUMMARY_REPORT_RECIPIENTS:}
+  service-config:
+    - service: cmc_claim_store
+      display-name: CMC
+    - service: send_letter_tests
+      display-name: Bulk Print
+    - service: divorce_frontend
+      display-name: Divorce
+    - service: probate_backend
+      display-name: Probate
+    - service: sscs
+      display-name: SSCS
 
 flyway:
   user: ${LETTER_TRACKING_DB_USER_NAME}
