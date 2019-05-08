@@ -12,8 +12,9 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.StaleLetterService;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Resources.getResource;
@@ -34,7 +35,7 @@ public class StaleLetterControllerTest {
 
     @Test
     public void should_return_letters_from_stale_letter_service() throws Exception {
-        Stream<Letter> letters = Stream.of(
+        List<Letter> letters = Arrays.asList(
             letter(
                 UUID.fromString("767cf17e-0ec0-452b-a457-bc173d51ff40"),
                 "service1",

@@ -12,9 +12,10 @@ import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.StaleLetterService;
 
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static java.time.LocalDateTime.now;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -40,7 +41,7 @@ class StaleLettersTaskTest {
     @Test
     void should_do_nothing_when_there_are_no_unprinted_letters() {
         // given
-        given(staleLetterService.getStaleLetters()).willReturn(Stream.empty());
+        given(staleLetterService.getStaleLetters()).willReturn(emptyList());
 
         // when
         task.run();
@@ -55,7 +56,7 @@ class StaleLettersTaskTest {
         // given
         Letter letter = staleLetter();
 
-        given(staleLetterService.getStaleLetters()).willReturn(Stream.of(letter));
+        given(staleLetterService.getStaleLetters()).willReturn(asList(letter));
 
         // when
         task.run();

@@ -6,12 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.StaleLetterService;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
 
@@ -35,15 +34,13 @@ public class StaleLettersTask {
         this.insights = insights;
     }
 
-    @Transactional
     @SchedulerLock(name = TASK_NAME)
     @Scheduled(cron = "${tasks.stale-letters-report}", zone = EUROPE_LONDON)
     public void run() {
         logger.info("Started '{}' task", TASK_NAME);
 
-        try (Stream<Letter> letters = staleLetterService.getStaleLetters()) {
-            long count = letters.peek(insights::trackStaleLetter).count();
-            logger.info("Completed '{}' task. Letters found: {}", TASK_NAME, count);
-        }
+        List<Letter> letters = staleLetterService.getStaleLetters();
+        long count = letters.stream().peek(insights::trackStaleLetter).count();
+        logger.info("Completed '{}' task. Letters found: {}", TASK_NAME, count);
     }
 }

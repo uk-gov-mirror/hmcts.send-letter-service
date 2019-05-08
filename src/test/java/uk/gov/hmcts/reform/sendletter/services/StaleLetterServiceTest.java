@@ -17,11 +17,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.DAYS;
-import static java.util.stream.Collectors.toList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -45,7 +44,7 @@ public class StaleLetterServiceTest {
 
     @BeforeEach
     public void setUp() {
-        given(letterRepository.findStaleLetters(any())).willReturn(Stream.of());
+        given(letterRepository.findStaleLetters(any())).willReturn(emptyList());
         given(dateCalculator.subtractBusinessDays(any(), anyInt())).willReturn(ZonedDateTime.now());
 
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON));
@@ -124,14 +123,14 @@ public class StaleLetterServiceTest {
             mock(Letter.class)
         );
 
-        given(letterRepository.findStaleLetters(any())).willReturn(repositoryLetters.stream());
+        given(letterRepository.findStaleLetters(any())).willReturn(repositoryLetters);
 
         // when
-        Stream<Letter> staleLetters =
+        List<Letter> staleLetters =
             staleLetterService("16:00", 2).getStaleLetters();
 
         // then
-        assertThat(staleLetters.collect(toList())).hasSameElementsAs(repositoryLetters);
+        assertThat(staleLetters).hasSameElementsAs(repositoryLetters);
     }
 
     private StaleLetterService staleLetterService(String ftpDowntimeStart, int minStaleLetterAgeInBusinessDays) {

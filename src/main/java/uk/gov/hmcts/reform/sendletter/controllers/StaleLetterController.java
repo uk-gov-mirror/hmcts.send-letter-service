@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.sendletter.model.out.StaleLetter;
 import uk.gov.hmcts.reform.sendletter.model.out.StaleLetterResponse;
 import uk.gov.hmcts.reform.sendletter.services.StaleLetterService;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
@@ -33,11 +33,14 @@ public class StaleLetterController {
         @ApiResponse(code = 500, message = "Error occurred while retrieving stale letters")
     })
     public StaleLetterResponse getStaleLetters() {
-        try (Stream<Letter> letters = staleLetterService.getStaleLetters()) {
-            return new StaleLetterResponse(
-                letters.map(this::mapToStaleLetter).collect(toList())
-            );
-        }
+        List<StaleLetter> staleLetters =
+            staleLetterService
+                .getStaleLetters()
+                .stream()
+                .map(this::mapToStaleLetter)
+                .collect(toList());
+
+        return new StaleLetterResponse(staleLetters);
     }
 
     private StaleLetter mapToStaleLetter(Letter dbLetter) {

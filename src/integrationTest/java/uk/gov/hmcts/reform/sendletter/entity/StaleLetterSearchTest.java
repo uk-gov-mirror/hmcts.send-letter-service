@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.sendletter.SampleData;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -30,7 +29,7 @@ public class StaleLetterSearchTest {
         Letter uploadedLetter = storeLetter(cutOffDate.minusDays(5), LetterStatus.Uploaded);
 
         // when
-        List<Letter> letters = repository.findStaleLetters(cutOffDate).collect(toList());
+        List<Letter> letters = repository.findStaleLetters(cutOffDate);
 
         // then
         assertThat(letters.size()).isEqualTo(2);
@@ -49,7 +48,7 @@ public class StaleLetterSearchTest {
         Letter abortedLetter = storeLetter(cutOffDate.minusSeconds(1), LetterStatus.Aborted);
 
         // when
-        List<Letter> letters = repository.findStaleLetters(cutOffDate).collect(toList());
+        List<Letter> letters = repository.findStaleLetters(cutOffDate);
 
         // then
         assertThat(letters.size()).isEqualTo(2);
@@ -66,7 +65,7 @@ public class StaleLetterSearchTest {
         storeLetter(cutOffDate.plusSeconds(1), LetterStatus.Created);
 
         // when
-        List<Letter> letters = repository.findStaleLetters(cutOffDate).collect(toList());
+        List<Letter> letters = repository.findStaleLetters(cutOffDate);
 
         // then
         assertThat(letters).isEmpty();
@@ -81,7 +80,7 @@ public class StaleLetterSearchTest {
         storeLetter(cutOffDate.minusDays(1), LetterStatus.Created, "not-smoke-test");
 
         // when
-        List<Letter> letters = repository.findStaleLetters(cutOffDate).collect(toList());
+        List<Letter> letters = repository.findStaleLetters(cutOffDate);
 
         // then
         assertThat(letters.size()).isEqualTo(1);

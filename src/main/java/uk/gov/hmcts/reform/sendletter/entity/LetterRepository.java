@@ -21,7 +21,7 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
         + " and l.createdAt < :createdBefore and l.type <> '"
         + UploadLettersTask.SMOKE_TEST_LETTER_TYPE
         + "' order by l.createdAt asc")
-    Stream<Letter> findStaleLetters(
+    List<Letter> findStaleLetters(
         @Param("createdBefore") LocalDateTime createdBefore
     );
 

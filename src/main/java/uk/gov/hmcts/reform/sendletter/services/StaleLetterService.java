@@ -10,7 +10,7 @@ import java.time.Clock;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.stream.Stream;
+import java.util.List;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
@@ -42,7 +42,7 @@ public class StaleLetterService {
         this.clock = clock;
     }
 
-    public Stream<Letter> getStaleLetters() {
+    public List<Letter> getStaleLetters() {
         return letterRepository.findStaleLetters(
             calculateCutOffCreationDate()
                 .withZoneSameInstant(DB_TIME_ZONE_ID)
