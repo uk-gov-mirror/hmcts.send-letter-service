@@ -12,7 +12,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.reform.sendletter.PdfHelper;
-import uk.gov.hmcts.reform.sendletter.config.ThreadPoolConfig;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
@@ -89,9 +88,6 @@ class BaseTest {
             await().atMost(15, SECONDS).untilAsserted(
                 () -> assertThat(server.reportFolder.listFiles()).as("CSV reports not deleted!").isEmpty()
             );
-
-            assertThat(ThreadPoolConfig.getUnhandledTaskExceptionCount())
-                .as("Scheduled tasks encountered unhandled exceptions!").isZero();
         }
     }
 

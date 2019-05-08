@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.sql.DataSource;
 
@@ -16,7 +15,6 @@ import javax.sql.DataSource;
 @AutoConfigureAfter(FlywayConfiguration.class)
 @DependsOn({"flyway", "flywayInitializer"})
 @ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
-@EnableScheduling
 @EnableSchedulerLock(defaultLockAtMostFor = "${scheduling.lock_at_most_for}")
 public class SchedulerConfiguration {
 
