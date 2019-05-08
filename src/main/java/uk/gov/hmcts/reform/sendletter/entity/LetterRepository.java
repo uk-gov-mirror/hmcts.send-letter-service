@@ -17,14 +17,6 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
 
     Stream<Letter> findByStatus(LetterStatus status);
 
-    @Query("select l from Letter l where l.status = :status and l.type <> '"
-        + UploadLettersTask.SMOKE_TEST_LETTER_TYPE
-        + "' and l.sentToPrintAt < :before")
-    Stream<Letter> findByStatusAndSentToPrintAtBefore(
-        @Param("status") LetterStatus status,
-        @Param("before") LocalDateTime before
-    );
-
     @Query("select l from Letter l where l.status not in ('Posted', 'Aborted')"
         + " and l.createdAt < :createdBefore and l.type <> '"
         + UploadLettersTask.SMOKE_TEST_LETTER_TYPE

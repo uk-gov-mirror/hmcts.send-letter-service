@@ -8,13 +8,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
-import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
-import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
+import uk.gov.hmcts.reform.sendletter.services.StaleLetterService;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
@@ -28,31 +24,24 @@ public class StaleLettersTask {
     private static final Logger logger = LoggerFactory.getLogger(StaleLettersTask.class);
     private static final String TASK_NAME = "StaleLetters";
 
-    private final LetterRepository repo;
+    private final StaleLetterService staleLetterService;
     private final AppInsights insights;
-    private final LocalTime staleCutOffTime;
 
     public StaleLettersTask(
-        LetterRepository repo,
-        AppInsights insights,
-        IFtpAvailabilityChecker checker
+        StaleLetterService staleLetterService,
+        AppInsights insights
     ) {
-        this.repo = repo;
+        this.staleLetterService = staleLetterService;
         this.insights = insights;
-        this.staleCutOffTime = checker.getDowntimeStart();
     }
 
     @Transactional
     @SchedulerLock(name = TASK_NAME)
     @Scheduled(cron = "${tasks.stale-letters-report}", zone = EUROPE_LONDON)
     public void run() {
-        LocalDateTime staleCutOff = LocalDateTime.now()
-            .minusDays(1)
-            .with(staleCutOffTime);
+        logger.info("Started '{}' task", TASK_NAME);
 
-        logger.info("Started '{}' task with cut-off of {}", TASK_NAME, staleCutOff);
-
-        try (Stream<Letter> letters = repo.findByStatusAndSentToPrintAtBefore(LetterStatus.Uploaded, staleCutOff)) {
+        try (Stream<Letter> letters = staleLetterService.getStaleLetters()) {
             long count = letters.peek(insights::trackStaleLetter).count();
             logger.info("Completed '{}' task. Letters found: {}", TASK_NAME, count);
         }
