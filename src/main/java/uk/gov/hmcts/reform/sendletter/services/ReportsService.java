@@ -60,7 +60,7 @@ public class ReportsService {
 
     private LettersCountSummary fromDb(ServiceLettersCountSummary dbSummary) {
         return new LettersCountSummary(
-            reportsServiceConfig.getServiceConfig().get(dbSummary.getService()), //get service's display name
+            reportsServiceConfig.getDisplayName(dbSummary.getService()).orElse(dbSummary.getService()),
             dbSummary.getUploaded());
     }
 }

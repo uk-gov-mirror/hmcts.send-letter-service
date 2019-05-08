@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +13,7 @@ import uk.gov.hmcts.reform.sendletter.model.out.LettersCountSummary;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,8 +59,8 @@ class ReportsServiceTest {
             new ServiceLettersCount("bService", 20)
         ));
 
-        given(reportsServiceConfig.getServiceConfig())
-            .willReturn(ImmutableMap.of("aService", "FolderA", "bService", "FolderB"));
+        given(reportsServiceConfig.getDisplayName("aService")).willReturn(Optional.of("FolderA"));
+        given(reportsServiceConfig.getDisplayName("bService")).willReturn(Optional.of("FolderB"));
 
         //when
         List<LettersCountSummary> result = service.getCountFor(date);
@@ -90,8 +90,8 @@ class ReportsServiceTest {
             new ServiceLettersCount("send_letter_tests", 20)
         ));
 
-        given(reportsServiceConfig.getServiceConfig())
-            .willReturn(ImmutableMap.of("aService", "FolderA", "send_letter_tests", "Bulk Print"));
+        given(reportsServiceConfig.getDisplayName("aService")).willReturn(Optional.of("FolderA"));
+        given(reportsServiceConfig.getDisplayName("send_letter_tests")).willReturn(Optional.of("Bulk Print"));
 
         //when
         List<LettersCountSummary> result = service.getCountFor(date);
@@ -117,7 +117,7 @@ class ReportsServiceTest {
             new ServiceLettersCount("aService", 10),
             new ServiceLettersCount(null, 2)
         ));
-        given(reportsServiceConfig.getServiceConfig()).willReturn(ImmutableMap.of("aService", "FolderA"));
+        given(reportsServiceConfig.getDisplayName("aService")).willReturn(Optional.of("FolderA"));
 
         //when
         List<LettersCountSummary> result = service.getCountFor(date);
