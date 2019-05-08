@@ -12,11 +12,10 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -55,7 +54,7 @@ class ReportsServiceTest {
         given(repository.countByDate(
             localDateTimeWithUtc(date.minusDays(1), timeFrom),
             localDateTimeWithUtc(date, timeTo))
-        ).willReturn(asList(
+        ).willReturn(Stream.of(
             new ServiceLettersCount("aService", 10),
             new ServiceLettersCount("bService", 20)
         ));
@@ -86,7 +85,7 @@ class ReportsServiceTest {
         given(repository.countByDate(
             localDateTimeWithUtc(date.minusDays(1), timeFrom),
             localDateTimeWithUtc(date, timeTo))
-        ).willReturn(asList(
+        ).willReturn(Stream.of(
             new ServiceLettersCount("aService", 10),
             new ServiceLettersCount("send_letter_tests", 20)
         ));
@@ -113,7 +112,7 @@ class ReportsServiceTest {
         given(repository.countByDate(
             localDateTimeWithUtc(date.minusDays(1), timeFrom),
             localDateTimeWithUtc(date, timeTo))
-        ).willReturn(asList(
+        ).willReturn(Stream.of(
             new ServiceLettersCount("aService", 10),
             new ServiceLettersCount(null, 2)
         ));
@@ -139,7 +138,7 @@ class ReportsServiceTest {
         given(repository.countByDate(
             localDateTimeWithUtc(date.minusDays(1), timeFrom),
             localDateTimeWithUtc(date, timeTo))
-        ).willReturn(Collections.emptyList());
+        ).willReturn(Stream.empty());
 
         //when
         List<LettersCountSummary> result = service.getCountFor(date);

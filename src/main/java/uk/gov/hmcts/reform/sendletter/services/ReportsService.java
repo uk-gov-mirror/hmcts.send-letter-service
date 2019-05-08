@@ -50,7 +50,7 @@ public class ReportsService {
         LocalDateTime dateTimeTo = localDateTimeWithUtc(date, LocalTime.parse(timeToHour));
 
         return zeroRowFiller.fill(
-            repo.countByDate(dateTimeFrom, dateTimeTo).stream().map(this::fromDb).collect(toList()))
+            repo.countByDate(dateTimeFrom, dateTimeTo).map(this::fromDb).collect(toList()))
             .stream()
             .filter(
                 summary -> isNotBlank(summary.service) && !summary.service.equals(TEST_SERVICE)

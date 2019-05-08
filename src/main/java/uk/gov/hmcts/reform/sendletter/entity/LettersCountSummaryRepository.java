@@ -6,8 +6,8 @@ import org.springframework.data.repository.query.Param;
 import uk.gov.hmcts.reform.sendletter.entity.reports.ServiceLettersCountSummary;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public interface LettersCountSummaryRepository extends JpaRepository<Letter, UUID> {
 
@@ -19,7 +19,7 @@ public interface LettersCountSummaryRepository extends JpaRepository<Letter, UUI
             + "  GROUP BY service \n"
             + "  ORDER BY service ASC"
     )
-    List<ServiceLettersCountSummary> countByDate(
+    Stream<ServiceLettersCountSummary> countByDate(
         @Param("dateFrom") LocalDateTime dateFrom,
         @Param("dateTo") LocalDateTime dateTo);
 }
