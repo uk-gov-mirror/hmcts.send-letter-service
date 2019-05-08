@@ -71,6 +71,34 @@ class ZeroRowFillerTest {
     }
 
     @Test
+    void should_add_services_when_input_collection_contains_unconfigured_services() {
+        //given
+        given(reportsServiceConfig.getServiceConfig())
+            .willReturn(ImmutableMap.of("aService", "ServiceA", "bService", "ServiceB"));
+
+        ZeroRowFiller zeroRowFiller = new ZeroRowFiller(reportsServiceConfig);
+
+        List<LettersCountSummary> listToFill = asList(
+            new LettersCountSummary("ServiceA", 10),
+            new LettersCountSummary("service_not_configured", 10)
+        );
+
+        //when
+        List<LettersCountSummary> result = zeroRowFiller.fill(listToFill);
+
+        //then
+        assertThat(result)
+            .isNotEmpty()
+            .hasSize(3)
+            .usingFieldByFieldElementComparator()
+            .containsExactlyInAnyOrder(
+                new LettersCountSummary("ServiceA", 10),
+                new LettersCountSummary("ServiceB", 0),
+                new LettersCountSummary("service_not_configured", 10)
+            );
+    }
+
+    @Test
     void should_not_change_the_collection_when_all_services_exist() {
         //given
         given(reportsServiceConfig.getServiceConfig())

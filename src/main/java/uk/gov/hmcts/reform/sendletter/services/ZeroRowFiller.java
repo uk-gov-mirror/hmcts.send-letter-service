@@ -27,13 +27,13 @@ public class ZeroRowFiller {
     public List<LettersCountSummary> fill(List<LettersCountSummary> listToFill) {
         return Stream.concat(
             listToFill.stream(),
-            missingServiceFolders(listToFill).stream().map(
-                serviceFolder -> new LettersCountSummary(serviceFolder, 0)
+            missingServiceNames(listToFill).stream().map(
+                serviceName -> new LettersCountSummary(serviceName, 0)
             )
         ).collect(toList());
     }
 
-    private Set<String> missingServiceFolders(List<LettersCountSummary> listToFill) {
+    private Set<String> missingServiceNames(List<LettersCountSummary> listToFill) {
         return Sets.difference(
             Sets.newHashSet(reportsServiceConfig.values()), //All service names
             listToFill.stream().map(res -> res.serviceName).collect(toSet())
