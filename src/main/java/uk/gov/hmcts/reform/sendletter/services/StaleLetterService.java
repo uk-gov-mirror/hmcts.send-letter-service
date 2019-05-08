@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.model.out.StaleLetter;
 import uk.gov.hmcts.reform.sendletter.services.date.DateCalculator;
 
 import java.time.Clock;
@@ -43,14 +42,12 @@ public class StaleLetterService {
         this.clock = clock;
     }
 
-    public Stream<StaleLetter> getStaleLetters() {
-        Stream<Letter> dbLetters = letterRepository.findStaleLetters(
+    public Stream<Letter> getStaleLetters() {
+        return letterRepository.findStaleLetters(
             calculateCutOffCreationDate()
                 .withZoneSameInstant(DB_TIME_ZONE_ID)
                 .toLocalDateTime()
         );
-
-        return dbLetters.map(this::mapToStaleLetter);
     }
 
     /**
@@ -80,17 +77,6 @@ public class StaleLetterService {
         return dateCalculator.subtractBusinessDays(
             todayWithFtpDowntimeAdjustedTime,
             minStaleLetterAgeInBusinessDays
-        );
-    }
-
-    private StaleLetter mapToStaleLetter(Letter dbLetter) {
-        return new StaleLetter(
-            dbLetter.getId(),
-            dbLetter.getStatus().name(),
-            dbLetter.getService(),
-            dbLetter.getCreatedAt(),
-            dbLetter.getSentToPrintAt(),
-            dbLetter.isFailed()
         );
     }
 }

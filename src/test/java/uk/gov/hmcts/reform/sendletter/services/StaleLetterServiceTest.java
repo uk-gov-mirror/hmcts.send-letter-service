@@ -7,8 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
-import uk.gov.hmcts.reform.sendletter.model.out.StaleLetter;
 import uk.gov.hmcts.reform.sendletter.services.date.DateCalculator;
 
 import java.time.Clock;
@@ -19,8 +17,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 import static java.time.ZoneOffset.UTC;
@@ -122,32 +118,20 @@ public class StaleLetterServiceTest {
     public void getStaleLetters_should_return_all_letters_returned_by_repository() {
         reset(letterRepository);
 
-        List<Letter> letters = Arrays.asList(
-            letter("service1", LetterStatus.Created, true),
-            letter("service2", LetterStatus.Uploaded, false)
+        List<Letter> repositoryLetters = Arrays.asList(
+            mock(Letter.class),
+            mock(Letter.class),
+            mock(Letter.class)
         );
 
-        given(letterRepository.findStaleLetters(any())).willReturn(letters.stream());
+        given(letterRepository.findStaleLetters(any())).willReturn(repositoryLetters.stream());
 
         // when
-        Stream<StaleLetter> staleLetters =
+        Stream<Letter> staleLetters =
             staleLetterService("16:00", 2).getStaleLetters();
 
         // then
-        Stream<StaleLetter> expectedStaleLetters = letters.stream().map(letter ->
-            new StaleLetter(
-                letter.getId(),
-                letter.getStatus().name(),
-                letter.getService(),
-                letter.getCreatedAt(),
-                letter.getSentToPrintAt(),
-                letter.isFailed()
-            )
-        );
-
-        assertThat(staleLetters.collect(toList()))
-            .usingFieldByFieldElementComparator()
-            .isEqualTo(expectedStaleLetters.collect(toList()));
+        assertThat(staleLetters.collect(toList())).hasSameElementsAs(repositoryLetters);
     }
 
     private StaleLetterService staleLetterService(String ftpDowntimeStart, int minStaleLetterAgeInBusinessDays) {
@@ -164,20 +148,5 @@ public class StaleLetterServiceTest {
         ZoneId zoneId = ZoneId.of(zone);
         given(clock.instant()).willReturn(dateTime.toInstant());
         given(clock.getZone()).willReturn(zoneId);
-    }
-
-    private Letter letter(String service, LetterStatus status, Boolean isFailed) {
-        Letter letter = mock(Letter.class);
-        LocalDateTime sentToPrintAt = LocalDateTime.now().minusMinutes(ThreadLocalRandom.current().nextInt(100));
-        LocalDateTime createdAt = sentToPrintAt.minusMinutes(ThreadLocalRandom.current().nextInt(100));
-
-        given(letter.getId()).willReturn(UUID.randomUUID());
-        given(letter.getSentToPrintAt()).willReturn(sentToPrintAt);
-        given(letter.getCreatedAt()).willReturn(createdAt);
-        given(letter.getService()).willReturn(service);
-        given(letter.getStatus()).willReturn(status);
-        given(letter.isFailed()).willReturn(isFailed);
-
-        return letter;
     }
 }

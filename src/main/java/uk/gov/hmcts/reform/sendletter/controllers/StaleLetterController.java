@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.model.out.StaleLetter;
 import uk.gov.hmcts.reform.sendletter.model.out.StaleLetterResponse;
 import uk.gov.hmcts.reform.sendletter.services.StaleLetterService;
@@ -32,10 +33,21 @@ public class StaleLetterController {
         @ApiResponse(code = 500, message = "Error occurred while retrieving stale letters")
     })
     public StaleLetterResponse getStaleLetters() {
-        try (Stream<StaleLetter> staleLetters = staleLetterService.getStaleLetters()) {
+        try (Stream<Letter> letters = staleLetterService.getStaleLetters()) {
             return new StaleLetterResponse(
-                staleLetters.collect(toList())
+                letters.map(this::mapToStaleLetter).collect(toList())
             );
         }
+    }
+
+    private StaleLetter mapToStaleLetter(Letter dbLetter) {
+        return new StaleLetter(
+            dbLetter.getId(),
+            dbLetter.getStatus().name(),
+            dbLetter.getService(),
+            dbLetter.getCreatedAt(),
+            dbLetter.getSentToPrintAt(),
+            dbLetter.isFailed()
+        );
     }
 }
