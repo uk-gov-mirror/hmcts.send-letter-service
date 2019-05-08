@@ -25,6 +25,8 @@ java:
     FTP_FINGERPRINT: "SHA256:gYzreAtWAraVRFsOrcP9SPJq9atn7QxXh9pAauKud2U"
     FTP_TARGET_FOLDER: "TO_XEROX"
     FTP_REPORTS_FOLDER: "FROM_XEROX"
+    # mails
+    SPRING_MAIL_HOST: "false"
   keyVaults:
     "rpe-send-letter":
       resourceGroup: rpe-send-letter-service

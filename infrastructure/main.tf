@@ -111,6 +111,16 @@ module "send-letter-service" {
     FTP_PRIVATE_KEY                 = "${local.ftp_private_key}"
     FTP_PUBLIC_KEY                  = "${local.ftp_public_key}"
     ENCRYPTION_PUBLIC_KEY           = "${local.encryption_public_key}"
+
+    // smtp
+    SMTP_HOST          = "${var.smtp_host}"
+    SMTP_USERNAME      = "${data.azurerm_key_vault_secret.smtp_username.value}"
+    SMTP_PASSWORD      = "${data.azurerm_key_vault_secret.smtp_password.value}"
+
+    // reports. depends on smtp
+    UPLOAD_SUMMARY_REPORT_CRON       = "${var.upload_summary_report_cron}"
+    UPLOAD_SUMMARY_REPORT_ENABLED    = "${var.upload_summary_report_enabled}"
+    UPLOAD_SUMMARY_REPORT_RECIPIENTS = "${data.azurerm_key_vault_secret.upload_summary_recipients.value}"
   }
 }
 
@@ -158,3 +168,18 @@ resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
   vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
 }
 # endregion
+
+data "azurerm_key_vault_secret" "smtp_username" {
+  name         = "reports-email-username"
+  key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
+}
+
+data "azurerm_key_vault_secret" "smtp_password" {
+  name         = "reports-email-password"
+  key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
+}
+
+data "azurerm_key_vault_secret" "upload_summary_recipients" {
+  name         = "upload-summary-report-recipients"
+  key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
+}

@@ -4,6 +4,7 @@ import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,8 @@ import java.util.List;
 import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
 
 @Component
-@ConditionalOnProperty(prefix = "spring.mail", name = "host")
+@ConditionalOnBean(EmailSender.class)
+@ConditionalOnProperty(prefix = "reports.upload-summary", name = "enabled")
 public class DailyLetterUploadSummaryReport {
 
     private static final Logger log = LoggerFactory.getLogger(DailyLetterUploadSummaryReport.class);

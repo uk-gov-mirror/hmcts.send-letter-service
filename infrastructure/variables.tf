@@ -107,6 +107,25 @@ variable "ftp_reports_cron" {
   default = "0 30 10 * * *"
 }
 
+variable "smtp_host" {
+  type        = "string"
+  default     = "false"
+  description = "SMTP host for sending out reports via JavaMailSender"
+}
+
+# region reports
+
+variable "upload_summary_report_cron" {
+  default     = "0 0 19 * * *"
+  description = "Cron signature for job to send daily summary report of uploaded letters"
+}
+
+variable "upload_summary_report_enabled" {
+  default = "false"
+}
+
+# endregion
+
 variable "deployment_namespace" {
   default = ""
 }

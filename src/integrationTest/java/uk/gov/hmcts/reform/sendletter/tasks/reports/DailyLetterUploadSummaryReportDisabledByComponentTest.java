@@ -8,9 +8,9 @@ import org.springframework.context.ApplicationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(properties = {
-    "reports.upload-summary.enabled=false"
+    "spring.mail.host=false"
 })
-public class DailyLetterUploadSummaryReportDisabledTest {
+public class DailyLetterUploadSummaryReportDisabledByComponentTest {
 
     @Autowired
     private ApplicationContext context;
