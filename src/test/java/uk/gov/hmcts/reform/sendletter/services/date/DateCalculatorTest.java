@@ -1,17 +1,37 @@
 package uk.gov.hmcts.reform.sendletter.services.date;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.web.client.RestClientException;
+import uk.gov.hmcts.reform.sendletter.services.date.holidays.BankHolidaysClient;
+import uk.gov.hmcts.reform.sendletter.services.date.holidays.response.Event;
+import uk.gov.hmcts.reform.sendletter.services.date.holidays.response.Holidays;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 public class DateCalculatorTest {
 
-    private final DateCalculator dateCalculator = new DateCalculator();
+    private BankHolidaysClient bankHolidaysClient;
+
+    private DateCalculator dateCalculator;
+
+    @BeforeEach
+    void setUp() {
+        this.bankHolidaysClient = mock(BankHolidaysClient.class);
+        dateCalculator = new DateCalculator(bankHolidaysClient);
+    }
 
     @ParameterizedTest
     @MethodSource("provideTestCaseData")
@@ -20,9 +40,48 @@ public class DateCalculatorTest {
         int daysToSubtract,
         String expectResult
     ) {
+        given(bankHolidaysClient.getHolidays()).willReturn(new Holidays(emptyList()));
+
         ZonedDateTime dateTime = ZonedDateTime.parse(baseDate);
         ZonedDateTime result = dateCalculator.subtractBusinessDays(dateTime, daysToSubtract);
         assertThat(result).isEqualTo(expectResult);
+    }
+
+    @Test
+    void should_take_bank_holidays_into_account() {
+        // given
+        LocalDate christmasDay = LocalDate.of(2019, 12, 25);
+        given(bankHolidaysClient.getHolidays())
+            .willReturn(new Holidays(singletonList(
+                new Event(christmasDay, "Christmas Day")
+            )));
+
+        // sanity check, not Saturday or Sunday
+        assertThat(christmasDay.getDayOfWeek()).isEqualTo(DayOfWeek.WEDNESDAY);
+
+        // when
+        ZonedDateTime result = this.dateCalculator.subtractBusinessDays(
+            ZonedDateTime.parse("2019-12-26T12:00:00Z"),
+            1
+        );
+
+        // then
+        assertThat(result).isEqualTo(ZonedDateTime.parse("2019-12-24T12:00:00Z"));
+    }
+
+    @Test
+    void should_work_if_fetching_holidays_fails() {
+        // given
+        given(bankHolidaysClient.getHolidays()).willThrow(RestClientException.class);
+
+        // when
+        ZonedDateTime result = this.dateCalculator.subtractBusinessDays(
+            ZonedDateTime.parse("2019-12-26T12:00:00Z"), // Thursday
+            1
+        );
+
+        // then
+        assertThat(result).isEqualTo(ZonedDateTime.parse("2019-12-25T12:00:00Z"));
     }
 
     private static Stream<Arguments> provideTestCaseData() {

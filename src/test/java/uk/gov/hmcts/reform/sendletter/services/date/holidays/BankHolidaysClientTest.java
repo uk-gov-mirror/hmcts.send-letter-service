@@ -37,7 +37,7 @@ public class BankHolidaysClientTest {
     @Test
     public void should_fetch_holidays() {
         // given
-        api.stubFor(get("/england-and-wales.json").willReturn(
+        api.stubFor(get("/").willReturn(
             okJson("{"
                 + "\"division\": \"england-and-wales\","
                 + "\"events\": ["
@@ -58,7 +58,7 @@ public class BankHolidaysClientTest {
             )));
 
         // when
-        Holidays holidays = client.getForEngland();
+        Holidays holidays = client.getHolidays();
 
         // then
         assertThat(holidays).isNotNull();
@@ -73,10 +73,10 @@ public class BankHolidaysClientTest {
     @Test
     public void should_throw_exception_if_error_occurred() {
         // given
-        api.stubFor(get("/england-and-wales.json").willReturn(notFound()));
+        api.stubFor(get("/").willReturn(notFound()));
 
         // when
-        Throwable exc = catchThrowable(client::getForEngland);
+        Throwable exc = catchThrowable(client::getHolidays);
 
         // then
         assertThat(exc).isInstanceOf(RestClientException.class);
