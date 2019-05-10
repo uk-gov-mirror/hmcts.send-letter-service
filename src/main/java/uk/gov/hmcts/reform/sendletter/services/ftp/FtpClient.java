@@ -153,15 +153,12 @@ public class FtpClient {
         });
     }
 
-    public void deleteFile(String filePath) {
-        runWith(sftp -> {
-            try {
-                sftp.rm(filePath);
-                return null;
-            } catch (Exception exc) {
-                throw new FtpException("Error while deleting file: " + filePath, exc);
-            }
-        });
+    public void deleteFile(String filePath, SFTPClient sftpClient) {
+        try {
+            sftpClient.rm(filePath);
+        } catch (Exception exc) {
+            throw new FtpException("Error while deleting file: " + filePath, exc);
+        }
     }
 
     public void testConnection() {

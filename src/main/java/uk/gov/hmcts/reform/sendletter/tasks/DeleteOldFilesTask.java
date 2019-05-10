@@ -28,7 +28,7 @@ public class DeleteOldFilesTask {
 
     private static final Logger logger = LoggerFactory.getLogger(DeleteOldFilesTask.class);
 
-    public static final String TASK_NAME = "DeleteOldFiles";
+    private static final String TASK_NAME = "DeleteOldFiles";
 
     private final FtpClient ftp;
     private final ServiceFolderMapping serviceFolderMapping;
@@ -60,14 +60,23 @@ public class DeleteOldFilesTask {
 
                 logger.info("Deleting {} old files from {}", filesToDelete.size(), folder);
 
-                filesToDelete.forEach(f -> {
-                    try {
-                        ftp.deleteFile(f.path);
-                    } catch (FtpException exc) {
-                        logger.error("Error deleting old file {}", f.path, exc);
-                    }
-                });
+                if (!filesToDelete.isEmpty()) {
+                    deleteFiles(filesToDelete);
+                }
             });
+    }
+
+    private void deleteFiles(List<FileInfo> filesToDelete) {
+        ftp.runWith(sftpClient -> {
+            filesToDelete.forEach(f -> {
+                try {
+                    ftp.deleteFile(f.path, sftpClient);
+                } catch (FtpException exc) {
+                    logger.error("Error deleting old file {}", f.path, exc);
+                }
+            });
+            return null;
+        });
     }
 }
 
