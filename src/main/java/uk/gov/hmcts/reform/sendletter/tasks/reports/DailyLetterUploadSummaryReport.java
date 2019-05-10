@@ -54,7 +54,7 @@ public class DailyLetterUploadSummaryReport {
         }
 
         if (this.recipients.length == 0) {
-            log.error("No recipients configured for '{}' report", EMAIL_SUBJECT);
+            log.error("No recipients configured");
         }
     }
 
@@ -62,22 +62,22 @@ public class DailyLetterUploadSummaryReport {
     @Scheduled(cron = "${reports.upload-summary.cron}", zone = EUROPE_LONDON)
     public void send() {
         if (recipients.length == 0) {
-            return;
-        }
+            log.error("Not sending a report. No recipients configured");
+        } else {
+            log.info("Generating report");
+            LocalDate today = LocalDate.now();
 
-        LocalDate today = LocalDate.now();
-        log.info("Generating report '{}' for '{}'", EMAIL_SUBJECT, today);
+            try {
+                List<LettersCountSummary> summary = reportService.getCountFor(today);
+                File csv = CsvWriter.writeLettersCountSummaryToCsv(summary);
+                Attachment attachment = new Attachment(ATTACHMENT_PREFIX + today.format(FORMATTER) + ".csv", csv);
 
-        try {
-            List<LettersCountSummary> summary = reportService.getCountFor(today);
-            File csv = CsvWriter.writeLettersCountSummaryToCsv(summary);
-            Attachment attachment = new Attachment(ATTACHMENT_PREFIX + today.format(FORMATTER) + ".csv", csv);
+                emailSender.send(EMAIL_SUBJECT, recipients, attachment);
 
-            emailSender.send(EMAIL_SUBJECT, recipients, attachment);
-
-            log.info("Report '{}' sent", EMAIL_SUBJECT);
-        } catch (IOException exception) {
-            log.error("Unable to generate report '{}'", EMAIL_SUBJECT, exception);
+                log.info("Report sent");
+            } catch (IOException exception) {
+                log.error("Unable to generate report", exception);
+            }
         }
     }
 }
