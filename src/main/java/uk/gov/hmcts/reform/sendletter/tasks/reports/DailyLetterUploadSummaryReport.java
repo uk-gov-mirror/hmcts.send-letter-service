@@ -58,7 +58,7 @@ public class DailyLetterUploadSummaryReport {
         }
     }
 
-    @SchedulerLock(name = "daily-letter-upload-summary")
+    @SchedulerLock(name = "daily-letter-upload-summary", lockAtLeastFor = 5_000)
     @Scheduled(cron = "${reports.upload-summary.cron}", zone = EUROPE_LONDON)
     public void send() {
         if (recipients.length == 0) {
