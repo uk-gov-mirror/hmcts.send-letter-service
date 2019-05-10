@@ -49,8 +49,7 @@ public class StaleLetterController {
             dbLetter.getStatus().name(),
             dbLetter.getService(),
             dbLetter.getCreatedAt(),
-            dbLetter.getSentToPrintAt(),
-            dbLetter.isFailed()
+            dbLetter.getSentToPrintAt()
         );
     }
 }

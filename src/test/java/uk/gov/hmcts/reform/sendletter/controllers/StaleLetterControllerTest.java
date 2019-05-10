@@ -40,7 +40,6 @@ public class StaleLetterControllerTest {
                 UUID.fromString("767cf17e-0ec0-452b-a457-bc173d51ff40"),
                 "service1",
                 LetterStatus.Uploaded,
-                false,
                 LocalDateTime.parse("2019-05-03T12:34:56.123"),
                 LocalDateTime.parse("2019-05-03T13:00:00.000")
             ),
@@ -48,7 +47,6 @@ public class StaleLetterControllerTest {
                 UUID.fromString("462a58fe-e9b7-494f-a719-5083f31c69cf"),
                 "service2",
                 LetterStatus.Created,
-                true,
                 LocalDateTime.parse("2019-05-02T10:11:22.321"),
                 null
             )
@@ -87,7 +85,6 @@ public class StaleLetterControllerTest {
         UUID id,
         String service,
         LetterStatus status,
-        Boolean isFailed,
         LocalDateTime createdAt,
         LocalDateTime sentToPrintAt
     ) {
@@ -98,7 +95,6 @@ public class StaleLetterControllerTest {
         given(letter.getCreatedAt()).willReturn(createdAt);
         given(letter.getService()).willReturn(service);
         given(letter.getStatus()).willReturn(status);
-        given(letter.isFailed()).willReturn(isFailed);
 
         return letter;
     }

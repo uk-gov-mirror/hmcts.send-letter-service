@@ -19,22 +19,17 @@ public class StaleLetter {
     @JsonProperty("sent_to_print_at")
     public final LocalDateTime sentToPrintAt;
 
-    @JsonProperty("has_failed")
-    public final boolean hasFailed;
-
     public StaleLetter(
         UUID id,
         String status,
         String service,
         LocalDateTime createdAt,
-        LocalDateTime sentToPrintAt,
-        boolean hasFailed
+        LocalDateTime sentToPrintAt
     ) {
         this.id = id;
         this.status = status;
         this.service = service;
         this.createdAt = createdAt;
         this.sentToPrintAt = sentToPrintAt;
-        this.hasFailed = hasFailed;
     }
 }
