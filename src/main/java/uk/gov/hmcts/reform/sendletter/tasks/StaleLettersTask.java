@@ -40,7 +40,12 @@ public class StaleLettersTask {
         logger.info("Started '{}' task", TASK_NAME);
 
         List<Letter> letters = staleLetterService.getStaleLetters();
-        long count = letters.stream().peek(insights::trackStaleLetter).count();
+        letters.forEach(insights::trackStaleLetter);
+        int count = letters.size();
+
         logger.info("Completed '{}' task. Letters found: {}", TASK_NAME, count);
+        if (count > 0) {
+            logger.warn("Found {} stale letters", count);
+        }
     }
 }
