@@ -4,7 +4,9 @@ import com.microsoft.applicationinsights.web.internal.RequestTelemetryContext;
 import com.microsoft.applicationinsights.web.internal.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
@@ -41,6 +43,11 @@ public class ThreadPoolConfig implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        taskRegistrar.setTaskScheduler(sendLetterTaskScheduler());
+    }
+
+    @Bean
+    public TaskScheduler sendLetterTaskScheduler() {
         ThreadPoolTaskScheduler taskScheduler = new SendLetterTaskScheduler();
         taskScheduler.setThreadNamePrefix("SendLetterTask-");
         taskScheduler.setErrorHandler(t -> {
@@ -49,7 +56,7 @@ public class ThreadPoolConfig implements SchedulingConfigurer {
         });
         taskScheduler.initialize();
 
-        taskRegistrar.setTaskScheduler(taskScheduler);
+        return taskScheduler;
     }
 
     /**
