@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.Instant;
+import static uk.gov.hmcts.reform.sendletter.util.TimeZones.getCurrentEuropeLondonInstant;
 
 @Aspect
 @Configuration
@@ -68,7 +68,7 @@ public class AspectConfiguration {
     ) {
         if (requestTelemetry != null) {
             requestTelemetry.setName(requestName);
-            requestTelemetry.setDuration(new Duration(Instant.now().toEpochMilli() - start));
+            requestTelemetry.setDuration(new Duration(getCurrentEuropeLondonInstant().toEpochMilli() - start));
             requestTelemetry.setSuccess(success);
 
             // in case telemetry client is not configured/enabled

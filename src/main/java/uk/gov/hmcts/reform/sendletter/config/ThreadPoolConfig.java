@@ -12,14 +12,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-import uk.gov.hmcts.reform.sendletter.util.TimeZones;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+
+import static uk.gov.hmcts.reform.sendletter.util.TimeZones.getCurrentEuropeLondonInstant;
 
 /**
  * Adds custom error handler to Scheduled Tasks. Followed suggestions by Microsoft.
@@ -32,11 +31,7 @@ public class ThreadPoolConfig implements SchedulingConfigurer {
     private static AtomicInteger errorCount = new AtomicInteger(0);
     private static final Logger log = LoggerFactory.getLogger(ThreadPoolConfig.class);
 
-    private static final Supplier<Long> CURRENT_MILLIS_SUPPLIER = () -> LocalDateTime
-        .now()
-        .atZone(ZoneId.of(TimeZones.EUROPE_LONDON))
-        .toInstant()
-        .toEpochMilli();
+    private static final Supplier<Long> CURRENT_MILLIS_SUPPLIER = () -> getCurrentEuropeLondonInstant().toEpochMilli();
 
     private static final Supplier<RequestTelemetryContext> REQUEST_CONTEXT_SUPPLIER = () ->
         new RequestTelemetryContext(CURRENT_MILLIS_SUPPLIER.get(), null);
