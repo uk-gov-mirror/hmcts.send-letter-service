@@ -124,7 +124,7 @@ class UploadLettersTaskTest {
         );
 
         // and
-        assertThat(repository.findByStatus(LetterStatus.Created).count()).isEqualTo(2);
+        assertThat(repository.findByStatus(LetterStatus.Created)).hasSize(2);
 
         // when
         try (LocalSftpServer server = LocalSftpServer.create()) {
@@ -163,7 +163,7 @@ class UploadLettersTaskTest {
         try (LocalSftpServer server = LocalSftpServer.create()) {
             task.run();
         }
-        assertThat(repository.findByStatus(LetterStatus.Uploaded).count()).isEqualTo(letterCount);
+        assertThat(repository.findByStatus(LetterStatus.Uploaded)).hasSize(letterCount);
         verify(insights).trackUploadedLetters(letterCount);
     }
 }
