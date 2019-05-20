@@ -65,8 +65,9 @@ class ProcessMessageTestForPdfEndpoint extends FunctionalTestSuite {
             PdfFile pdfFile = unzipFile(zipFile);
             assertThat(pdfFile.name).matches(getPdfFileNamePattern(letterId));
 
-            PDDocument pdfDocument = PDDocument.load(pdfFile.content);
-            assertThat(pdfDocument.getNumberOfPages()).isEqualTo(noOfDocuments);
+            try (PDDocument pdfDocument = PDDocument.load(pdfFile.content)) {
+                assertThat(pdfDocument.getNumberOfPages()).isEqualTo(noOfDocuments);
+            }
         }
     }
 
