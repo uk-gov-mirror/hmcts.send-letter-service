@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -122,6 +123,26 @@ class FtpClientTest {
 
         // then
         assertThat(exception).isInstanceOf(FtpException.class);
+    }
+
+    @Test
+    void should_delete_corrupt_file_in_case_upload_timed_out() throws IOException {
+        // given
+        given(sftpClient.getFileTransfer()).willReturn(sftpFileTransfer);
+        willThrow(new IOException(new TimeoutException("oh no")))
+            .given(sftpFileTransfer)
+            .upload(any(LocalSourceFile.class), anyString());
+
+        // when
+        Throwable exception = catchThrowable(() ->
+            client.upload(new FileToSend("massive.zip", "insane size".getBytes(), false), "cmc", sftpClient)
+        );
+
+        // then
+        assertThat(exception)
+            .isInstanceOf(FtpException.class)
+            .hasMessageStartingWith("Unable to upload file");
+        verify(sftpClient).rm("null/cmc/massive.zip"); // we mocked mapping hence null
     }
 
     @Test
