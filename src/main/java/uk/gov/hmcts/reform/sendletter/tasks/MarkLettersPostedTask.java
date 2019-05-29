@@ -100,6 +100,7 @@ public class MarkLettersPostedTask {
             if (letter.getStatus() == LetterStatus.Uploaded) {
                 letter.setPrintedAt(letterPrintStatus.printedAt.toLocalDateTime());
                 letter.setStatus(LetterStatus.Posted);
+                letter.setFileContent(null);
                 repo.save(letter);
                 logger.info("Marked letter {} as posted", letter.getId());
             } else {

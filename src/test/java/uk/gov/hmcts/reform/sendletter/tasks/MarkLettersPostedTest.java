@@ -64,6 +64,7 @@ class MarkLettersPostedTest {
 
         // then
         assertThat(letter.getStatus()).isEqualTo(LetterStatus.Posted);
+        assertThat(letter.getFileContent()).isNull();
     }
 
     @Test

@@ -95,10 +95,13 @@ public class UploadLettersTask {
                 boolean isUploaded = uploadToFtp(letter, sftpClient);
 
                 if (isUploaded) {
-                    markAsUploaded(letter);
+                    letter.setStatus(LetterStatus.Uploaded);
+                    letter.setSentToPrintAt(now());
                 } else {
-                    markAsSkipped(letter);
+                    letter.setStatus(LetterStatus.Skipped);
                 }
+
+                updateLetterInDb(letter);
 
                 return isUploaded ? 1 : 0;
             })
@@ -135,22 +138,6 @@ public class UploadLettersTask {
         repo.saveAndFlush(letter);
 
         logger.info("Marked letter {} as {}", letter.getId(), letter.getStatus());
-    }
-
-    private void markAsUploaded(Letter letter) {
-        letter.setStatus(LetterStatus.Uploaded);
-        letter.setSentToPrintAt(now());
-
-        // remove pdf content, as it's no longer needed
-        letter.setFileContent(null);
-
-        updateLetterInDb(letter);
-    }
-
-    private void markAsSkipped(Letter letter) {
-        letter.setStatus(LetterStatus.Skipped);
-
-        updateLetterInDb(letter);
     }
 
     private boolean isSmokeTest(Letter letter) {

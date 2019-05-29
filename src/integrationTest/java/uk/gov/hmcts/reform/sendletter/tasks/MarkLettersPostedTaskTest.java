@@ -64,6 +64,7 @@ class MarkLettersPostedTaskTest {
         assertThat(letter.getStatus()).isEqualTo(LetterStatus.Posted);
         // Check that printed at date has been set.
         assertThat(letter.getPrintedAt()).isNotNull();
+        assertThat(letter.getFileContent()).isNull();
 
         verify(insights).trackPrintReportReceived(any(ParsedReport.class));
     }

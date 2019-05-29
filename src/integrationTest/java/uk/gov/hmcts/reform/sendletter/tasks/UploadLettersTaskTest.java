@@ -99,9 +99,7 @@ class UploadLettersTaskTest {
             assertThat(l.getStatus()).isEqualTo(LetterStatus.Uploaded);
             assertThat(l.getSentToPrintAt()).isNotNull();
             assertThat(l.getPrintedAt()).isNull();
-
-            // pdf content should be removed now
-            assertThat(l.getFileContent()).isNull();
+            assertThat(l.getFileContent()).isNotNull();
         }
 
         verify(insights).trackUploadedLetters(1);
