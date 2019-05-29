@@ -1,11 +1,17 @@
 package uk.gov.hmcts.reform.sendletter.e2e;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
+import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.applicationinsights.telemetry.RequestTelemetry;
 import org.bouncycastle.openpgp.PGPException;
 import org.junit.jupiter.api.AfterEach;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,6 +25,9 @@ import uk.gov.hmcts.reform.sendletter.helper.FakeFtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.encryption.PgpDecryptionHelper;
 import uk.gov.hmcts.reform.sendletter.services.util.FileNameHelper;
+import uk.gov.hmcts.reform.sendletter.tasks.MarkLettersPostedTask;
+import uk.gov.hmcts.reform.sendletter.tasks.StaleLettersTask;
+import uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask;
 import uk.gov.hmcts.reform.sendletter.util.CsvReportWriter;
 
 import java.io.File;
@@ -31,7 +40,10 @@ import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.BDDMockito.atLeastOnce;
+import static org.mockito.BDDMockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -48,6 +60,12 @@ class BaseTest {
 
     @Autowired
     private FakeFtpAvailabilityChecker fakeFtpAvailabilityChecker;
+
+    @SpyBean
+    private TelemetryClient telemetryClient;
+
+    @Captor
+    private ArgumentCaptor<RequestTelemetry> requestTelemetryCaptor;
 
     @AfterEach
     public void cleanUp() {
@@ -89,6 +107,18 @@ class BaseTest {
                 () -> assertThat(server.reportFolder.listFiles()).as("CSV reports not deleted!").isEmpty()
             );
         }
+
+        verify(telemetryClient, atLeastOnce()).trackRequest(requestTelemetryCaptor.capture());
+        assertThat(requestTelemetryCaptor.getAllValues())
+            .extracting(requestTelemetry -> tuple(
+                requestTelemetry.getName(),
+                requestTelemetry.isSuccess()
+            ))
+            .containsAnyElementsOf(ImmutableList.of(
+                tuple("Schedule /" + UploadLettersTask.class.getSimpleName(), true),
+                tuple("Schedule /" + MarkLettersPostedTask.class.getSimpleName(), true),
+                tuple("Schedule /" + StaleLettersTask.class.getSimpleName(), true)
+            ));
     }
 
     String readResource(final String fileName) throws IOException {

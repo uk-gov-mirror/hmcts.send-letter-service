@@ -5,6 +5,14 @@ import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.core.dependencies.apachecommons.lang3.BooleanUtils;
 import com.microsoft.applicationinsights.telemetry.Duration;
 import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
+import com.microsoft.applicationinsights.telemetry.RequestTelemetry;
+import com.microsoft.applicationinsights.web.internal.RequestTelemetryContext;
+import com.microsoft.applicationinsights.web.internal.ThreadContext;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
@@ -13,8 +21,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.sendletter.util.TimeZones.getCurrentEuropeLondonInstant;
+
+@Aspect
 @Component
 public class AppInsights {
+
+    private static final Logger log = LoggerFactory.getLogger(AppInsights.class);
 
     static final String FTP_TYPE = "FTP";
 
@@ -26,10 +39,63 @@ public class AppInsights {
 
     static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    private final TelemetryClient telemetry;
+    private final TelemetryClient telemetryClient;
 
-    public AppInsights(TelemetryClient telemetry) {
-        this.telemetry = telemetry;
+    public AppInsights(TelemetryClient telemetryClient) {
+        this.telemetryClient = telemetryClient;
+    }
+
+    // schedules
+
+    @Around("@annotation(org.springframework.scheduling.annotation.Scheduled)")
+    public void aroundSchedule(ProceedingJoinPoint joinPoint) throws Throwable {
+        RequestTelemetryContext requestTelemetry = ThreadContext.getRequestTelemetryContext();
+        boolean success = false;
+
+        try {
+            joinPoint.proceed();
+
+            success = true;
+        } finally {
+            handleRequestTelemetry(requestTelemetry, joinPoint.getTarget().getClass().getSimpleName(), success);
+        }
+    }
+
+    private void handleRequestTelemetry(
+        RequestTelemetryContext requestTelemetryContext,
+        String caller,
+        boolean success
+    ) {
+        String requestName = "Schedule /" + caller;
+
+        if (requestTelemetryContext != null) {
+            handleRequestTelemetry(
+                requestTelemetryContext.getHttpRequestTelemetry(),
+                requestName,
+                requestTelemetryContext.getRequestStartTimeTicks(),
+                success
+            );
+        } else {
+            log.warn(
+                "Request Telemetry Context has been removed by ThreadContext - cannot log '{}' request",
+                requestName
+            );
+        }
+    }
+
+    private void handleRequestTelemetry(
+        RequestTelemetry requestTelemetry,
+        String requestName,
+        long start,
+        boolean success
+    ) {
+        if (requestTelemetry != null) {
+            requestTelemetry.setName(requestName);
+            requestTelemetry.setDuration(new Duration(getCurrentEuropeLondonInstant().toEpochMilli() - start));
+            requestTelemetry.setSuccess(success);
+
+            telemetryClient.trackRequest(requestTelemetry);
+        }
     }
 
     // dependencies
@@ -42,7 +108,7 @@ public class AppInsights {
             success
         );
         dependencyTelemetry.setType(FTP_TYPE);
-        telemetry.trackDependency(dependencyTelemetry);
+        telemetryClient.trackDependency(dependencyTelemetry);
     }
 
     public void trackFtpUpload(java.time.Duration duration, boolean success) {
@@ -69,11 +135,11 @@ public class AppInsights {
         properties.put("sentToPrintDayOfWeek", staleLetter.getSentToPrintAt().getDayOfWeek().name());
         properties.put("sentToPrintAt", staleLetter.getSentToPrintAt().format(TIME_FORMAT));
 
-        telemetry.trackEvent(LETTER_NOT_PRINTED, properties, null);
+        telemetryClient.trackEvent(LETTER_NOT_PRINTED, properties, null);
     }
 
     public void trackPrintReportReceived(ParsedReport report) {
-        telemetry.trackEvent(
+        telemetryClient.trackEvent(
             LETTER_PRINT_REPORT,
             ImmutableMap.of("isReportParsedFully", BooleanUtils.toStringYesNo(report.allRowsParsed)),
             ImmutableMap.of("reportSize", (double) report.statuses.size())
@@ -83,6 +149,6 @@ public class AppInsights {
     // metrics
 
     public void trackUploadedLetters(int lettersUploaded) {
-        telemetry.trackMetric(LETTER_UPLOAD_FOR_PRINT, lettersUploaded);
+        telemetryClient.trackMetric(LETTER_UPLOAD_FOR_PRINT, lettersUploaded);
     }
 }
