@@ -98,6 +98,7 @@ module "send-letter-service" {
     SCHEDULING_ENABLED              = "${var.scheduling_enabled}"
     SCHEDULING_LOCK_AT_MOST_FOR     = "${var.scheduling_lock_at_most_for}"
     FILE_CLEANUP_ENABLED            = "${var.file_cleanup_enabled}"
+    FILE_CLEANUP_CRON               = "${var.file_cleanup_cron}"
 
     // ftp
     FTP_HOSTNAME                    = "${var.ftp_hostname}"

@@ -74,6 +74,11 @@ variable "file_cleanup_enabled" {
   description = "Determines whether old files should be deleted from the FTP server. Should only be enabled on AAT."
 }
 
+variable "file_cleanup_cron" {
+  default     = "0 0 5 * * *"
+  description = "Crontab value for task to be run. Default - 5AM server time"
+}
+
 variable scheduling_lock_at_most_for {
   default = "PT10M"
   description = "For how long to keep the lock of the specific task"
