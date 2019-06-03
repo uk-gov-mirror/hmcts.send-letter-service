@@ -8,16 +8,20 @@ import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
 import com.microsoft.applicationinsights.telemetry.RequestTelemetry;
 import com.microsoft.applicationinsights.web.internal.RequestTelemetryContext;
 import com.microsoft.applicationinsights.web.internal.ThreadContext;
+import com.microsoft.applicationinsights.web.internal.correlation.TelemetryCorrelationUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
 
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,8 +32,6 @@ import static uk.gov.hmcts.reform.sendletter.util.TimeZones.getCurrentEuropeLond
 public class AppInsights {
 
     private static final Logger log = LoggerFactory.getLogger(AppInsights.class);
-
-    static final String FTP_TYPE = "FTP";
 
     static final String LETTER_NOT_PRINTED = "LetterNotPrinted";
 
@@ -100,27 +102,53 @@ public class AppInsights {
 
     // dependencies
 
-    private void trackDependency(String command, java.time.Duration duration, boolean success) {
+    @Pointcut("@annotation(dependency)")
+    public void useAdviceOnDependency(Dependency dependency) {
+        // empty pointcut definition
+    }
+
+    @Around("useAdviceOnDependency(dependency)")
+    public Object aroundDependency(ProceedingJoinPoint joinPoint, Dependency dependency) throws Throwable {
+        Instant start = Instant.now();
+        boolean success = false;
+
+        try {
+            Object object = joinPoint.proceed();
+
+            success = true;
+
+            return object;
+        } finally {
+            handleDependencyTelemetry(dependency, ChronoUnit.MILLIS.between(start, Instant.now()), success);
+        }
+    }
+
+    private void handleDependencyTelemetry(Dependency dependency, long durationInMillis, boolean success) {
+        // dependency definition
         RemoteDependencyTelemetry dependencyTelemetry = new RemoteDependencyTelemetry(
-            AppDependency.FTP_CLIENT,
-            command,
-            new Duration(duration.toMillis()),
+            dependency.name(),
+            dependency.command(),
+            new Duration(durationInMillis),
             success
         );
-        dependencyTelemetry.setType(FTP_TYPE);
+
+        dependencyTelemetry.setType(dependency.type());
+
+        // tracing support
+        RequestTelemetryContext context = ThreadContext.getRequestTelemetryContext();
+
+        if (context != null) {
+            RequestTelemetry requestTelemetry = context.getHttpRequestTelemetry();
+            dependencyTelemetry.setId(TelemetryCorrelationUtils.generateChildDependencyId());
+            dependencyTelemetry.getContext().getOperation().setId(
+                requestTelemetry.getContext().getOperation().getId()
+            );
+            dependencyTelemetry.getContext().getOperation().setParentId(
+                requestTelemetry.getId()
+            );
+        }
+
         telemetryClient.trackDependency(dependencyTelemetry);
-    }
-
-    public void trackFtpUpload(java.time.Duration duration, boolean success) {
-        trackDependency(AppDependencyCommand.FTP_FILE_UPLOADED, duration, success);
-    }
-
-    public void trackFtpReportDeletion(java.time.Duration duration, boolean success) {
-        trackDependency(AppDependencyCommand.FTP_REPORT_DELETED, duration, success);
-    }
-
-    public void trackFtpReportDownload(java.time.Duration duration, boolean success) {
-        trackDependency(AppDependencyCommand.FTP_REPORT_DOWNLOADED, duration, success);
     }
 
     // events

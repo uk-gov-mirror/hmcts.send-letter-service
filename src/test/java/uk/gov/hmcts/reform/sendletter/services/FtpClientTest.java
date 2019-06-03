@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
-import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.Report;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
@@ -43,11 +42,10 @@ class FtpClientTest {
     @Mock private SFTPClient sftpClient;
     @Mock private SFTPFileTransfer sftpFileTransfer;
     @Mock private FtpConfigProperties ftpProps;
-    @Mock private AppInsights insights;
 
     @BeforeEach
     void setUp() {
-        client = new FtpClient(() -> sshClient, ftpProps, insights);
+        client = new FtpClient(() -> sshClient, ftpProps);
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
 import com.microsoft.applicationinsights.telemetry.RequestTelemetry;
 import org.bouncycastle.openpgp.PGPException;
 import org.junit.jupiter.api.AfterEach;
@@ -45,6 +46,11 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.BDDMockito.atLeastOnce;
 import static org.mockito.BDDMockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_FILE_UPLOADED;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_REPORT_DELETED;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_REPORT_DOWNLOADED;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyName.FTP_CLIENT;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyType.FTP;
 
 @AutoConfigureMockMvc
 @ComponentScan(basePackages = "...", lazyInit = true)
@@ -66,6 +72,9 @@ class BaseTest {
 
     @Captor
     private ArgumentCaptor<RequestTelemetry> requestTelemetryCaptor;
+
+    @Captor
+    private ArgumentCaptor<RemoteDependencyTelemetry> dependencyTelemetryCaptor;
 
     @AfterEach
     public void cleanUp() {
@@ -118,6 +127,20 @@ class BaseTest {
                 tuple("Schedule /" + UploadLettersTask.class.getSimpleName(), true),
                 tuple("Schedule /" + MarkLettersPostedTask.class.getSimpleName(), true),
                 tuple("Schedule /" + StaleLettersTask.class.getSimpleName(), true)
+            ));
+
+        verify(telemetryClient, atLeastOnce()).trackDependency(dependencyTelemetryCaptor.capture());
+        assertThat(dependencyTelemetryCaptor.getAllValues())
+            .extracting(dependencyTelemetry -> tuple(
+                dependencyTelemetry.getType(),
+                dependencyTelemetry.getName(),
+                dependencyTelemetry.getCommandName(),
+                dependencyTelemetry.getSuccess()
+            ))
+            .containsAnyElementsOf(ImmutableList.of(
+                tuple(FTP, FTP_CLIENT, FTP_FILE_UPLOADED, true),
+                tuple(FTP, FTP_CLIENT, FTP_REPORT_DELETED, true),
+                tuple(FTP, FTP_CLIENT, FTP_REPORT_DOWNLOADED, true)
             ));
     }
 

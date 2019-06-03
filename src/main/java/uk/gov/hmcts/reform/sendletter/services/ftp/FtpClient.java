@@ -10,12 +10,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
-import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
+import uk.gov.hmcts.reform.sendletter.logging.Dependency;
 import uk.gov.hmcts.reform.sendletter.model.InMemoryDownloadedFile;
 import uk.gov.hmcts.reform.sendletter.model.Report;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -25,6 +24,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_FILE_UPLOADED;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_REPORT_DELETED;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_REPORT_DOWNLOADED;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyName.FTP_CLIENT;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyType.FTP;
 
 @Component
 @EnableConfigurationProperties(FtpConfigProperties.class)
@@ -36,20 +40,17 @@ public class FtpClient {
 
     private final Supplier<SSHClient> sshClientSupplier;
 
-    private final AppInsights insights;
-
     // region constructor
     public FtpClient(
         Supplier<SSHClient> sshClientSupplier,
-        FtpConfigProperties configProperties,
-        AppInsights insights
+        FtpConfigProperties configProperties
     ) {
         this.sshClientSupplier = sshClientSupplier;
         this.configProperties = configProperties;
-        this.insights = insights;
     }
     // endregion
 
+    @Dependency(name = FTP_CLIENT, command = FTP_FILE_UPLOADED, type = FTP)
     public void upload(FileToSend file, String serviceFolder, SFTPClient sftpClient) {
         String folder = file.isSmokeTest
             ? configProperties.getSmokeTestTargetFolder()
@@ -57,7 +58,6 @@ public class FtpClient {
 
         String path = String.join("/", folder, file.getName());
         Instant start = Instant.now();
-        boolean isSuccess = false;
 
         try {
             sftpClient.getFileTransfer().upload(file, path);
@@ -68,8 +68,6 @@ public class FtpClient {
                 file.content.length / 1024 + "KB",
                 serviceFolder
             );
-
-            isSuccess = true;
         } catch (IOException exc) {
             if (exc.getCause() instanceof TimeoutException) {
                 logger.error("Timeout error while uploading file. Deleting corrupt file. Path: {}", path, exc);
@@ -81,24 +79,19 @@ public class FtpClient {
             }
 
             throw new FtpException("Unable to upload file.", exc);
-        } finally {
-            insights.trackFtpUpload(Duration.between(start, Instant.now()), isSuccess);
         }
     }
 
     /**
      * Downloads ALL files from reports directory.
      */
+    @Dependency(name = FTP_CLIENT, command = FTP_REPORT_DOWNLOADED, type = FTP)
     public List<Report> downloadReports() {
-        Instant now = Instant.now();
-
         return runWith(sftp -> {
-            boolean isSuccess = false;
-
             try {
                 SFTPFileTransfer transfer = sftp.getFileTransfer();
 
-                List<Report> reports = sftp.ls(configProperties.getReportsFolder())
+                return sftp.ls(configProperties.getReportsFolder())
                     .stream()
                     .filter(this::isReportFile)
                     .map(file -> {
@@ -111,34 +104,21 @@ public class FtpClient {
                         }
                     })
                     .collect(toList());
-
-                isSuccess = true;
-
-                return reports;
             } catch (IOException exc) {
                 throw new FtpException("Error while downloading reports", exc);
-            } finally {
-                insights.trackFtpReportDownload(Duration.between(now, Instant.now()), isSuccess);
             }
         });
     }
 
+    @Dependency(name = FTP_CLIENT, command = FTP_REPORT_DELETED, type = FTP)
     public void deleteReport(String reportPath) {
-        Instant now = Instant.now();
-
         runWith(sftp -> {
-            boolean isSuccess = false;
-
             try {
                 sftp.rm(reportPath);
-
-                isSuccess = true;
 
                 return null;
             } catch (Exception exc) {
                 throw new FtpException("Error while deleting report: " + reportPath, exc);
-            } finally {
-                insights.trackFtpReportDeletion(Duration.between(now, Instant.now()), isSuccess);
             }
         });
     }

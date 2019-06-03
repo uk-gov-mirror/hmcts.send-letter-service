@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.sendletter.logging;
 
 import com.google.common.collect.ImmutableMap;
 import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
 import com.microsoft.applicationinsights.telemetry.TelemetryContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +15,6 @@ import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -27,18 +25,10 @@ import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.sendletter.logging.AppDependency.FTP_CLIENT;
-import static uk.gov.hmcts.reform.sendletter.logging.AppDependencyCommand.FTP_FILE_UPLOADED;
-import static uk.gov.hmcts.reform.sendletter.logging.AppDependencyCommand.FTP_REPORT_DELETED;
-import static uk.gov.hmcts.reform.sendletter.logging.AppDependencyCommand.FTP_REPORT_DOWNLOADED;
-import static uk.gov.hmcts.reform.sendletter.logging.AppInsights.FTP_TYPE;
 
 @ExtendWith(MockitoExtension.class)
 class AppInsightsTest {
@@ -51,9 +41,6 @@ class AppInsightsTest {
 
     @Captor
     private ArgumentCaptor<Map<String, String>> properties;
-
-    @Captor
-    private ArgumentCaptor<RemoteDependencyTelemetry> dependencyTelemetryCaptor;
 
     @Mock
     private TelemetryClient telemetry;
@@ -72,50 +59,6 @@ class AppInsightsTest {
     @AfterEach
     void tearDown() {
         reset(telemetry);
-    }
-
-    // dependencies
-
-    // doing all dependencies in one go as they are not requiring any logic whatsoever
-    @Test
-    void should_track_all_ftp_dependencies() {
-        Instant now = ZonedDateTime.now().toInstant();
-        java.time.Duration duration = java.time.Duration.between(now, now.plusSeconds(1));
-
-        // resetting now to be able to verify exactly what tested
-        reset(telemetry);
-
-        insights.trackFtpUpload(duration, true);
-        insights.trackFtpReportDeletion(duration, true);
-        insights.trackFtpReportDownload(duration, true);
-
-        verify(telemetry, times(3)).trackDependency(dependencyTelemetryCaptor.capture());
-        verifyNoMoreInteractions(telemetry);
-
-        reset(telemetry);
-
-        insights.trackFtpUpload(duration, false);
-        insights.trackFtpReportDeletion(duration, false);
-        insights.trackFtpReportDownload(duration, false);
-
-        verify(telemetry, times(3)).trackDependency(dependencyTelemetryCaptor.capture());
-        verifyNoMoreInteractions(telemetry);
-
-        assertThat(dependencyTelemetryCaptor.getAllValues())
-            .extracting(dependencyTelemetry -> tuple(
-                dependencyTelemetry.getName(),
-                dependencyTelemetry.getCommandName(),
-                dependencyTelemetry.getSuccess(),
-                dependencyTelemetry.getType()
-            ))
-            .containsOnly(
-                tuple(FTP_CLIENT, FTP_FILE_UPLOADED, true, FTP_TYPE),
-                tuple(FTP_CLIENT, FTP_REPORT_DELETED, true, FTP_TYPE),
-                tuple(FTP_CLIENT, FTP_REPORT_DOWNLOADED, true, FTP_TYPE),
-                tuple(FTP_CLIENT, FTP_FILE_UPLOADED, false, FTP_TYPE),
-                tuple(FTP_CLIENT, FTP_REPORT_DELETED, false, FTP_TYPE),
-                tuple(FTP_CLIENT, FTP_REPORT_DOWNLOADED, false, FTP_TYPE)
-            );
     }
 
     // events
