@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.sendletter.model.out;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -8,9 +7,6 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 public class LetterStatus {
-
-    // TODO: replace with a proper global solution - BPS-639
-    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     public final UUID id;
 
@@ -24,15 +20,12 @@ public class LetterStatus {
     public final String checksum;
 
     @JsonProperty("created_at")
-    @JsonFormat(pattern = DATE_TIME_PATTERN)
     public final ZonedDateTime createdAt;
 
     @JsonProperty("sent_to_print_at")
-    @JsonFormat(pattern = DATE_TIME_PATTERN)
     public final ZonedDateTime sentToPrintAt;
 
     @JsonProperty("printed_at")
-    @JsonFormat(pattern = DATE_TIME_PATTERN)
     public final ZonedDateTime printedAt;
 
     @JsonProperty("has_failed")

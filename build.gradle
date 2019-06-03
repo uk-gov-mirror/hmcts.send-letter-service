@@ -78,7 +78,6 @@ task integration(type: Test) {
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
 
-  environment("APPINSIGHTS_INSTRUMENTATIONKEY", "test-key")
   environment("FTP_PRIVATE_KEY", file('src/integrationTest/resources/keypair').text)
   environment("FTP_PUBLIC_KEY", file('src/integrationTest/resources/keypair.pub').text)
   environment("ENCRYPTION_PUBLIC_KEY", file('src/integrationTest/resources/encryption/pubkey.asc').text)
