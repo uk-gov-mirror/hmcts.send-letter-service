@@ -36,7 +36,7 @@ withPipeline(type , product, component) {
       env.TEST_S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
       env.TEST_FTP_HOSTNAME = 'cmseft.services.xerox.com'
       env.TEST_FTP_PORT = 22
-      env.TEST_FTP_FINGERPRINT = 'SHA256:gYzreAtWAraVRFsOrcP9SPJq9atn7QxXh9pAauKud2U'
+      env.TEST_FTP_FINGERPRINT = 'SHA256:3tX3DIkqd1Loz2alHfnt+qjHocfxk0YUOZHlnf9Zgdk'
       env.FTP_TARGET_FOLDER = 'TO_XEROX'
       env.TEST_FTP_REPORTS_FOLDER = 'FROM_XEROX'
       env.TEST_ENCRYPTION_ENABLED = false

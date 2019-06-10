@@ -22,7 +22,7 @@ java:
     S2S_URL: "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     FTP_HOSTNAME: "cmseft.services.xerox.com"
     FTP_PORT: "22"
-    FTP_FINGERPRINT: "SHA256:gYzreAtWAraVRFsOrcP9SPJq9atn7QxXh9pAauKud2U"
+    FTP_FINGERPRINT: "SHA256:3tX3DIkqd1Loz2alHfnt+qjHocfxk0YUOZHlnf9Zgdk"
     FTP_TARGET_FOLDER: "TO_XEROX"
     FTP_REPORTS_FOLDER: "FROM_XEROX"
     # mails

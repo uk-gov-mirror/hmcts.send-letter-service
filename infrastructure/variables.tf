@@ -93,7 +93,7 @@ variable "ftp_port" {
 }
 
 variable "ftp_fingerprint" {
-  default = "SHA256:gYzreAtWAraVRFsOrcP9SPJq9atn7QxXh9pAauKud2U"
+  default = "SHA256:3tX3DIkqd1Loz2alHfnt+qjHocfxk0YUOZHlnf9Zgdk"
 }
 
 variable "ftp_target_folder" {
