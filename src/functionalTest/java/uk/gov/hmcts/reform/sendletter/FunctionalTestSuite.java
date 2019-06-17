@@ -8,7 +8,9 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.sftp.RemoteFile;
+import net.schmizz.sshj.sftp.RemoteResourceInfo;
 import net.schmizz.sshj.sftp.SFTPClient;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,13 +22,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static com.google.common.io.Resources.getResource;
 import static com.google.common.io.Resources.toByteArray;
+import static org.apache.commons.lang.time.DateUtils.addMilliseconds;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.util.DateUtil.now;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -141,7 +151,7 @@ abstract class FunctionalTestSuite {
         return requestBody.replace("{{pdf}}", new String(Base64.getEncoder().encode(pdf)));
     }
 
-    SFTPClient getSftpClient() throws IOException {
+    SSHClient getSshClient() throws IOException {
         SSHClient ssh = new SSHClient();
 
         ssh.addHostKeyVerifier(ftpFingerprint);
@@ -152,7 +162,7 @@ abstract class FunctionalTestSuite {
             ssh.loadKeys(ftpPrivateKey, ftpPublicKey, null)
         );
 
-        return ssh.newSFTPClient();
+        return ssh;
     }
 
     ZipInputStream getZipInputStream(RemoteFile zipFile) throws IOException {
@@ -195,6 +205,87 @@ abstract class FunctionalTestSuite {
             Pattern.quote(s2sName.replace("_", "")),
             Pattern.quote(letterId)
         );
+    }
+
+    void awaitAndVerifyFileOnSftp(
+        String letterId,
+        BiConsumer<RemoteResourceInfo, SFTPClient> action
+    ) throws IOException, InterruptedException {
+        Date waitUntil = addMilliseconds(now(), maxWaitForFtpFileInMs);
+
+        Boolean fileExists = false;
+
+        try (SSHClient ssh = getSshClient()) {
+            SFTPClient sftp = ssh.newSFTPClient();
+
+            while (!(now().after(waitUntil) || fileExists)) {
+                Optional<RemoteResourceInfo> matchingFile = findSingleFileOnSftp(letterId, sftp);
+
+                if (matchingFile.isPresent()) {
+                    fileExists = true;
+                    action.accept(matchingFile.get(), sftp);
+                } else {
+                    Thread.sleep(1000);
+                }
+            }
+
+            if (!fileExists) {
+                throw new AssertionError("The expected file didn't appear on SFTP server");
+            }
+        }
+    }
+
+    private Optional<RemoteResourceInfo> findSingleFileOnSftp(
+        String letterId,
+        SFTPClient sftp
+    ) throws IOException {
+        String lettersFolder = String.join("/", ftpTargetFolder, "BULKPRINT");
+
+        List<RemoteResourceInfo> matchingFiles = sftp.ls(lettersFolder, file -> file.getName().contains(letterId));
+
+        if (matchingFiles.size() > 1) {
+            String failMessage = String.format(
+                "Expected one file with name containing '%s'. Found %d",
+                letterId,
+                matchingFiles.size()
+            );
+
+            throw new AssertionError(failMessage);
+        } else {
+            return matchingFiles.stream().findFirst();
+        }
+    }
+
+    void validatePdfFile(
+        String letterId,
+        SFTPClient sftp,
+        RemoteResourceInfo sftpFile,
+        int noOfDocuments
+    ) {
+        try (RemoteFile zipFile = sftp.open(sftpFile.getPath())) {
+            PdfFile pdfFile = unzipFile(zipFile);
+            assertThat(pdfFile.name).matches(getPdfFileNamePattern(letterId));
+
+            try (PDDocument pdfDocument = PDDocument.load(pdfFile.content)) {
+                assertThat(pdfDocument.getNumberOfPages()).isEqualTo(noOfDocuments);
+            }
+        } catch (IOException e) {
+            fail("Failed to validate PDF file", e);
+        }
+    }
+
+    PdfFile unzipFile(RemoteFile zipFile) throws IOException {
+        try (ZipInputStream zipStream = getZipInputStream(zipFile)) {
+            ZipEntry firstEntry = zipStream.getNextEntry();
+            byte[] pdfContent = readAllBytes(zipStream);
+
+            ZipEntry secondEntry = zipStream.getNextEntry();
+            assertThat(secondEntry).as("second file in zip").isNull();
+
+            String pdfName = firstEntry.getName();
+
+            return new PdfFile(pdfName, pdfContent);
+        }
     }
 
     static class PdfFile {
