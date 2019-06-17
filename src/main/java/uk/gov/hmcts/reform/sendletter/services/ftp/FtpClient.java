@@ -174,7 +174,7 @@ public class FtpClient {
 
             return action.apply(ssh.newSFTPClient());
         } catch (IOException exc) {
-            throw new FtpException("Unable to upload file.", exc);
+            throw new FtpException("FTP operation failed.", exc);
         } finally {
             try {
                 if (ssh != null) {
