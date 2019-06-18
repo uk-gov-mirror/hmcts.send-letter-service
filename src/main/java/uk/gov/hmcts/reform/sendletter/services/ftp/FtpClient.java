@@ -52,6 +52,8 @@ public class FtpClient {
 
     @Dependency(name = FTP_CLIENT, command = FTP_FILE_UPLOADED, type = FTP)
     public void upload(FileToSend file, String serviceFolder, SFTPClient sftpClient) {
+        logger.info("Uploading file {} to SFTP server", file.filename);
+
         String folder = file.isSmokeTest
             ? configProperties.getSmokeTestTargetFolder()
             : String.join("/", configProperties.getTargetFolder(), serviceFolder);
@@ -63,7 +65,8 @@ public class FtpClient {
             sftpClient.getFileTransfer().upload(file, path);
 
             logger.info(
-                "File uploaded. Time: {}, Size: {}, Folder: {}",
+                "File {} uploaded. Time: {}, Size: {}, Folder: {}",
+                file.filename,
                 ChronoUnit.MILLIS.between(start, Instant.now()) + "ms",
                 file.content.length / 1024 + "KB",
                 serviceFolder
@@ -78,7 +81,7 @@ public class FtpClient {
                 logger.error("Error uploading file. Path: {}", path, exc);
             }
 
-            throw new FtpException("Unable to upload file.", exc);
+            throw new FtpException(String.format("Unable to upload file %s.", file.filename), exc);
         }
     }
 
@@ -87,23 +90,31 @@ public class FtpClient {
      */
     @Dependency(name = FTP_CLIENT, command = FTP_REPORT_DOWNLOADED, type = FTP)
     public List<Report> downloadReports() {
+        logger.info("Downloading reports from SFTP server");
+
         return runWith(sftp -> {
             try {
                 SFTPFileTransfer transfer = sftp.getFileTransfer();
 
-                return sftp.ls(configProperties.getReportsFolder())
+                List<Report> reports = sftp.ls(configProperties.getReportsFolder())
                     .stream()
                     .filter(this::isReportFile)
                     .map(file -> {
                         InMemoryDownloadedFile inMemoryFile = new InMemoryDownloadedFile();
                         try {
                             transfer.download(file.getPath(), inMemoryFile);
-                            return new Report(file.getPath(), inMemoryFile.getBytes());
+                            Report report = new Report(file.getPath(), inMemoryFile.getBytes());
+                            logger.info("Downloaded report file '{}'", report.path);
+                            return report;
                         } catch (IOException exc) {
                             throw new FtpException("Unable to download file " + file.getName(), exc);
                         }
                     })
                     .collect(toList());
+
+                logger.info("Finished downloading reports from SFTP server. Number of reports: {}", reports.size());
+
+                return reports;
             } catch (IOException exc) {
                 throw new FtpException("Error while downloading reports", exc);
             }
@@ -112,10 +123,12 @@ public class FtpClient {
 
     @Dependency(name = FTP_CLIENT, command = FTP_REPORT_DELETED, type = FTP)
     public void deleteReport(String reportPath) {
+        logger.info("Deleting report '{}'", reportPath);
+
         runWith(sftp -> {
             try {
                 sftp.rm(reportPath);
-
+                logger.info("Deleted report '{}'", reportPath);
                 return null;
             } catch (Exception exc) {
                 throw new FtpException("Error while deleting report: " + reportPath, exc);
@@ -144,7 +157,9 @@ public class FtpClient {
 
     public void deleteFile(String filePath, SFTPClient sftpClient) {
         try {
+            logger.info("Deleting file {} on SFTP server", filePath);
             sftpClient.rm(filePath);
+            logger.info("Deleted file {} on SFTP server", filePath);
         } catch (Exception exc) {
             throw new FtpException("Error while deleting file: " + filePath, exc);
         }

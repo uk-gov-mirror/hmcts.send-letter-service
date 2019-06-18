@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
-import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.sendletter.services.ReportParser;
@@ -88,8 +87,8 @@ public class MarkLettersPostedTask {
                 });
 
             logger.info("Completed '{}' task", TASK_NAME);
-        } catch (FtpException f) {
-            logger.warn("Error fetching csv reports", f);
+        } catch (Exception e) {
+            logger.error("An error occurred when downloading reports from SFTP server", e);
         }
     }
 
