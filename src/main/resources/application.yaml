@@ -110,7 +110,7 @@ tasks:
 
 file-cleanup:
   enabled: ${FILE_CLEANUP_ENABLED:false}
-  cron: ${FILE_CLEANUP_CRON:0 0 5 * * *}
+  cron: ${FILE_CLEANUP_CRON:0 15 * * * *}
   ttl: 12h
 
 encryption:
