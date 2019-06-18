@@ -49,6 +49,7 @@ public class DeleteOldFilesTask {
     @SchedulerLock(name = TASK_NAME)
     @Scheduled(cron = "${file-cleanup.cron}", zone = EUROPE_LONDON)
     public void run() {
+        logger.info("Starting {} task", TASK_NAME);
         serviceFolderMapping
             .getFolders()
             .forEach(folder -> {
@@ -62,8 +63,11 @@ public class DeleteOldFilesTask {
 
                 if (!filesToDelete.isEmpty()) {
                     deleteFiles(filesToDelete);
+                } else {
+                    logger.info("No files to delete found");
                 }
             });
+        logger.info("Completed {} task", TASK_NAME);
     }
 
     private void deleteFiles(List<FileInfo> filesToDelete) {
