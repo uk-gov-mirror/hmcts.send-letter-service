@@ -11,7 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
 
@@ -26,6 +26,7 @@ import java.util.UUID;
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,19 +66,14 @@ class AppInsightsTest {
 
     @Test
     void should_track_event_of_not_printed_letter() {
-        Letter letter = new Letter(
-            UUID.randomUUID(),
-            CHECKSUM,
-            SERVICE_NAME,
-            null,
-            TYPE,
-            null,
-            false,
-            now()
-        );
-
         LocalDateTime sentToPrint = now();
-        letter.setSentToPrintAt(sentToPrint);
+
+        BasicLetterInfo letter = mock(BasicLetterInfo.class);
+        when(letter.getId()).thenReturn(UUID.randomUUID());
+        when(letter.getChecksum()).thenReturn(CHECKSUM);
+        when(letter.getService()).thenReturn(SERVICE_NAME);
+        when(letter.getType()).thenReturn(TYPE);
+        when(letter.getSentToPrintAt()).thenReturn(sentToPrint);
 
         insights.trackStaleLetter(letter);
 

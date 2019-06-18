@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.StaleLetterService;
 
@@ -35,7 +35,7 @@ public class StaleLetterControllerTest {
 
     @Test
     public void should_return_letters_from_stale_letter_service() throws Exception {
-        List<Letter> letters = Arrays.asList(
+        List<BasicLetterInfo> letters = Arrays.asList(
             letter(
                 UUID.fromString("767cf17e-0ec0-452b-a457-bc173d51ff40"),
                 "service1",
@@ -81,20 +81,20 @@ public class StaleLetterControllerTest {
             .andExpect(status().is5xxServerError());
     }
 
-    private Letter letter(
+    private BasicLetterInfo letter(
         UUID id,
         String service,
         LetterStatus status,
         LocalDateTime createdAt,
         LocalDateTime sentToPrintAt
     ) {
-        Letter letter = mock(Letter.class);
+        BasicLetterInfo letter = mock(BasicLetterInfo.class);
 
         given(letter.getId()).willReturn(id);
         given(letter.getSentToPrintAt()).willReturn(sentToPrintAt);
         given(letter.getCreatedAt()).willReturn(createdAt);
         given(letter.getService()).willReturn(service);
-        given(letter.getStatus()).willReturn(status);
+        given(letter.getStatus()).willReturn(status.name());
 
         return letter;
     }

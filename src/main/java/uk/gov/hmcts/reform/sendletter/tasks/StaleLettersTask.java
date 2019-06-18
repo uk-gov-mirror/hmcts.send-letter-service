@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.StaleLetterService;
 
@@ -39,7 +39,7 @@ public class StaleLettersTask {
     public void run() {
         logger.info("Started '{}' task", TASK_NAME);
 
-        List<Letter> letters = staleLetterService.getStaleLetters();
+        List<BasicLetterInfo> letters = staleLetterService.getStaleLetters();
         letters.forEach(insights::trackStaleLetter);
         int count = letters.size();
 

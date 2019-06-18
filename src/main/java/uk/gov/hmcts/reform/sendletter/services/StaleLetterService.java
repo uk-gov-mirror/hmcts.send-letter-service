@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.sendletter.services;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.services.date.DateCalculator;
 
@@ -42,7 +42,7 @@ public class StaleLetterService {
         this.clock = clock;
     }
 
-    public List<Letter> getStaleLetters() {
+    public List<BasicLetterInfo> getStaleLetters() {
         return letterRepository.findStaleLetters(
             calculateCutOffCreationDate()
                 .withZoneSameInstant(DB_TIME_ZONE_ID)

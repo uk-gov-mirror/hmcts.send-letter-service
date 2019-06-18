@@ -7,7 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.model.out.StaleLetter;
 import uk.gov.hmcts.reform.sendletter.model.out.StaleLetterResponse;
 import uk.gov.hmcts.reform.sendletter.services.StaleLetterService;
@@ -43,10 +43,10 @@ public class StaleLetterController {
         return new StaleLetterResponse(staleLetters);
     }
 
-    private StaleLetter mapToStaleLetter(Letter dbLetter) {
+    private StaleLetter mapToStaleLetter(BasicLetterInfo dbLetter) {
         return new StaleLetter(
             dbLetter.getId(),
-            dbLetter.getStatus().name(),
+            dbLetter.getStatus(),
             dbLetter.getService(),
             dbLetter.getCreatedAt(),
             dbLetter.getSentToPrintAt()

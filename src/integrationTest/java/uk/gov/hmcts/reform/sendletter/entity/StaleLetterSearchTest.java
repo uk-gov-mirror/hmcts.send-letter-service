@@ -29,7 +29,7 @@ public class StaleLetterSearchTest {
         Letter uploadedLetter = storeLetter(cutOffDate.minusDays(5), LetterStatus.Uploaded);
 
         // when
-        List<Letter> letters = repository.findStaleLetters(cutOffDate);
+        List<BasicLetterInfo> letters = repository.findStaleLetters(cutOffDate);
 
         // then
         assertThat(letters.size()).isEqualTo(2);
@@ -48,12 +48,12 @@ public class StaleLetterSearchTest {
         Letter abortedLetter = storeLetter(cutOffDate.minusSeconds(1), LetterStatus.Aborted);
 
         // when
-        List<Letter> letters = repository.findStaleLetters(cutOffDate);
+        List<BasicLetterInfo> letters = repository.findStaleLetters(cutOffDate);
 
         // then
         assertThat(letters.size()).isEqualTo(2);
-        assertThat(letters).extracting(Letter::getId).doesNotContain(postedLetter.getId());
-        assertThat(letters).extracting(Letter::getId).doesNotContain(abortedLetter.getId());
+        assertThat(letters).extracting(BasicLetterInfo::getId).doesNotContain(postedLetter.getId());
+        assertThat(letters).extracting(BasicLetterInfo::getId).doesNotContain(abortedLetter.getId());
     }
 
     @Test
@@ -65,7 +65,7 @@ public class StaleLetterSearchTest {
         storeLetter(cutOffDate.plusSeconds(1), LetterStatus.Created);
 
         // when
-        List<Letter> letters = repository.findStaleLetters(cutOffDate);
+        List<BasicLetterInfo> letters = repository.findStaleLetters(cutOffDate);
 
         // then
         assertThat(letters).isEmpty();
@@ -80,7 +80,7 @@ public class StaleLetterSearchTest {
         storeLetter(cutOffDate.minusDays(1), LetterStatus.Created, "not-smoke-test");
 
         // when
-        List<Letter> letters = repository.findStaleLetters(cutOffDate);
+        List<BasicLetterInfo> letters = repository.findStaleLetters(cutOffDate);
 
         // then
         assertThat(letters.size()).isEqualTo(1);

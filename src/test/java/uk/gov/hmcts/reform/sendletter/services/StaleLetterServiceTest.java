@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.services.date.DateCalculator;
 
@@ -117,16 +117,16 @@ public class StaleLetterServiceTest {
     public void getStaleLetters_should_return_all_letters_returned_by_repository() {
         reset(letterRepository);
 
-        List<Letter> repositoryLetters = Arrays.asList(
-            mock(Letter.class),
-            mock(Letter.class),
-            mock(Letter.class)
+        List<BasicLetterInfo> repositoryLetters = Arrays.asList(
+            mock(BasicLetterInfo.class),
+            mock(BasicLetterInfo.class),
+            mock(BasicLetterInfo.class)
         );
 
         given(letterRepository.findStaleLetters(any())).willReturn(repositoryLetters);
 
         // when
-        List<Letter> staleLetters =
+        List<BasicLetterInfo> staleLetters =
             staleLetterService("16:00", 2).getStaleLetters();
 
         // then

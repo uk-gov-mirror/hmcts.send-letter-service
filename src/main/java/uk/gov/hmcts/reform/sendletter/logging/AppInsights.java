@@ -16,7 +16,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
 
 import java.time.Instant;
@@ -153,7 +153,7 @@ public class AppInsights {
 
     // events
 
-    public void trackStaleLetter(Letter staleLetter) {
+    public void trackStaleLetter(BasicLetterInfo staleLetter) {
         Map<String, String> properties = new HashMap<>();
 
         properties.put("letterId", staleLetter.getId().toString());

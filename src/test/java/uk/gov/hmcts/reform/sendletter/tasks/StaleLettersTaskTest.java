@@ -6,21 +6,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
-import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.StaleLetterService;
 
 import java.util.UUID;
 
-import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StaleLettersTaskTest {
@@ -47,14 +47,14 @@ class StaleLettersTaskTest {
         task.run();
 
         // then
-        verify(insights, never()).trackStaleLetter(any(Letter.class));
+        verify(insights, never()).trackStaleLetter(any(BasicLetterInfo.class));
     }
 
     @Test
     @SuppressWarnings("VariableDeclarationUsageDistance")
     void should_report_to_insights_when_there_is_an_unprinted_letter() {
         // given
-        Letter letter = staleLetter();
+        BasicLetterInfo letter = staleLetter();
 
         given(staleLetterService.getStaleLetters()).willReturn(asList(letter));
 
@@ -62,7 +62,7 @@ class StaleLettersTaskTest {
         task.run();
 
         // then
-        ArgumentCaptor<Letter> captor = ArgumentCaptor.forClass(Letter.class);
+        ArgumentCaptor<BasicLetterInfo> captor = ArgumentCaptor.forClass(BasicLetterInfo.class);
         verify(insights).trackStaleLetter(captor.capture());
 
         // and
@@ -70,20 +70,9 @@ class StaleLettersTaskTest {
         assertThat(captor.getValue().getId()).isEqualTo(letter.getId());
     }
 
-    private Letter staleLetter() {
-        Letter letter = new Letter(
-            UUID.randomUUID(),
-            "checksum",
-            "service",
-            null,
-            "type1",
-            null,
-            false,
-            now()
-        );
-
-        letter.setStatus(LetterStatus.Uploaded);
-        letter.setSentToPrintAt(now().minusDays(1));
+    private BasicLetterInfo staleLetter() {
+        BasicLetterInfo letter = mock(BasicLetterInfo.class);
+        when(letter.getId()).thenReturn(UUID.randomUUID());
 
         return letter;
     }
