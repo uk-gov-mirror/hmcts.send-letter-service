@@ -193,7 +193,7 @@ class UploadLettersTaskTest {
     @SuppressWarnings("unchecked")
     private void givenDbContains(Letter... letters) {
         // Return letter on first call, then empty list.
-        given(repo.findFirst10ByStatus(eq(Created)))
+        given(repo.findFirst3ByStatus(eq(Created)))
             .willReturn(Arrays.asList(letters)).willReturn(Lists.newArrayList());
     }
 }

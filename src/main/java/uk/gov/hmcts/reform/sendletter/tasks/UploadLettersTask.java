@@ -64,7 +64,7 @@ public class UploadLettersTask {
 
         // Upload the letters in batches.
         // With each batch we mark them Uploaded/Skipped so they no longer appear in the query.
-        List<Letter> lettersToUpload = repo.findFirst10ByStatus(LetterStatus.Created);
+        List<Letter> lettersToUpload = repo.findFirst3ByStatus(LetterStatus.Created);
         int counter = 0;
 
         if (!lettersToUpload.isEmpty()) {
@@ -73,7 +73,7 @@ public class UploadLettersTask {
                 List<Letter> letters;
 
                 do {
-                    letters = repo.findFirst10ByStatus(LetterStatus.Created);
+                    letters = repo.findFirst3ByStatus(LetterStatus.Created);
                     uploaded += uploadLetters(letters, sftpClient);
                 } while (!letters.isEmpty());
 

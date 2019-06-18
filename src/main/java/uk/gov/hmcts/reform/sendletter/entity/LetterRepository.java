@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface LetterRepository extends JpaRepository<Letter, UUID> {
 
-    List<Letter> findFirst10ByStatus(LetterStatus status);
+    List<Letter> findFirst3ByStatus(LetterStatus status);
 
     List<Letter> findByStatus(LetterStatus status);
 
