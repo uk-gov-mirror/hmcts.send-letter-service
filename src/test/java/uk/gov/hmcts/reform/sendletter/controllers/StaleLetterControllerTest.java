@@ -19,7 +19,6 @@ import java.util.UUID;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Resources.getResource;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -88,14 +87,6 @@ public class StaleLetterControllerTest {
         LocalDateTime createdAt,
         LocalDateTime sentToPrintAt
     ) {
-        BasicLetterInfo letter = mock(BasicLetterInfo.class);
-
-        given(letter.getId()).willReturn(id);
-        given(letter.getSentToPrintAt()).willReturn(sentToPrintAt);
-        given(letter.getCreatedAt()).willReturn(createdAt);
-        given(letter.getService()).willReturn(service);
-        given(letter.getStatus()).willReturn(status.name());
-
-        return letter;
+        return new BasicLetterInfo(id, "checksum", service, status, "type", createdAt, sentToPrintAt);
     }
 }

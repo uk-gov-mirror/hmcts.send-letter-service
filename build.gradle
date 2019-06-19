@@ -124,7 +124,8 @@ jacocoTestReport {
   afterEvaluate {
     getClassDirectories().from = getClassDirectories().files.collect {
       fileTree(dir: it, exclude: [
-        'uk/gov/hmcts/reform/sendletter/config/**'
+        'uk/gov/hmcts/reform/sendletter/config/**',
+        '**/BasicLetterInfo.java'
       ])
     }
   }
@@ -136,7 +137,7 @@ sonarqube {
     property "sonar.projectName", "Reform :: Send Letter Service 2.0"
     property "sonar.jacoco.reportPath", "${project.buildDir}/jacoco/test.exec"
     property "sonar.jacoco.itReportPath", "${project.buildDir}/jacoco/integration.exec"
-    property 'sonar.exclusions', "**/config/**"
+    property 'sonar.exclusions', "**/config/**, **/BasicLetterInfo.java"
   }
 }
 

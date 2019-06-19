@@ -10,16 +10,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("checkstyle:LineLength")
 public interface LetterRepository extends JpaRepository<Letter, UUID> {
 
     List<Letter> findFirst3ByStatus(LetterStatus status);
 
     List<Letter> findByStatus(LetterStatus status);
 
-    @Query("select l from Letter l where l.status not in ('Posted', 'Aborted')"
-        + " and l.createdAt < :createdBefore and l.type <> '"
-        + UploadLettersTask.SMOKE_TEST_LETTER_TYPE
-        + "' order by l.createdAt asc")
+    @Query("select new uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo(l.id, l.checksum, l.service, l.status, l.type, l.createdAt, l.sentToPrintAt)"
+        + " from Letter l "
+        + " where l.status not in ('Posted', 'Aborted')"
+        + " and l.createdAt < :createdBefore"
+        + " and l.type <> '" + UploadLettersTask.SMOKE_TEST_LETTER_TYPE + "'"
+        + " order by l.createdAt asc")
     List<BasicLetterInfo> findStaleLetters(
         @Param("createdBefore") LocalDateTime createdBefore
     );
