@@ -109,7 +109,7 @@ variable "ftp_reports_folder" {
 }
 
 variable "ftp_reports_cron" {
-  default = "0 30 10 * * *"
+  default = "0 30 * * * *"
 }
 
 variable "smtp_host" {

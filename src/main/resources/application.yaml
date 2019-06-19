@@ -105,7 +105,7 @@ scheduling:
 
 tasks:
   upload-letters-interval-ms: ${UPLOAD_LETTERS_INTERVAL:30000}
-  mark-letters-posted: ${FTP_REPORTS_CRON:0 30 10 * * *}
+  mark-letters-posted: ${FTP_REPORTS_CRON:0 30 * * * *}
   stale-letters-report: ${STALE_LETTERS_REPORT_CRON:0 30 11 * * *}
 
 file-cleanup:
