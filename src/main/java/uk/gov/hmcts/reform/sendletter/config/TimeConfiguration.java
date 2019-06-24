@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 @Configuration
 public class TimeConfiguration {
 
-    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    public static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     @Bean
     public Clock clock() {

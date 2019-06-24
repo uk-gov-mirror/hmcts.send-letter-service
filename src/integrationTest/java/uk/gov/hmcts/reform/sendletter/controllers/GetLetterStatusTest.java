@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.authorisation.validators.AuthTokenValidator;
 import uk.gov.hmcts.reform.sendletter.SampleData;
+import uk.gov.hmcts.reform.sendletter.config.TimeConfiguration;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 
@@ -80,6 +81,8 @@ class GetLetterStatusTest {
     }
 
     private String toIso(LocalDateTime dateTime) {
-        return dateTime.atZone(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_INSTANT);
+        return dateTime
+            .atZone(ZoneId.of("UTC"))
+            .format(DateTimeFormatter.ofPattern(TimeConfiguration.DATE_TIME_PATTERN));
     }
 }
