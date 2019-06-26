@@ -44,7 +44,6 @@ public class LetterService {
     private final Zipper zipper;
     private final ObjectMapper mapper;
     private final boolean isEncryptionEnabled;
-    private final String encryptionPublicKey;
     private final PGPPublicKey pgpPublicKey;
     private final ServiceFolderMapping serviceFolderMapping;
 
@@ -62,7 +61,6 @@ public class LetterService {
         this.zipper = zipper;
         this.mapper = mapper;
         this.isEncryptionEnabled = isEncryptionEnabled;
-        this.encryptionPublicKey = encryptionPublicKey;
         this.pgpPublicKey = loadPgpPublicKey(encryptionPublicKey);
         this.serviceFolderMapping = serviceFolderMapping;
     }
@@ -127,7 +125,7 @@ public class LetterService {
         byte[] zipContent,
         LocalDateTime createdAt
     ) {
-        Asserts.notNull(encryptionPublicKey, "encryptionPublicKey");
+        Asserts.notNull(pgpPublicKey, "pgpPublicKey");
 
         String zipFileName = FinalPackageFileNameHelper.generateName(
             letter.getType(),
