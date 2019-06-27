@@ -27,7 +27,12 @@ public class PendingLettersController {
             service
                 .getPendingLetters()
                 .stream()
-                .map(l -> new PendingLetter(l.getId(), l.getService(), l.getCreatedAt()))
+                .map(l -> new PendingLetter(
+                    l.getId(),
+                    l.getService(),
+                    l.getCreatedAt(),
+                    l.getEncryptionKeyFingerprint()
+                ))
                 .collect(toList());
 
         return new PendingLettersResponse(pendingLetters);

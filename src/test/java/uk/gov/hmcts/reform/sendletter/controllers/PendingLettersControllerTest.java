@@ -36,12 +36,14 @@ public class PendingLettersControllerTest {
         Letter letter1 = letter(
             UUID.fromString("9b9c019d-78e7-479d-afc6-a7b5b585c47e"),
             "service_A",
-            LocalDateTime.of(2019, MAY, 17, 11, 29, 30)
+            LocalDateTime.of(2019, MAY, 17, 11, 29, 30),
+            "9c61b7da4e6c94416be51136122ed01acea9884f"
         );
         Letter letter2 = letter(
             UUID.fromString("19ae96e9-30c2-4b8b-befc-7d26c7fb0731"),
             "service_B",
-            LocalDateTime.of(2019, MAY, 16, 7, 0, 0)
+            LocalDateTime.of(2019, MAY, 16, 7, 0, 0),
+            "85e38f69046b44c1ec9fb07b76d78f0500d026c4"
         );
 
         given(service.getPendingLetters()).willReturn(asList(letter1, letter2));
@@ -55,12 +57,14 @@ public class PendingLettersControllerTest {
                     + "  {"
                     + "    'id': '9b9c019d-78e7-479d-afc6-a7b5b585c47e',"
                     + "    'service': 'service_A',"
-                    + "    'created_at': '2019-05-17T11:29:30'"
+                    + "    'created_at': '2019-05-17T11:29:30',"
+                    + "    'key_fingerprint': '9c61b7da4e6c94416be51136122ed01acea9884f'"
                     + "  },"
                     + "  {"
                     + "    'id': '19ae96e9-30c2-4b8b-befc-7d26c7fb0731',"
                     + "    'service': 'service_B',"
-                    + "    'created_at': '2019-05-16T07:00:00'"
+                    + "    'created_at': '2019-05-16T07:00:00',"
+                    + "    'key_fingerprint': '85e38f69046b44c1ec9fb07b76d78f0500d026c4'"
                     + "  }"
                     + "]"
                     + "}"
@@ -79,11 +83,12 @@ public class PendingLettersControllerTest {
             .andExpect(content().json("{ 'pending_letters': [] }"));
     }
 
-    private Letter letter(UUID id, String service, LocalDateTime createdAt) {
+    private Letter letter(UUID id, String service, LocalDateTime createdAt, String keyFingerprint) {
         Letter letter = mock(Letter.class);
         when(letter.getId()).thenReturn(id);
         when(letter.getService()).thenReturn(service);
         when(letter.getCreatedAt()).thenReturn(createdAt);
+        when(letter.getEncryptionKeyFingerprint()).thenReturn(keyFingerprint);
         return letter;
     }
 }

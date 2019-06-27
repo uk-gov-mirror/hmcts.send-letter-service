@@ -16,9 +16,13 @@ public class PendingLetter {
     @JsonProperty("created_at")
     public final LocalDateTime createdAt;
 
-    public PendingLetter(UUID id, String service, LocalDateTime createdAt) {
+    @JsonProperty("key_fingerprint")
+    public final String keyFingerprint;
+
+    public PendingLetter(UUID id, String service, LocalDateTime createdAt, String keyFingerprint) {
         this.id = id;
         this.service = service;
         this.createdAt = createdAt;
+        this.keyFingerprint = keyFingerprint;
     }
 }
