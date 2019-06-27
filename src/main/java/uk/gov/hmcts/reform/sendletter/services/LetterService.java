@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.http.util.Asserts;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.slf4j.Logger;
@@ -102,14 +103,11 @@ public class LetterService {
             serviceName,
             mapper.valueToTree(letter.getAdditionalData()),
             letter.getType(),
-            zipContent,
+            isEncryptionEnabled ? encryptZipContents(letter, serviceName, id, zipContent, createdAtTime) : zipContent,
             isEncryptionEnabled,
+            getEncryptionKeyFingerprint(),
             createdAtTime
         );
-
-        if (isEncryptionEnabled) {
-            dbLetter.setFileContent(encryptZipContents(letter, serviceName, id, zipContent, createdAtTime));
-        }
 
         letterRepository.save(dbLetter);
 
@@ -136,6 +134,14 @@ public class LetterService {
         );
 
         return PgpEncryptionUtil.encryptFile(zipContent, zipFileName, pgpPublicKey);
+    }
+
+    private String getEncryptionKeyFingerprint() {
+        if (isEncryptionEnabled) {
+            return Hex.encodeHexString(this.pgpPublicKey.getFingerprint());
+        } else {
+            return null;
+        }
     }
 
     private PGPPublicKey loadPgpPublicKey(String encryptionPublicKey) {

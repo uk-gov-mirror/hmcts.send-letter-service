@@ -173,6 +173,7 @@ class UploadLettersTaskTest {
             type,
             "hello".getBytes(),
             true,
+            "9c61b7da4e6c94416be51136122ed01acea9884f",
             now()
         );
     }
@@ -186,6 +187,7 @@ class UploadLettersTaskTest {
             "type",
             "hello".getBytes(),
             true,
+            "9c61b7da4e6c94416be51136122ed01acea9884f",
             now()
         );
     }

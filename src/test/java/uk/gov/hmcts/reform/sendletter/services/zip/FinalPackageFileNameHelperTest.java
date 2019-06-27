@@ -24,6 +24,7 @@ class FinalPackageFileNameHelperTest {
             "type",
             null,
             false,
+            null,
             now()
         );
 
@@ -67,6 +68,7 @@ class FinalPackageFileNameHelperTest {
             "type",
             null,
             false,
+            null,
             now()
         );
 
@@ -88,6 +90,7 @@ class FinalPackageFileNameHelperTest {
             "some_type",
             null,
             false,
+            null,
             now()
         );
 
@@ -108,6 +111,7 @@ class FinalPackageFileNameHelperTest {
             "type",
             null,
             false,
+            null,
             now()
         );
 
@@ -119,6 +123,7 @@ class FinalPackageFileNameHelperTest {
             "type",
             null,
             true,
+            "752c14ea195c369bac3c3b7896975ee9fd15eeb7",
             now()
         );
 

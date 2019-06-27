@@ -78,6 +78,7 @@ public final class SampleData {
                 type,
                 new byte[1],
                 false,
+                null,
                 createdAt
             );
         } catch (IOException e) {

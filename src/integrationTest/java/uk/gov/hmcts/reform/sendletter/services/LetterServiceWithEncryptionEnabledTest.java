@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 class LetterServiceWithEncryptionEnabledTest {
 
     private static final String SERVICE_NAME = "a_service";
+    private static final String KEY_FINGERPRINT = "9c61b7da4e6c94416be51136122ed01acea9884f";
 
     @Value("${encryption.publicKey}")
     private String encryptionPublicKey;
@@ -71,6 +72,9 @@ class LetterServiceWithEncryptionEnabledTest {
         UUID id = service.save(letterRequest, SERVICE_NAME);
 
         Letter letterInDb = letterRepository.findById(id).get();
+
+        assertThat(letterInDb.isEncrypted()).isTrue();
+        assertThat(letterInDb.getEncryptionKeyFingerprint()).isEqualTo(KEY_FINGERPRINT);
 
         byte[] encryptedZip = letterInDb.getFileContent();
 

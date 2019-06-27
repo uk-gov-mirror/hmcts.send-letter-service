@@ -40,6 +40,7 @@ public class Letter {
     private LetterStatus status = LetterStatus.Created;
     private byte[] fileContent;
     private Boolean isEncrypted;
+    private String encryptionKeyFingerprint;
 
     // For use by hibernate.
     private Letter() {
@@ -53,6 +54,7 @@ public class Letter {
         String type,
         byte[] fileContent,
         Boolean isEncrypted,
+        String encryptionKeyFingerprint,
         LocalDateTime createdAt
     ) {
         this.id = id;
@@ -63,6 +65,7 @@ public class Letter {
         this.fileContent = fileContent;
         this.isFailed = false;
         this.isEncrypted = isEncrypted;
+        this.encryptionKeyFingerprint = encryptionKeyFingerprint;
         this.createdAt = createdAt;
     }
 
@@ -128,5 +131,13 @@ public class Letter {
 
     public Boolean isEncrypted() {
         return isEncrypted;
+    }
+
+    public String getEncryptionKeyFingerprint() {
+        return encryptionKeyFingerprint;
+    }
+
+    public void setEncryptionKeyFingerprint(String encryptionKeyFingerprint) {
+        this.encryptionKeyFingerprint = encryptionKeyFingerprint;
     }
 }

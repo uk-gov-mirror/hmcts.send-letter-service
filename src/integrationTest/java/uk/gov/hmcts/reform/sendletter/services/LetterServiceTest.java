@@ -73,6 +73,9 @@ class LetterServiceTest {
         UUID id = service.save(SampleData.letterRequest(), SERVICE_NAME);
 
         Letter result = letterRepository.findById(id).get();
+
+        assertThat(result.isEncrypted()).isFalse();
+        assertThat(result.getEncryptionKeyFingerprint()).isNull();
         PdfHelper.validateZippedPdf(result.getFileContent());
     }
 
