@@ -35,7 +35,7 @@ public class StaleLettersTask {
     }
 
     @SchedulerLock(name = TASK_NAME)
-    @Scheduled(cron = "${tasks.stale-letters-report}", zone = EUROPE_LONDON)
+    @Scheduled(cron = "${tasks.stale-letters-report.cron}", zone = EUROPE_LONDON)
     public void run() {
         logger.info("Started '{}' task", TASK_NAME);
 

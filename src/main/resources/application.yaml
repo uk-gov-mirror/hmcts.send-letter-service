@@ -104,9 +104,12 @@ scheduling:
   lock_at_most_for: ${SCHEDULING_LOCK_AT_MOST_FOR:PT10M} # 10 minutes in ISO-8601
 
 tasks:
-  upload-letters-interval-ms: ${UPLOAD_LETTERS_INTERVAL:30000}
-  mark-letters-posted: ${FTP_REPORTS_CRON:0 30 * * * *}
-  stale-letters-report: ${STALE_LETTERS_REPORT_CRON:0 30 11 * * *}
+  upload-letters:
+    interval-ms: ${UPLOAD_LETTERS_INTERVAL:30000}
+  mark-letters-posted:
+    cron:  ${FTP_REPORTS_CRON:0 30 * * * *}
+  stale-letters-report:
+    cron: ${STALE_LETTERS_REPORT_CRON:0 30 11 * * *}
 
 file-cleanup:
   enabled: ${FILE_CLEANUP_ENABLED:false}

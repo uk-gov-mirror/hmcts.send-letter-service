@@ -53,7 +53,7 @@ public class UploadLettersTask {
     }
 
     @SchedulerLock(name = TASK_NAME)
-    @Scheduled(fixedDelayString = "${tasks.upload-letters-interval-ms}")
+    @Scheduled(fixedDelayString = "${tasks.upload-letters.interval-ms}")
     public void run() {
         if (!availabilityChecker.isFtpAvailable(now(ZoneId.of(EUROPE_LONDON)).toLocalTime())) {
             logger.info("Not processing '{}' task due to FTP downtime window", TASK_NAME);

@@ -11,9 +11,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @TestPropertySource(properties = {
     "scheduling.enabled=true",
-    "tasks.upload-letters-interval-ms=1000",
-    "tasks.mark-letters-posted=*/1 * * * * *",
-    "tasks.stale-letters-report=*/1 * * * * *",
+    "tasks.upload-letters.interval-ms=1000",
+    "tasks.mark-letters-posted.cron=*/1 * * * * *",
+    "tasks.stale-letters-report.cron=*/1 * * * * *",
     "ftp.service-folders[0].service=some_service_name",
     "ftp.service-folders[0].folder=BULKPRINT"
 })
