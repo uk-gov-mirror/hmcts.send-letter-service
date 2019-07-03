@@ -97,23 +97,31 @@ class BaseTest {
                 .andReturn();
 
             // Wait for letter to be uploaded.
-            await().atMost(15, SECONDS).untilAsserted(
-                () -> assertThat(validLettersUploaded(server.lettersFolder, isEncryptionEnabled))
-                      .as("No letters uploaded!").isTrue()
-            );
+            await()
+                .atMost(15, SECONDS)
+                .untilAsserted(() -> {
+                    assertThat(server.lettersFolder.listFiles())
+                        .as("Files on FTP")
+                        .isNotEmpty()
+                        .allMatch(f -> isValidPdf(isEncryptionEnabled, f));
+                });
 
             // Generate csv report.
             createCsvReport(server);
 
             // The report should be processed and the letter marked posted.
-            await().atMost(15, SECONDS).untilAsserted(
-                () -> assertThat(letterHasBeenPosted()).as("Letter not posted").isTrue()
-            );
+            await()
+                .atMost(15, SECONDS)
+                .untilAsserted(() -> {
+                    List<Letter> letters = repository.findAll();
+                    assertThat(letters).as("Letters in DB").hasSize(1);
+                    assertThat(letters.get(0).getStatus()).as("Letter status").isEqualTo(LetterStatus.Posted);
+                });
 
             // Wait for the csv report to be deleted so that we don't stop the FTP server before the send letters
             // task has finished using it.
             await().atMost(15, SECONDS).untilAsserted(
-                () -> assertThat(server.reportFolder.listFiles()).as("CSV reports not deleted!").isEmpty()
+                () -> assertThat(server.reportFolder.listFiles()).as("CSV reports on FTP").isEmpty()
             );
         }
 
@@ -148,25 +156,12 @@ class BaseTest {
         return Resources.toString(Resources.getResource(fileName), Charsets.UTF_8);
     }
 
-    private boolean letterHasBeenPosted() {
-        List<Letter> letters = repository.findAll();
-        return letters.size() == 1 && letters.get(0).getStatus() == LetterStatus.Posted;
-    }
-
     private void createCsvReport(LocalSftpServer server) throws IOException {
         try (Stream<UUID> letterIds = Arrays.stream(server.lettersFolder.list())
             .map(FileNameHelper::extractIdFromPdfName)) {
 
             CsvReportWriter.writeReport(letterIds, server.reportFolder);
         }
-    }
-
-    private boolean validLettersUploaded(File folder, boolean isEncryptionEnabled) {
-        if (folder.listFiles().length == 0) {
-            return false;
-        }
-        return Arrays.stream(folder.listFiles())
-            .allMatch(f -> isValidPdf(isEncryptionEnabled, f));
     }
 
     private boolean isValidPdf(boolean isEncryptionEnabled, File file) {
