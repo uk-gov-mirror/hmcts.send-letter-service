@@ -106,6 +106,7 @@ scheduling:
 tasks:
   upload-letters:
     interval-ms: ${UPLOAD_LETTERS_INTERVAL:30000}
+    key-fingerprint: ${UPLOAD_LETTERS_KEY_FINGERPRINT:}
   mark-letters-posted:
     cron:  ${FTP_REPORTS_CRON:0 30 * * * *}
   stale-letters-report:

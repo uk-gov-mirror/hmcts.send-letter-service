@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.sendletter.tasks;
 
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import net.schmizz.sshj.sftp.SFTPClient;
+import org.assertj.core.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -36,6 +38,7 @@ public class UploadLettersTask {
     private final FtpClient ftp;
     private final IFtpAvailabilityChecker availabilityChecker;
     private final ServiceFolderMapping serviceFolderMapping;
+    private final String keyFingerprint; // only letters with this fingerprint will be sent
     private final AppInsights insights;
 
     public UploadLettersTask(
@@ -43,12 +46,14 @@ public class UploadLettersTask {
         FtpClient ftp,
         IFtpAvailabilityChecker availabilityChecker,
         ServiceFolderMapping serviceFolderMapping,
+        @Value("${tasks.upload-letters.key-fingerprint}") String keyFingerprint,
         AppInsights insights
     ) {
         this.repo = repo;
         this.ftp = ftp;
         this.availabilityChecker = availabilityChecker;
         this.serviceFolderMapping = serviceFolderMapping;
+        this.keyFingerprint = keyFingerprint;
         this.insights = insights;
     }
 
@@ -64,7 +69,7 @@ public class UploadLettersTask {
 
         // Upload the letters in batches.
         // With each batch we mark them Uploaded/Skipped so they no longer appear in the query.
-        List<Letter> lettersToUpload = repo.findFirst3ByStatus(LetterStatus.Created);
+        List<Letter> lettersToUpload = getBatchForUpload();
         int counter = 0;
 
         if (!lettersToUpload.isEmpty()) {
@@ -73,7 +78,7 @@ public class UploadLettersTask {
                 List<Letter> letters;
 
                 do {
-                    letters = repo.findFirst3ByStatus(LetterStatus.Created);
+                    letters = getBatchForUpload();
                     uploaded += uploadLetters(letters, sftpClient);
                 } while (!letters.isEmpty());
 
@@ -86,6 +91,14 @@ public class UploadLettersTask {
         }
 
         logger.info("Completed '{}' task. Uploaded {} letters", TASK_NAME, counter);
+    }
+
+    private List<Letter> getBatchForUpload() {
+        if (Strings.isNullOrEmpty(this.keyFingerprint)) {
+            return repo.findFirst3ByStatus(LetterStatus.Created);
+        } else {
+            return repo.findFirst3ByStatusAndEncryptionKeyFingerprint(LetterStatus.Created, this.keyFingerprint);
+        }
     }
 
     private int uploadLetters(List<Letter> lettersToUpload, SFTPClient sftpClient) {

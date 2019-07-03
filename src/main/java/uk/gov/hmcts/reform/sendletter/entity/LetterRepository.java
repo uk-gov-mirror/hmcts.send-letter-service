@@ -15,6 +15,8 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
 
     List<Letter> findFirst3ByStatus(LetterStatus status);
 
+    List<Letter> findFirst3ByStatusAndEncryptionKeyFingerprint(LetterStatus status, String fingerprint);
+
     List<Letter> findByStatus(LetterStatus status);
 
     @Query("select new uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo(l.id, l.checksum, l.service, l.status, l.type, l.createdAt, l.sentToPrintAt)"
