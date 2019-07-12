@@ -1,6 +1,6 @@
 data "azurerm_key_vault_secret" "source_bsp_email_secret" {
-  name      = "send-letter-alert-email"
-  vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
+  key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
+  name         = "send-letter-alert-email"
 }
 
 module "alert-action-group" {
@@ -16,9 +16,9 @@ module "alert-action-group" {
 }
 
 resource "azurerm_key_vault_secret" "alert_action_group_name" {
-  name = "alert-action-group-name"
-  value = "${module.alert-action-group.action_group_name}"
-  vault_uri = "${module.send-letter-key-vault.key_vault_uri}"
+  key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
+  name         = "alert-action-group-name"
+  value        = "${module.alert-action-group.action_group_name}"
 }
 
 output "action_group_name" {
