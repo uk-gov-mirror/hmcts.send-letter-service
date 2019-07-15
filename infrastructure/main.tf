@@ -9,39 +9,40 @@ resource "azurerm_resource_group" "rg" {
 }
 
 locals {
-  ase_name               = "core-compute-${var.env}"
+  ase_name = "core-compute-${var.env}"
 
-  ftp_private_key        = "${data.azurerm_key_vault_secret.ftp_private_key.value}"
-  ftp_public_key         = "${data.azurerm_key_vault_secret.ftp_public_key.value}"
-  ftp_user               = "${data.azurerm_key_vault_secret.ftp_user.value}"
+  ftp_private_key = "${data.azurerm_key_vault_secret.ftp_private_key.value}"
+  ftp_public_key  = "${data.azurerm_key_vault_secret.ftp_public_key.value}"
+  ftp_user        = "${data.azurerm_key_vault_secret.ftp_user.value}"
 
-  encryption_public_key  = "${data.azurerm_key_vault_secret.encryption_public_key.value}"
+  encryption_public_key = "${data.azurerm_key_vault_secret.encryption_public_key.value}"
 
-  local_env              = "${(var.env == "preview" || var.env == "spreview") ? (var.env == "preview" ) ? "aat" : "saat" : var.env}"
-  local_ase              = "${(var.env == "preview" || var.env == "spreview") ? (var.env == "preview" ) ? "core-compute-aat" : "core-compute-saat" : local.ase_name}"
+  local_env = "${(var.env == "preview" || var.env == "spreview") ? (var.env == "preview" ) ? "aat" : "saat" : var.env}"
+  local_ase = "${(var.env == "preview" || var.env == "spreview") ? (var.env == "preview" ) ? "core-compute-aat" : "core-compute-saat" : local.ase_name}"
 
   s2s_rg  = "rpe-service-auth-provider-${local.local_env}"
   s2s_url = "http://${local.s2s_rg}.service.core-compute-${local.local_env}.internal"
 
-  previewVaultName       = "${var.product}-send-letter"
-  nonPreviewVaultName    = "${var.product}-send-letter-${var.env}"
-  vaultName              = "${(var.env == "preview" || var.env == "spreview") ? local.previewVaultName : local.nonPreviewVaultName}"
+  previewVaultName    = "${var.product}-send-letter"
+  nonPreviewVaultName = "${var.product}-send-letter-${var.env}"
+  vaultName           = "${(var.env == "preview" || var.env == "spreview") ? local.previewVaultName : local.nonPreviewVaultName}"
 
-  db_connection_options  = "?sslmode=require"
+  db_connection_options = "?sslmode=require"
 
   sku_size = "${var.env == "prod" || var.env == "sprod" || var.env == "aat" ? "I2" : "I1"}"
 }
 
 module "db" {
-  source              = "git@github.com:hmcts/moj-module-postgres?ref=master"
-  product             = "${var.product}-${var.component}-db"
-  location            = "${var.location_db}"
-  env                 = "${var.env}"
-  database_name       = "send_letter"
-  postgresql_user     = "send_letter"
-  sku_name            = "GP_Gen5_2"
-  sku_tier            = "GeneralPurpose"
-  common_tags         = "${var.common_tags}"
+  source          = "git@github.com:hmcts/moj-module-postgres?ref=master"
+  product         = "${var.product}-${var.component}-db"
+  location        = "${var.location_db}"
+  env             = "${var.env}"
+  database_name   = "send_letter"
+  postgresql_user = "send_letter"
+  sku_name        = "GP_Gen5_2"
+  sku_tier        = "GeneralPurpose"
+  common_tags     = "${var.common_tags}"
+  subscription    = "${var.subscription}"
 }
 
 module "send-letter-service" {
@@ -78,22 +79,22 @@ module "send-letter-service" {
     UPLOAD_LETTERS_KEY_FINGERPRINT  = "${var.upload_letters_key_fingerprint}"
 
     // ftp
-    FTP_HOSTNAME                    = "${var.ftp_hostname}"
-    FTP_PORT                        = "${var.ftp_port}"
-    FTP_FINGERPRINT                 = "${var.ftp_fingerprint}"
-    FTP_TARGET_FOLDER               = "${var.ftp_target_folder}"
-    FTP_SMOKE_TEST_TARGET_FOLDER    = "${var.ftp_smoke_test_target_folder}"
-    FTP_REPORTS_FOLDER              = "${var.ftp_reports_folder}"
-    FTP_REPORTS_CRON                = "${var.ftp_reports_cron}"
-    FTP_USER                        = "${local.ftp_user}"
-    FTP_PRIVATE_KEY                 = "${local.ftp_private_key}"
-    FTP_PUBLIC_KEY                  = "${local.ftp_public_key}"
-    ENCRYPTION_PUBLIC_KEY           = "${local.encryption_public_key}"
+    FTP_HOSTNAME                 = "${var.ftp_hostname}"
+    FTP_PORT                     = "${var.ftp_port}"
+    FTP_FINGERPRINT              = "${var.ftp_fingerprint}"
+    FTP_TARGET_FOLDER            = "${var.ftp_target_folder}"
+    FTP_SMOKE_TEST_TARGET_FOLDER = "${var.ftp_smoke_test_target_folder}"
+    FTP_REPORTS_FOLDER           = "${var.ftp_reports_folder}"
+    FTP_REPORTS_CRON             = "${var.ftp_reports_cron}"
+    FTP_USER                     = "${local.ftp_user}"
+    FTP_PRIVATE_KEY              = "${local.ftp_private_key}"
+    FTP_PUBLIC_KEY               = "${local.ftp_public_key}"
+    ENCRYPTION_PUBLIC_KEY        = "${local.encryption_public_key}"
 
     // smtp
-    SMTP_HOST          = "${var.smtp_host}"
-    SMTP_USERNAME      = "${data.azurerm_key_vault_secret.smtp_username.value}"
-    SMTP_PASSWORD      = "${data.azurerm_key_vault_secret.smtp_password.value}"
+    SMTP_HOST     = "${var.smtp_host}"
+    SMTP_USERNAME = "${data.azurerm_key_vault_secret.smtp_username.value}"
+    SMTP_PASSWORD = "${data.azurerm_key_vault_secret.smtp_password.value}"
 
     // reports. depends on smtp
     UPLOAD_SUMMARY_REPORT_CRON       = "${var.upload_summary_report_cron}"
@@ -111,9 +112,10 @@ module "send-letter-key-vault" {
   tenant_id           = "${var.tenant_id}"
   object_id           = "${var.jenkins_AAD_objectId}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
+
   # dcd_cc-dev group object ID
   product_group_object_id = "38f9dea6-e861-4a50-9e73-21e64f563537"
-  common_tags         = "${var.common_tags}"
+  common_tags             = "${var.common_tags}"
 }
 
 data "azurerm_key_vault" "s2s_key_vault" {
@@ -150,6 +152,7 @@ resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
   name         = "${var.component}-POSTGRES-DATABASE"
   value        = "${module.db.postgresql_database}"
 }
+
 # endregion
 
 data "azurerm_key_vault_secret" "smtp_username" {
