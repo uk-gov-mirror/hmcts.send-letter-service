@@ -69,6 +69,8 @@ reports:
       display-name: Probate
     - service: sscs
       display-name: SSCS
+    - service: finrem_document_generator
+      display-name: FINREM
 
 flyway:
   user: ${LETTER_TRACKING_DB_USER_NAME}
@@ -98,6 +100,8 @@ ftp:
       folder: PROBATE
     - service: sscs
       folder: SSCS
+    - service: finrem_document_generator
+      folder: FINREM
 
 scheduling:
   enabled: ${SCHEDULING_ENABLED:false}
