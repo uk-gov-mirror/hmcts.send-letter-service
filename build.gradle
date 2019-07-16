@@ -264,7 +264,7 @@ dependencies {
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
   integrationTestCompile group: 'org.apache.sshd', name: 'sshd-scp', version: '2.2.0'
-  integrationTestCompile group: 'org.apache.sshd', name: 'sshd-sftp', version: '2.2.0'
+  integrationTestCompile group: 'org.apache.sshd', name: 'sshd-sftp', version: '2.3.0'
   integrationTestCompile group: 'org.testcontainers', name: 'postgresql', version: '1.11.4'
   integrationTestCompile group: 'org.awaitility', name: 'awaitility', version: '3.1.6'
   integrationTestImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: versions.junit
