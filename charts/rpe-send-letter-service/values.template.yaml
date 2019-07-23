@@ -25,6 +25,8 @@ java:
     FTP_FINGERPRINT: "SHA256:3tX3DIkqd1Loz2alHfnt+qjHocfxk0YUOZHlnf9Zgdk"
     FTP_TARGET_FOLDER: "TO_XEROX"
     FTP_REPORTS_FOLDER: "FROM_XEROX"
+    FTP_DOWNTIME_FROM: "23:58"
+    FTP_DOWNTIME_TO: "23:59"
     # mails
     SPRING_MAIL_HOST: "false"
   keyVaults:
