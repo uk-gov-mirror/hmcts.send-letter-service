@@ -24,7 +24,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_CONNECTED;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_FILE_DELETED;
 import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_FILE_UPLOADED;
+import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_LIST_FILES;
 import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_REPORT_DELETED;
 import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_REPORT_DOWNLOADED;
 import static uk.gov.hmcts.reform.sendletter.logging.DependencyName.FTP_CLIENT;
@@ -136,6 +139,7 @@ public class FtpClient {
         });
     }
 
+    @Dependency(name = FTP_CLIENT, command = FTP_LIST_FILES, type = FTP)
     public List<FileInfo> listLetters(String serviceFolder) {
         return runWith(sftp -> {
             try {
@@ -155,6 +159,7 @@ public class FtpClient {
         });
     }
 
+    @Dependency(name = FTP_CLIENT, command = FTP_FILE_DELETED, type = FTP)
     public void deleteFile(String filePath, SFTPClient sftpClient) {
         try {
             logger.info("Deleting file {} on SFTP server", filePath);
@@ -165,27 +170,11 @@ public class FtpClient {
         }
     }
 
-    public void testConnection() {
-        runWith(sftpClient -> null);
-    }
-
     public <T> T runWith(Function<SFTPClient, T> action) {
         SSHClient ssh = null;
 
         try {
-            ssh = sshClientSupplier.get();
-
-            ssh.addHostKeyVerifier(configProperties.getFingerprint());
-            ssh.connect(configProperties.getHostname(), configProperties.getPort());
-
-            ssh.authPublickey(
-                configProperties.getUsername(),
-                ssh.loadKeys(
-                    configProperties.getPrivateKey(),
-                    configProperties.getPublicKey(),
-                    null
-                )
-            );
+            ssh = getSshClient();
 
             return action.apply(ssh.newSFTPClient());
         } catch (IOException exc) {
@@ -199,6 +188,25 @@ public class FtpClient {
                 logger.warn("Error closing ssh connection.", e);
             }
         }
+    }
+
+    @Dependency(name = FTP_CLIENT, command = FTP_CONNECTED, type = FTP)
+    public SSHClient getSshClient() throws IOException {
+        SSHClient ssh = sshClientSupplier.get();
+
+        ssh.addHostKeyVerifier(configProperties.getFingerprint());
+        ssh.connect(configProperties.getHostname(), configProperties.getPort());
+
+        ssh.authPublickey(
+            configProperties.getUsername(),
+            ssh.loadKeys(
+                configProperties.getPrivateKey(),
+                configProperties.getPublicKey(),
+                null
+            )
+        );
+
+        return ssh;
     }
 
     private boolean isReportFile(RemoteResourceInfo resourceInfo) {

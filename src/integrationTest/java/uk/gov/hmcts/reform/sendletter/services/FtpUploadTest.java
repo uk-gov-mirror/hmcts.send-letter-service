@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
 import com.google.common.io.Files;
+import net.schmizz.sshj.SSHClient;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
@@ -15,7 +16,9 @@ class FtpUploadTest {
     @Test
     void connects_to_ftp() throws Exception {
         try (LocalSftpServer server = LocalSftpServer.create()) {
-            FtpHelper.getSuccessfulClient(LocalSftpServer.port).testConnection();
+            try (SSHClient client = FtpHelper.getSuccessfulClient(LocalSftpServer.port).getSshClient()) {
+                assertThat(client.isConnected()).isTrue();
+            }
         }
     }
 
