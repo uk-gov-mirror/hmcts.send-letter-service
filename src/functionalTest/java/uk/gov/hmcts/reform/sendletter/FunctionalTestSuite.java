@@ -230,7 +230,9 @@ abstract class FunctionalTestSuite {
             }
 
             if (!fileExists) {
-                throw new AssertionError("The expected file didn't appear on SFTP server");
+                throw new AssertionError(
+                    "The expected file for letter '" + letterId + "' didn't appear on SFTP server"
+                );
             }
         }
     }
