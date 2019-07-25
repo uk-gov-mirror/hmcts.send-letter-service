@@ -50,7 +50,7 @@ class DeleteOldFilesTaskTest {
         given(serviceFolderMapping.getFolders())
             .willReturn(ImmutableSet.of("SERVICE"));
 
-        given(ftp.listLetters("SERVICE"))
+        given(ftp.listLetters("SERVICE", sftpClient))
             .willReturn(asList(
                 new FileInfo("new.zip", now()),
                 new FileInfo("old.zip", now().minus(ttl.plusSeconds(1))),
@@ -76,8 +76,10 @@ class DeleteOldFilesTaskTest {
                 "B"
             ));
 
-        given(ftp.listLetters("A")).willReturn(ImmutableList.of(new FileInfo("a.zip", secondAgo())));
-        given(ftp.listLetters("B")).willReturn(ImmutableList.of(new FileInfo("b.zip", secondAgo())));
+        given(ftp.listLetters("A", sftpClient))
+            .willReturn(ImmutableList.of(new FileInfo("a.zip", secondAgo())));
+        given(ftp.listLetters("B", sftpClient))
+            .willReturn(ImmutableList.of(new FileInfo("b.zip", secondAgo())));
 
         // when
         new DeleteOldFilesTask(ftp, serviceFolderMapping, Duration.ZERO).run();
@@ -101,7 +103,7 @@ class DeleteOldFilesTaskTest {
             new FileInfo("ok2.zip", secondAgo())
         );
 
-        given(ftp.listLetters("SERVICE")).willReturn(files);
+        given(ftp.listLetters("SERVICE", sftpClient)).willReturn(files);
 
         willThrow(FtpException.class).given(ftp).deleteFile("error1.zip", sftpClient);
         willThrow(FtpException.class).given(ftp).deleteFile("error2.zip", sftpClient);

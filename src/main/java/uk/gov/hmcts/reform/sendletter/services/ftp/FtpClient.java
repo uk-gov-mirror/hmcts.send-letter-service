@@ -140,23 +140,21 @@ public class FtpClient {
     }
 
     @Dependency(name = FTP_CLIENT, command = FTP_LIST_FILES, type = FTP)
-    public List<FileInfo> listLetters(String serviceFolder) {
-        return runWith(sftp -> {
-            try {
-                String path = String.join("/", configProperties.getTargetFolder(), serviceFolder);
-                return sftp
-                    .ls(path)
-                    .stream()
-                    .map(it -> new FileInfo(
-                            it.getPath(),
-                            Instant.ofEpochSecond(it.getAttributes().getMtime())
-                        )
-                    )
-                    .collect(toList());
-            } catch (Exception exc) {
-                throw new FtpException("Error while listing files for: " + serviceFolder, exc);
-            }
-        });
+    public List<FileInfo> listLetters(String serviceFolder, SFTPClient sftpClient) {
+        String path = String.join("/", configProperties.getTargetFolder(), serviceFolder);
+
+        try {
+            return sftpClient
+                .ls(path)
+                .stream()
+                .map(it -> new FileInfo(
+                    it.getPath(),
+                    Instant.ofEpochSecond(it.getAttributes().getMtime())
+                ))
+                .collect(toList());
+        } catch (Exception exc) {
+            throw new FtpException("Error while listing files for: " + serviceFolder, exc);
+        }
     }
 
     @Dependency(name = FTP_CLIENT, command = FTP_FILE_DELETED, type = FTP)

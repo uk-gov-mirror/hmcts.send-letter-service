@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
 import net.javacrumbs.shedlock.core.SchedulerLock;
+import net.schmizz.sshj.sftp.SFTPClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,33 +54,35 @@ public class DeleteOldFilesTask {
         serviceFolderMapping
             .getFolders()
             .forEach(folder -> {
-                List<FileInfo> filesToDelete =
-                    ftp.listLetters(folder)
-                        .stream()
-                        .filter(f -> f.modifiedAt.isBefore(now().minus(ttl)))
-                        .collect(toList());
+                // new connection per folder
+                ftp.runWith(sftpClient -> {
+                    List<FileInfo> filesToDelete =
+                        ftp.listLetters(folder, sftpClient)
+                            .stream()
+                            .filter(f -> f.modifiedAt.isBefore(now().minus(ttl)))
+                            .collect(toList());
 
-                logger.info("Deleting {} old files from {}", filesToDelete.size(), folder);
+                    if (!filesToDelete.isEmpty()) {
+                        deleteFiles(folder, filesToDelete, sftpClient);
+                    } else {
+                        logger.info("No files to delete found");
+                    }
 
-                if (!filesToDelete.isEmpty()) {
-                    deleteFiles(filesToDelete);
-                } else {
-                    logger.info("No files to delete found");
-                }
+                    return null;
+                });
             });
         logger.info("Completed {} task", TASK_NAME);
     }
 
-    private void deleteFiles(List<FileInfo> filesToDelete) {
-        ftp.runWith(sftpClient -> {
-            filesToDelete.forEach(f -> {
-                try {
-                    ftp.deleteFile(f.path, sftpClient);
-                } catch (FtpException exc) {
-                    logger.error("Error deleting old file {}", f.path, exc);
-                }
-            });
-            return null;
+    private void deleteFiles(String ftpFolder, List<FileInfo> filesToDelete, SFTPClient sftpClient) {
+        logger.info("Deleting {} old files from {}", filesToDelete.size(), ftpFolder);
+
+        filesToDelete.forEach(f -> {
+            try {
+                ftp.deleteFile(f.path, sftpClient);
+            } catch (FtpException exc) {
+                logger.error("Error deleting old file {}", f.path, exc);
+            }
         });
     }
 }

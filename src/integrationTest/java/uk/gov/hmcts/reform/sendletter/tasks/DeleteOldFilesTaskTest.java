@@ -36,16 +36,21 @@ class DeleteOldFilesTaskTest {
                     LocalSftpServer.SERVICE_FOLDER,
                     sftpClient
                 );
+
+                assertThat(ftp.listLetters(LocalSftpServer.SERVICE_FOLDER, sftpClient)).hasSize(1); // sanity check
+
                 return null;
             });
-
-            assertThat(ftp.listLetters(LocalSftpServer.SERVICE_FOLDER)).hasSize(1); // sanity check
 
             // when
             new DeleteOldFilesTask(ftp, serviceFolderMapping, Duration.ZERO).run();
 
             //then
-            assertThat(ftp.listLetters(LocalSftpServer.SERVICE_FOLDER)).isEmpty();
+            ftp.runWith(sftpClient -> {
+                assertThat(ftp.listLetters(LocalSftpServer.SERVICE_FOLDER, sftpClient)).isEmpty();
+
+                return null;
+            });
         }
     }
 }
