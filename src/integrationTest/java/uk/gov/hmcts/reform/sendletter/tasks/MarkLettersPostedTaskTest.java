@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
+import uk.gov.hmcts.reform.sendletter.services.LetterDataAccessService;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.ReportParser;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
@@ -34,12 +36,19 @@ class MarkLettersPostedTaskTest {
     @Autowired
     LetterRepository repository;
 
+    private LetterDataAccessService dataAccessService;
+
     @Autowired
     private EntityManager entityManager;
 
     ReportParser parser = new ReportParser();
     FtpAvailabilityChecker checker = mock(FtpAvailabilityChecker.class);
     AppInsights insights = mock(AppInsights.class);
+
+    @BeforeEach
+    void setUp() {
+        dataAccessService = new LetterDataAccessService(repository);
+    }
 
     @Test
     void marks_uploaded_letters_as_posted() throws Exception {
@@ -51,7 +60,13 @@ class MarkLettersPostedTaskTest {
         when(checker.isFtpAvailable(any(LocalTime.class))).thenReturn(true);
         try (LocalSftpServer server = LocalSftpServer.create()) {
             FtpClient client = FtpHelper.getSuccessfulClient(LocalSftpServer.port);
-            MarkLettersPostedTask task = new MarkLettersPostedTask(repository, client, checker, parser, insights);
+            MarkLettersPostedTask task = new MarkLettersPostedTask(
+                dataAccessService,
+                client,
+                checker,
+                parser,
+                insights
+            );
 
             // Prepare the CSV report and run the task.
             CsvReportWriter.writeReport(Stream.of(letter.getId()), server.reportFolder);

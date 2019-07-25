@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.entity;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask;
@@ -32,6 +33,13 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
     Optional<Letter> findByChecksumAndStatusOrderByCreatedAtDesc(String checksum, LetterStatus status);
 
     Optional<Letter> findById(UUID id);
+
+    @Query("SELECT l.status FROM Letter l WHERE l.id = :id")
+    Optional<LetterStatus> findLetterStatus(@Param("id") UUID id);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Letter l SET l.status = 'Posted', l.printedAt = :printedAt, l.fileContent = null WHERE l.id = :id")
+    int markLetterAsPosted(@Param("id") UUID id, @Param("printedAt") LocalDateTime printedAt);
 
     Optional<Letter> findByIdAndService(UUID id, String service);
 

@@ -6,11 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
-import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
+import uk.gov.hmcts.reform.sendletter.services.LetterDataAccessService;
 import uk.gov.hmcts.reform.sendletter.services.ReportParser;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
@@ -29,7 +28,7 @@ import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
 @ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
 public class MarkLettersPostedTask {
 
-    private final LetterRepository repo;
+    private final LetterDataAccessService dataAccessService;
     private final FtpClient ftpClient;
     private final IFtpAvailabilityChecker ftpAvailabilityChecker;
     private final ReportParser parser;
@@ -39,13 +38,13 @@ public class MarkLettersPostedTask {
     private static final String TASK_NAME = "MarkLettersPosted";
 
     public MarkLettersPostedTask(
-        LetterRepository repo,
+        LetterDataAccessService dataAccessService,
         FtpClient ftp,
         IFtpAvailabilityChecker checker,
         ReportParser parser,
         AppInsights insights
     ) {
-        this.repo = repo;
+        this.dataAccessService = dataAccessService;
         this.ftpClient = ftp;
         this.ftpAvailabilityChecker = checker;
         this.parser = parser;
@@ -93,20 +92,23 @@ public class MarkLettersPostedTask {
     }
 
     private void markAsPosted(LetterPrintStatus letterPrintStatus, String reportFileName) {
-        Optional<Letter> optional = repo.findById(letterPrintStatus.id);
+        Optional<LetterStatus> optional = dataAccessService.findLetterStatus(letterPrintStatus.id);
+
+        // from java9 `ifPresentOrElse` is available. note for future
         if (optional.isPresent()) {
-            Letter letter = optional.get();
-            if (letter.getStatus() == LetterStatus.Uploaded) {
-                letter.setPrintedAt(letterPrintStatus.printedAt.toLocalDateTime());
-                letter.setStatus(LetterStatus.Posted);
-                letter.setFileContent(null);
-                repo.save(letter);
-                logger.info("Marked letter {} as posted", letter.getId());
+            LetterStatus status = optional.get();
+
+            if (status.equals(LetterStatus.Uploaded)) {
+                dataAccessService.markLetterAsPosted(
+                    letterPrintStatus.id,
+                    letterPrintStatus.printedAt.toLocalDateTime()
+                );
+                logger.info("Marked letter {} as posted", letterPrintStatus.id);
             } else {
                 logger.warn(
                     "Failed to mark letter {} as posted - unexpected status: {}. Report file name: {}",
-                    letter.getId(),
-                    letter.getStatus(),
+                    letterPrintStatus.id,
+                    status,
                     reportFileName
                 );
             }
