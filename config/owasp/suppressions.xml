@@ -28,10 +28,10 @@
 
     <suppress>
         <notes><![CDATA[
-            File name: bcpg-jdk15on-1.61.jar
+            File name: bcpg-jdk15on-1.62.jar
             No newer version available.
         ]]></notes>
-        <gav regex="true">^org\.bouncycastle:bcpg-jdk15on:1\.61$</gav>
+        <gav regex="true">^org\.bouncycastle:bcpg-jdk15on:1\.62$</gav>
         <cve>CVE-2005-0366</cve>
     </suppress>
 
