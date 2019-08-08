@@ -37,8 +37,6 @@ public class AppInsights {
 
     static final String LETTER_PRINT_REPORT = "LetterPrintReportReceived";
 
-    static final String LETTER_UPLOAD_FOR_PRINT = "LetterUploadedForPrint";
-
     static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private final TelemetryClient telemetryClient;
@@ -172,11 +170,5 @@ public class AppInsights {
             ImmutableMap.of("isReportParsedFully", BooleanUtils.toStringYesNo(report.allRowsParsed)),
             ImmutableMap.of("reportSize", (double) report.statuses.size())
         );
-    }
-
-    // metrics
-
-    public void trackUploadedLetters(int lettersUploaded) {
-        telemetryClient.trackMetric(LETTER_UPLOAD_FOR_PRINT, lettersUploaded);
     }
 }

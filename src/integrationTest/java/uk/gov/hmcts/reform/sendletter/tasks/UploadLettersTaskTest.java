@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
-import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
@@ -34,8 +33,6 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -52,9 +49,6 @@ class UploadLettersTaskTest {
     private FtpAvailabilityChecker availabilityChecker;
 
     @Mock ServiceFolderMapping serviceFolderMapping;
-
-    @Mock
-    private AppInsights insights;
 
     private LetterService letterService;
 
@@ -82,8 +76,7 @@ class UploadLettersTaskTest {
             FtpHelper.getSuccessfulClient(LocalSftpServer.port),
             availabilityChecker,
             serviceFolderMapping,
-            null,
-            insights
+            null
         );
 
         // Invoke the upload job.
@@ -103,8 +96,6 @@ class UploadLettersTaskTest {
             assertThat(l.getPrintedAt()).isNull();
             assertThat(l.getFileContent()).isNotNull();
         }
-
-        verify(insights).trackUploadedLetters(1);
     }
 
     @Test
@@ -120,8 +111,7 @@ class UploadLettersTaskTest {
             FtpHelper.getFailingClient(LocalSftpServer.port),
             availabilityChecker,
             serviceFolderMapping,
-            null,
-            insights
+            null
         );
 
         // and
@@ -142,8 +132,6 @@ class UploadLettersTaskTest {
             assertThat(l.getSentToPrintAt()).isNull();
             assertThat(l.getFileContent()).isNotNull();
         }
-
-        verify(insights, never()).trackUploadedLetters(0);
     }
 
     @Test
@@ -158,15 +146,13 @@ class UploadLettersTaskTest {
             FtpHelper.getSuccessfulClient(LocalSftpServer.port),
             availabilityChecker,
             serviceFolderMapping,
-            null,
-            insights
+            null
         );
 
         try (LocalSftpServer server = LocalSftpServer.create()) {
             task.run();
         }
         assertThat(repository.findByStatus(LetterStatus.Uploaded)).hasSize(letterCount);
-        verify(insights).trackUploadedLetters(letterCount);
     }
 
     @Test
@@ -189,8 +175,7 @@ class UploadLettersTaskTest {
             FtpHelper.getSuccessfulClient(LocalSftpServer.port),
             availabilityChecker,
             serviceFolderMapping,
-            fingerprint,
-            insights
+            fingerprint
         );
 
         // when

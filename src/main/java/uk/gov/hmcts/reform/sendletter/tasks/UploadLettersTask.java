@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
-import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
@@ -39,22 +38,19 @@ public class UploadLettersTask {
     private final IFtpAvailabilityChecker availabilityChecker;
     private final ServiceFolderMapping serviceFolderMapping;
     private final String keyFingerprint; // only letters with this fingerprint will be sent
-    private final AppInsights insights;
 
     public UploadLettersTask(
         LetterRepository repo,
         FtpClient ftp,
         IFtpAvailabilityChecker availabilityChecker,
         ServiceFolderMapping serviceFolderMapping,
-        @Value("${tasks.upload-letters.key-fingerprint}") String keyFingerprint,
-        AppInsights insights
+        @Value("${tasks.upload-letters.key-fingerprint}") String keyFingerprint
     ) {
         this.repo = repo;
         this.ftp = ftp;
         this.availabilityChecker = availabilityChecker;
         this.serviceFolderMapping = serviceFolderMapping;
         this.keyFingerprint = keyFingerprint;
-        this.insights = insights;
     }
 
     @SchedulerLock(name = TASK_NAME)
@@ -84,10 +80,6 @@ public class UploadLettersTask {
 
                 return uploaded;
             });
-        }
-
-        if (counter > 0) {
-            insights.trackUploadedLetters(counter);
         }
 
         logger.info("Completed '{}' task. Uploaded {} letters", TASK_NAME, counter);

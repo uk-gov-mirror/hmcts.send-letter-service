@@ -123,11 +123,4 @@ class AppInsightsTest {
             ImmutableMap.of("reportSize", 0.0)
         );
     }
-
-    @Test
-    void should_track_metric_of_letter_amount_sent_to_print() {
-        insights.trackUploadedLetters(123);
-
-        verify(telemetry).trackMetric(AppInsights.LETTER_UPLOAD_FOR_PRINT, 123.0);
-    }
 }

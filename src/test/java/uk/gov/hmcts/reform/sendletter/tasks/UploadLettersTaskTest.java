@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
@@ -58,9 +57,6 @@ class UploadLettersTaskTest {
 
     @Mock
     private ServiceFolderMapping serviceFolderMapping;
-
-    @Mock
-    private AppInsights insights;
 
     private ArgumentCaptor<FileToSend> captureFileToSend = ArgumentCaptor.forClass(FileToSend.class);
 
@@ -228,8 +224,7 @@ class UploadLettersTaskTest {
             ftpClient,
             availabilityChecker,
             serviceFolderMapping,
-            fingerprint,
-            insights
+            fingerprint
         );
     }
 }
