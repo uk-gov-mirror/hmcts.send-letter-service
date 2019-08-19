@@ -1,11 +1,15 @@
 #!groovy
-@Library("Infrastructure") _
+@Library("Infrastructure")
 
-List<LinkedHashMap<String, Object>> secrets = [
-  secret('test-s2s-secret', 'TEST_S2S_SECRET'),
-  secret('test-ftp-user', 'TEST_FTP_USER'),
-  secret('test-ftp-private-key', 'TEST_FTP_PRIVATE_KEY'),
-  secret('test-ftp-public-key', 'TEST_FTP_PUBLIC_KEY')
+secrets = [
+  's2s-${env}': [
+    secret('test-s2s-secret', 'TEST_S2S_SECRET')
+  ],
+  'rpe-send-letter-${env}': [
+    secret('test-ftp-user', 'TEST_FTP_USER'),
+    secret('test-ftp-private-key', 'TEST_FTP_PRIVATE_KEY'),
+    secret('test-ftp-public-key', 'TEST_FTP_PUBLIC_KEY')
+  ]
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
