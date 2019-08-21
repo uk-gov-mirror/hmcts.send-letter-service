@@ -6,9 +6,9 @@ secrets = [
     secret('test-s2s-secret', 'TEST_S2S_SECRET')
   ],
   'rpe-send-letter-${env}': [
-    secret('test-ftp-user', 'TEST_FTP_USER'),
-    secret('test-ftp-private-key', 'TEST_FTP_PRIVATE_KEY'),
-    secret('test-ftp-public-key', 'TEST_FTP_PUBLIC_KEY')
+    secret('ftp-user', 'TEST_FTP_USER'),
+    secret('ftp-private-key', 'TEST_FTP_PRIVATE_KEY'),
+    secret('ftp-public-key', 'TEST_FTP_PUBLIC_KEY')
   ]
 ]
 

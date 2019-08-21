@@ -30,13 +30,12 @@ java:
     # mails
     SPRING_MAIL_HOST: "false"
   keyVaults:
-    "rpe-send-letter":
+    rpe-send-letter:
       resourceGroup: rpe-send-letter-service
       secrets:
-        - test-s2s-secret
-        - test-ftp-user
-        - test-ftp-private-key
-        - test-ftp-public-key
+        - ftp-user
+        - ftp-private-key
+        - ftp-public-key
   # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
