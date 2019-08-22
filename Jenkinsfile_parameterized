@@ -3,7 +3,7 @@
 
 secrets = [
   's2s-${env}': [
-    secret('test-s2s-secret', 'TEST_S2S_SECRET')
+    secret('microservicekey-send-letter-tests', 'TEST_S2S_SECRET')
   ],
   'rpe-send-letter-${env}': [
     secret('ftp-user', 'TEST_FTP_USER'),
@@ -36,7 +36,7 @@ properties([
 def channel = '#bsp-build-notices'
 
 withParameterizedPipeline(params.TYPE, params.PRODUCT_NAME, params.APP, params.ENVIRONMENT, params.SUBSCRIPTION) {
-  enableDbMigration()
+  enableDbMigration('rpe-send-letter')
   enableSlackNotifications(channel)
 
   loadVaultSecrets(secrets)
