@@ -8,4 +8,3 @@ spring:
         rpe-send-letter.ftp-user: FTP_USER
         rpe-send-letter.ftp-private-key: FTP_PRIVATE_KEY
         rpe-send-letter.ftp-public-key: FTP_PUBLIC_KEY
-        rpe-send-letter.send-letter-service-POSTGRES-PASS: LETTER_TRACKING_DB_PASSWORD
