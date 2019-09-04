@@ -62,11 +62,11 @@ variable "jenkins_AAD_objectId" {
 }
 
 variable encyption_enabled {
-  default = "false"
+  default = "true"
 }
 
 variable scheduling_enabled {
-  default = "false"
+  default = "true"
 }
 
 variable "file_cleanup_enabled" {
