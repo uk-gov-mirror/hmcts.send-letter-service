@@ -208,10 +208,6 @@ dependencyManagement {
     dependencySet(group: 'org.mockito', version: versions.mockitoJupiter) {
       entry 'mockito-core'
     }
-    // CVE-2019-12814
-    dependencySet(group: 'com.fasterxml.jackson.core', version: '2.9.9.3') {
-      entry 'jackson-databind'
-    }
   }
 }
 
