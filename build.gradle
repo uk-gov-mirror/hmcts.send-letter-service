@@ -190,7 +190,7 @@ def versions = [
   mockitoJupiter: '3.0.0',
   pdfbox: '2.0.16',
   reformLogging: '5.0.1',
-  shedlock: '2.5.0',
+  shedlock: '3.0.0',
   springBoot: plugins.getPlugin('org.springframework.boot').class.package.implementationVersion,
   springfoxSwagger: '2.9.2'
 ]
