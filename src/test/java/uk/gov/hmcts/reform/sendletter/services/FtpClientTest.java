@@ -4,6 +4,9 @@ import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.sftp.RemoteResourceInfo;
 import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.sftp.SFTPFileTransfer;
+import net.schmizz.sshj.transport.TransportException;
+import net.schmizz.sshj.userauth.UserAuthException;
+import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import net.schmizz.sshj.xfer.LocalSourceFile;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +22,7 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -167,5 +171,25 @@ class FtpClientTest {
 
         // then
         assertThat(exception).isInstanceOf(FtpException.class);
+    }
+
+    @Test
+    void should_not_apply_action_when_failed_to_authenticate_user() throws UserAuthException, TransportException {
+        // given (nulls because mocks)
+        willThrow(new UserAuthException("oh no", new TimeoutException())).given(sshClient).authPublickey(
+            null,
+            (KeyProvider) null
+        );
+        AtomicBoolean actuallyNotModified = new AtomicBoolean(true);
+
+        // when
+        Throwable exception = catchThrowable(() -> client.runWith(sftpClient -> actuallyNotModified.getAndSet(false)));
+
+        // then
+        assertThat(actuallyNotModified).isTrue();
+        assertThat(exception)
+            .isInstanceOf(FtpException.class)
+            .hasMessage("Unable to authenticate.")
+            .hasCauseInstanceOf(UserAuthException.class);
     }
 }

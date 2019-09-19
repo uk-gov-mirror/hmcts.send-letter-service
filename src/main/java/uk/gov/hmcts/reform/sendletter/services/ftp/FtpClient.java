@@ -4,6 +4,7 @@ import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.sftp.RemoteResourceInfo;
 import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.sftp.SFTPFileTransfer;
+import net.schmizz.sshj.userauth.UserAuthException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -175,6 +176,10 @@ public class FtpClient {
             ssh = getSshClient();
 
             return action.apply(ssh.newSFTPClient());
+        } catch (UserAuthException exception) {
+            // action not yet applied. schedule will retry on next run
+            // logging better message as after 3 retries connection was established
+            throw new FtpException("Unable to authenticate.", exception);
         } catch (IOException exc) {
             throw new FtpException("FTP operation failed.", exc);
         } finally {
