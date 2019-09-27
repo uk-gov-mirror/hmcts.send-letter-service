@@ -33,7 +33,7 @@ import java.util.zip.ZipInputStream;
 
 import static com.google.common.io.Resources.getResource;
 import static com.google.common.io.Resources.toByteArray;
-import static org.apache.commons.lang.time.DateUtils.addMilliseconds;
+import static org.apache.commons.lang.time.DateUtils.addSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.util.DateUtil.now;
@@ -75,9 +75,6 @@ abstract class FunctionalTestSuite {
 
     @Value("${ftp-public-key}")
     private String ftpPublicKey;
-
-    @Value("${max-wait-for-ftp-file-in-ms}")
-    int maxWaitForFtpFileInMs;
 
     @Value("${encryption.enabled}")
     Boolean isEncryptionEnabled;
@@ -211,7 +208,7 @@ abstract class FunctionalTestSuite {
         String letterId,
         BiConsumer<RemoteResourceInfo, SFTPClient> action
     ) throws IOException, InterruptedException {
-        Date waitUntil = addMilliseconds(now(), maxWaitForFtpFileInMs);
+        Date waitUntil = addSeconds(now(), 60);
 
         Boolean fileExists = false;
 
