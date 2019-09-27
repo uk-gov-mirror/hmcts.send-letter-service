@@ -118,10 +118,6 @@ variable "smtp_host" {
   description = "SMTP host for sending out reports via JavaMailSender"
 }
 
-variable upload_letters_key_fingerprint {
-  default = ""
-}
-
 # region reports
 
 variable "upload_summary_report_cron" {
