@@ -180,11 +180,11 @@ repositories {
 }
 
 def versions = [
-  bouncycastle: '1.62',
+  bouncycastle: '1.63',
   junit: '5.5.2',
   junitPlatform: '1.5.2',
   mockitoJupiter: '3.0.0',
-  pdfbox: '2.0.16',
+  pdfbox: '2.0.17',
   reformLogging: '5.0.1',
   shedlock: '3.0.0',
   springBoot: plugins.getPlugin('org.springframework.boot').class.package.implementationVersion,
