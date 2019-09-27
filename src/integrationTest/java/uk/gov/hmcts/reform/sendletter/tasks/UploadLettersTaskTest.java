@@ -29,7 +29,6 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 import javax.persistence.EntityManager;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,8 +74,7 @@ class UploadLettersTaskTest {
             repository,
             FtpHelper.getSuccessfulClient(LocalSftpServer.port),
             availabilityChecker,
-            serviceFolderMapping,
-            null
+            serviceFolderMapping
         );
 
         // Invoke the upload job.
@@ -110,8 +108,7 @@ class UploadLettersTaskTest {
             repository,
             FtpHelper.getFailingClient(LocalSftpServer.port),
             availabilityChecker,
-            serviceFolderMapping,
-            null
+            serviceFolderMapping
         );
 
         // and
@@ -145,46 +142,12 @@ class UploadLettersTaskTest {
             repository,
             FtpHelper.getSuccessfulClient(LocalSftpServer.port),
             availabilityChecker,
-            serviceFolderMapping,
-            null
+            serviceFolderMapping
         );
 
         try (LocalSftpServer server = LocalSftpServer.create()) {
             task.run();
         }
         assertThat(repository.findByStatus(LetterStatus.Uploaded)).hasSize(letterCount);
-    }
-
-    @Test
-    void should_filter_by_fingerprint_when_it_is_provided() throws Exception {
-        // given
-        String fingerprint = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-        String someOtherFingerprint = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
-
-        // 3 ok letters, 2 that should not be uploaded
-        repository.saveAll(asList(
-            SampleData.letterWithFingerprint(fingerprint),
-            SampleData.letterWithFingerprint(someOtherFingerprint),
-            SampleData.letterWithFingerprint(fingerprint),
-            SampleData.letterWithFingerprint(someOtherFingerprint),
-            SampleData.letterWithFingerprint(fingerprint)
-        ));
-
-        UploadLettersTask task = new UploadLettersTask(
-            repository,
-            FtpHelper.getSuccessfulClient(LocalSftpServer.port),
-            availabilityChecker,
-            serviceFolderMapping,
-            fingerprint
-        );
-
-        // when
-        try (LocalSftpServer server = LocalSftpServer.create()) {
-            task.run();
-        }
-
-        // then
-        assertThat(repository.findByStatus(LetterStatus.Uploaded)).hasSize(3);
-        assertThat(repository.findByStatus(LetterStatus.Created)).hasSize(2);
     }
 }

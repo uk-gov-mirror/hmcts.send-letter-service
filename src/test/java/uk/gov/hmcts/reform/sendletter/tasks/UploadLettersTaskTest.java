@@ -22,14 +22,12 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -84,7 +82,7 @@ class UploadLettersTaskTest {
         );
 
         // when
-        task(null).run();
+        task().run();
 
         // and
         verify(ftpClient).runWith(captureRunWith.capture());
@@ -114,7 +112,7 @@ class UploadLettersTaskTest {
         reset(availabilityChecker, ftpClient);
         given(availabilityChecker.isFtpAvailable(any(LocalTime.class))).willReturn(false);
 
-        task(null).run();
+        task().run();
 
         verify(ftpClient, never()).runWith(any());
         verify(repo, never()).findByStatus(eq(Created));
@@ -134,7 +132,7 @@ class UploadLettersTaskTest {
         given(serviceFolderMapping.getFolderFor(letterC.getService())).willReturn(Optional.of("folder_C"));
 
         // when
-        task(null).run();
+        task().run();
 
         // and
         verify(ftpClient).runWith(captureRunWith.capture());
@@ -158,37 +156,15 @@ class UploadLettersTaskTest {
         verifyNoMoreInteractions(ftpClient);
     }
 
-    @Test
-    void should_send_only_letters_with_specified_fingerprint() {
-        // given
-        Letter letterA = letterWithFingerprint("xxx");
-        Letter letterB = letterWithFingerprint("xxx");
-        Letter letterC = letterWithFingerprint("yyy");
-
-        givenDbContains(letterA, letterB, letterC);
-
-        // when
-        task("xxx").run();
-
-        // then
-        verify(repo, atLeastOnce()).findFirst3ByStatusAndEncryptionKeyFingerprint(Created, "xxx");
-        verify(repo, never()).findFirst3ByStatusAndEncryptionKeyFingerprint(Created, "yyy");
-        verify(repo, never()).findFirst3ByStatus(Created);
-    }
-
     private Letter letterOfType(String type) {
-        return letter("cmc", type, "9c61b7da4e6c94416be51136122ed01acea9884f");
-    }
-
-    private Letter letterWithFingerprint(String fingerprint) {
-        return letter("cmc", "type", fingerprint);
+        return letter("cmc", type);
     }
 
     private Letter letterForService(String serviceName) {
-        return letter(serviceName, "type", "9c61b7da4e6c94416be51136122ed01acea9884f");
+        return letter(serviceName, "type");
     }
 
-    private Letter letter(String service, String type, String fingerprint) {
+    private Letter letter(String service, String type) {
         return new Letter(
             UUID.randomUUID(),
             "msgId",
@@ -197,7 +173,7 @@ class UploadLettersTaskTest {
             type,
             "hello".getBytes(),
             true,
-            fingerprint,
+            "9c61b7da4e6c94416be51136122ed01acea9884f",
             now()
         );
     }
@@ -208,23 +184,14 @@ class UploadLettersTaskTest {
         given(repo.findFirst3ByStatus(eq(Created)))
             .willReturn(Arrays.asList(letters))
             .willReturn(Lists.newArrayList());
-
-        Arrays.stream(letters)
-            .collect(Collectors.groupingBy(Letter::getEncryptionKeyFingerprint))
-            .forEach((fingerprint, lettersForFingerprint) -> {
-                given(repo.findFirst3ByStatusAndEncryptionKeyFingerprint(eq(Created), eq(fingerprint)))
-                    .willReturn(lettersForFingerprint)
-                    .willReturn(Lists.newArrayList());
-            });
     }
 
-    private UploadLettersTask task(String fingerprint) {
+    private UploadLettersTask task() {
         return new UploadLettersTask(
             repo,
             ftpClient,
             availabilityChecker,
-            serviceFolderMapping,
-            fingerprint
+            serviceFolderMapping
         );
     }
 }
