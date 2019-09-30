@@ -264,7 +264,7 @@ dependencies {
   testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
   testCompile group: 'org.apache.pdfbox', name: 'preflight', version: versions.pdfbox
   testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockitoJupiter
-  testCompile group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.24.1', withoutJunit4
+  testCompile group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.25.0', withoutJunit4
 
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
