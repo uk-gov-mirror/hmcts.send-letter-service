@@ -6,6 +6,7 @@
             <HIBERNATE enabled="true"/>
             <HTTP enabled="true"/>
             <JDBC enabled="true"/>
+            <Logging enabled="false" /><!-- So to capture logging in hmcts way -->
         </BuiltIn>
 
         <Class name="uk.gov.hmcts.reform.sendletter.services.encryption.PgpEncryptionUtil" type="Encryption">

@@ -1,16 +1,20 @@
 package uk.gov.hmcts.reform.sendletter.controllers;
 
+import com.microsoft.applicationinsights.web.internal.WebRequestTrackingFilter;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.validators.AuthTokenValidator;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.config.TimeConfiguration;
@@ -26,6 +30,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @AutoConfigureMockMvc
 @ComponentScan(basePackages = "...", lazyInit = true)
@@ -42,6 +47,16 @@ class GetLetterStatusTest {
 
     @MockBean
     private AuthTokenValidator tokenValidator;
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    @BeforeEach
+    void setUp() {
+        WebRequestTrackingFilter filter = new WebRequestTrackingFilter();
+        filter.init(new MockFilterConfig());
+        mvc = webAppContextSetup(wac).addFilters(filter).build();
+    }
 
     @AfterEach
     void tearDown() {

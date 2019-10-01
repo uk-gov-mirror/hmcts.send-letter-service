@@ -185,7 +185,7 @@ def versions = [
   junitPlatform: '1.5.2',
   mockitoJupiter: '3.0.0',
   pdfbox: '2.0.17',
-  reformLogging: '5.0.1',
+  reformLogging: '5.1.0',
   shedlock: '3.0.0',
   springBoot: plugins.getPlugin('org.springframework.boot').class.package.implementationVersion,
   springfoxSwagger: '2.9.2'
@@ -230,8 +230,8 @@ dependencies {
   compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
 
-  compile group: 'uk.gov.hmcts.reform', name: 'java-logging', version: versions.reformLogging
-  compile group: 'uk.gov.hmcts.reform', name: 'java-logging-appinsights', version: versions.reformLogging
+  compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
+  compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.0.0'
   compile group: 'uk.gov.hmcts.reform', name: 'reform-api-standards', version: '0.4.0'
   compile group: 'uk.gov.hmcts.reform', name: 'pdf-generator', version: '1.0.2'

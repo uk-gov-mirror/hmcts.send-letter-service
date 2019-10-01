@@ -6,18 +6,22 @@ import com.google.common.io.Resources;
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
 import com.microsoft.applicationinsights.telemetry.RequestTelemetry;
+import com.microsoft.applicationinsights.web.internal.WebRequestTrackingFilter;
 import org.bouncycastle.openpgp.PGPException;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.sendletter.PdfHelper;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
@@ -46,6 +50,7 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.BDDMockito.atLeastOnce;
 import static org.mockito.BDDMockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_FILE_UPLOADED;
 import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_REPORT_DELETED;
 import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_REPORT_DOWNLOADED;
@@ -75,6 +80,16 @@ class BaseTest {
 
     @Captor
     private ArgumentCaptor<RemoteDependencyTelemetry> dependencyTelemetryCaptor;
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    @BeforeEach
+    void setUp() {
+        WebRequestTrackingFilter filter = new WebRequestTrackingFilter();
+        filter.init(new MockFilterConfig());
+        mvc = webAppContextSetup(wac).addFilters(filter).build();
+    }
 
     @AfterEach
     public void cleanUp() {

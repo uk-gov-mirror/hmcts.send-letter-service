@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.sendletter.controllers;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import com.microsoft.applicationinsights.web.internal.WebRequestTrackingFilter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,12 +11,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 
 import java.io.IOException;
@@ -23,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @AutoConfigureMockMvc
 @ComponentScan(basePackages = "...", lazyInit = true)
@@ -33,6 +38,16 @@ class SendLetterTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    @BeforeEach
+    void setUp() {
+        WebRequestTrackingFilter filter = new WebRequestTrackingFilter();
+        filter.init(new MockFilterConfig());
+        mvc = webAppContextSetup(wac).addFilters(filter).build();
+    }
 
     @SpyBean
     private AppInsights insights;
