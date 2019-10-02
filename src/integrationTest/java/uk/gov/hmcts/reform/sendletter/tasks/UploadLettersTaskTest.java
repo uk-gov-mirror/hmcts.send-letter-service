@@ -132,9 +132,8 @@ class UploadLettersTaskTest {
     }
 
     @Test
-    void should_process_all_letter_batches() throws Exception {
-        // Twice the batch size.
-        int letterCount = 20;
+    void should_process_only_one_batch_of_files_in_single_run() throws Exception {
+        int letterCount = 10;
         IntStream.rangeClosed(1, letterCount).forEach(
             x -> letterService.save(SampleData.letterRequest(), "bulkprint"));
 
@@ -148,6 +147,6 @@ class UploadLettersTaskTest {
         try (LocalSftpServer server = LocalSftpServer.create()) {
             task.run();
         }
-        assertThat(repository.findByStatus(LetterStatus.Uploaded)).hasSize(letterCount);
+        assertThat(repository.findByStatus(LetterStatus.Uploaded)).hasSize(3); // batch size
     }
 }
