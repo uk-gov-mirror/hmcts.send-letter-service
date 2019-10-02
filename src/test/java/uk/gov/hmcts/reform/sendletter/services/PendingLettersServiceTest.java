@@ -3,21 +3,19 @@ package uk.gov.hmcts.reform.sendletter.services;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.sendletter.SampleData;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
-import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 
-import java.util.Collections;
 import java.util.List;
 
+import static java.time.LocalDateTime.now;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
 
 @ExtendWith(MockitoExtension.class)
 class PendingLettersServiceTest {
@@ -33,34 +31,23 @@ class PendingLettersServiceTest {
     }
 
     @Test
-    void should_read_letters_in_proper_status_from_repo() {
-        // given
-        List<Letter> noLetters = Collections.emptyList();
-        given(repo.findByStatus(any())).willReturn(noLetters);
-
-        ArgumentCaptor<LetterStatus> statusArgumentCaptor = ArgumentCaptor.forClass(LetterStatus.class);
-
-        // when
-        List<Letter> letters = service.getPendingLetters();
-
-        // then
-        assertThat(letters).isEqualTo(noLetters);
-        verify(repo).findByStatus(statusArgumentCaptor.capture());
-        assertThat(statusArgumentCaptor.getValue()).isEqualTo(LetterStatus.Created);
-    }
-
-    @Test
     void should_return_list_of_letters_from_repo() {
         // given
-        List<Letter> letters = Collections.singletonList(SampleData.letterEntity("some service"));
-        given(repo.findByStatus(any())).willReturn(letters);
+        List<BasicLetterInfo> letters =
+            asList(
+                new BasicLetterInfo(randomUUID(), "c1", "s1", Created, "t1", "f1", now(), now().minusSeconds(1)),
+                new BasicLetterInfo(randomUUID(), "c2", "s2", Created, "t1", "f2", now().minusSeconds(1), now())
+            );
+
+        given(repo.findPendingLetters()).willReturn(letters);
 
         // when
-        List<Letter> lettersFromDb = service.getPendingLetters();
+        List<BasicLetterInfo> lettersFromDb = service.getPendingLetters();
 
         // then
         assertThat(lettersFromDb)
             .usingRecursiveFieldByFieldElementComparator()
             .isEqualTo(letters);
     }
+
 }

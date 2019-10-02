@@ -10,6 +10,7 @@ public class BasicLetterInfo {
     private String service;
     private String status;
     private String type;
+    private String encryptionKeyFingerprint;
     private LocalDateTime createdAt;
     private LocalDateTime sentToPrintAt;
 
@@ -19,6 +20,7 @@ public class BasicLetterInfo {
         String service,
         LetterStatus status,
         String type,
+        String encryptionKeyFingerprint,
         LocalDateTime createdAt,
         LocalDateTime sentToPrintAt
     ) {
@@ -27,6 +29,7 @@ public class BasicLetterInfo {
         this.service = service;
         this.status = status.name(); // todo: use enum in this class
         this.type = type;
+        this.encryptionKeyFingerprint = encryptionKeyFingerprint;
         this.createdAt = createdAt;
         this.sentToPrintAt = sentToPrintAt;
     }
@@ -69,6 +72,14 @@ public class BasicLetterInfo {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getEncryptionKeyFingerprint() {
+        return encryptionKeyFingerprint;
+    }
+
+    public void setEncryptionKeyFingerprint(String encryptionKeyFingerprint) {
+        this.encryptionKeyFingerprint = encryptionKeyFingerprint;
     }
 
     public LocalDateTime getCreatedAt() {

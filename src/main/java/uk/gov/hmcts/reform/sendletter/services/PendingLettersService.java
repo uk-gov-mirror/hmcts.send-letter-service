@@ -1,12 +1,10 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 
 import java.util.List;
-
-import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
 
 @Service
 public class PendingLettersService {
@@ -17,7 +15,7 @@ public class PendingLettersService {
         this.repo = repo;
     }
 
-    public List<Letter> getPendingLetters() {
-        return repo.findByStatus(Created);
+    public List<BasicLetterInfo> getPendingLetters() {
+        return repo.findPendingLetters();
     }
 }

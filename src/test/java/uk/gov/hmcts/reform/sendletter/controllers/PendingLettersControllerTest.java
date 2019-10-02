@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.services.PendingLettersService;
 
 import java.time.LocalDateTime;
@@ -33,13 +33,13 @@ public class PendingLettersControllerTest {
     @Test
     void should_return_pending_letters() throws Exception {
 
-        Letter letter1 = letter(
+        BasicLetterInfo letter1 = letter(
             UUID.fromString("9b9c019d-78e7-479d-afc6-a7b5b585c47e"),
             "service_A",
             LocalDateTime.of(2019, MAY, 17, 11, 29, 30),
             "9c61b7da4e6c94416be51136122ed01acea9884f"
         );
-        Letter letter2 = letter(
+        BasicLetterInfo letter2 = letter(
             UUID.fromString("19ae96e9-30c2-4b8b-befc-7d26c7fb0731"),
             "service_B",
             LocalDateTime.of(2019, MAY, 16, 7, 0, 0),
@@ -83,8 +83,8 @@ public class PendingLettersControllerTest {
             .andExpect(content().json("{ 'pending_letters': [] }"));
     }
 
-    private Letter letter(UUID id, String service, LocalDateTime createdAt, String keyFingerprint) {
-        Letter letter = mock(Letter.class);
+    private BasicLetterInfo letter(UUID id, String service, LocalDateTime createdAt, String keyFingerprint) {
+        BasicLetterInfo letter = mock(BasicLetterInfo.class);
         when(letter.getId()).thenReturn(id);
         when(letter.getService()).thenReturn(service);
         when(letter.getCreatedAt()).thenReturn(createdAt);
