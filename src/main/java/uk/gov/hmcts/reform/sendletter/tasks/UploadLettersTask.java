@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -27,7 +26,9 @@ import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
 @Component
 @ConditionalOnProperty(value = "scheduling.enabled", matchIfMissing = true)
 public class UploadLettersTask {
+
     private static final Logger logger = LoggerFactory.getLogger(UploadLettersTask.class);
+    public static final int BATCH_SIZE = 10;
     public static final String SMOKE_TEST_LETTER_TYPE = "smoke_test";
     private static final String TASK_NAME = "UploadLetters";
 
@@ -51,73 +52,78 @@ public class UploadLettersTask {
     @SchedulerLock(name = TASK_NAME)
     @Scheduled(fixedDelayString = "${tasks.upload-letters.interval-ms}")
     public void run() {
-        if (!availabilityChecker.isFtpAvailable(now(ZoneId.of(EUROPE_LONDON)).toLocalTime())) {
-            logger.info("Not processing '{}' task due to FTP downtime window", TASK_NAME);
-            return;
-        }
-
         logger.info("Started '{}' task", TASK_NAME);
 
-        List<Letter> lettersToUpload = repo.findFirst3ByStatus(LetterStatus.Created);
-        int counter = 0;
-
-        if (!lettersToUpload.isEmpty()) {
-            counter = ftp.runWith(sftpClient -> uploadLetters(lettersToUpload, sftpClient));
+        if (!availabilityChecker.isFtpAvailable(now(ZoneId.of(EUROPE_LONDON)).toLocalTime())) {
+            logger.info("Not processing '{}' task due to FTP downtime window", TASK_NAME);
+        } else {
+            if (repo.countByStatus(LetterStatus.Created) > 0) {
+                int uploadCount = processLetters();
+                logger.info("Completed '{}' task. Uploaded {} letters", TASK_NAME, uploadCount);
+            } else {
+                logger.info("Completed '{}' task. No letters to upload.", TASK_NAME);
+            }
         }
-
-        logger.info("Completed '{}' task. Uploaded {} letters", TASK_NAME, counter);
     }
 
-    private int uploadLetters(List<Letter> lettersToUpload, SFTPClient sftpClient) {
-        return lettersToUpload
-            .stream()
-            .mapToInt(letter -> {
-                boolean isUploaded = uploadToFtp(letter, sftpClient);
+    private int processLetters() {
+        return ftp.runWith(client -> {
+            int uploadCount = 0;
 
-                if (isUploaded) {
-                    letter.setStatus(LetterStatus.Uploaded);
-                    letter.setSentToPrintAt(now());
+            for (int i = 0; i < BATCH_SIZE; i++) {
+                Optional<Letter> letter = repo.findFirstByStatusOrderByCreatedAtAsc(LetterStatus.Created);
+                if (letter.isPresent()) {
+                    boolean uploaded = processLetter(letter.get(), client);
+                    if (uploaded) {
+                        uploadCount++;
+                    }
                 } else {
-                    letter.setStatus(LetterStatus.Skipped);
+                    break;
                 }
+            }
 
-                updateLetterInDb(letter);
-
-                return isUploaded ? 1 : 0;
-            })
-            .sum();
+            return uploadCount;
+        });
     }
 
-    private boolean uploadToFtp(Letter letter, SFTPClient sftpClient) {
+    private boolean processLetter(Letter letter, SFTPClient sftpClient) {
         Optional<String> serviceFolder = serviceFolderMapping.getFolderFor(letter.getService());
 
         if (serviceFolder.isPresent()) {
-            FileToSend file = new FileToSend(
-                FinalPackageFileNameHelper.generateName(letter),
-                letter.getFileContent(),
-                isSmokeTest(letter)
-            );
+            uploadLetter(letter, serviceFolder.get(), sftpClient);
 
-            ftp.upload(file, serviceFolder.get(), sftpClient);
+            letter.setStatus(LetterStatus.Uploaded);
+            letter.setSentToPrintAt(now());
+            repo.saveAndFlush(letter);
 
-            logger.info(
-                "Uploaded letter id: {}, checksum: {}, file name: {}, additional data: {}",
-                letter.getId(),
-                letter.getChecksum(),
-                file.filename,
-                letter.getAdditionalData()
-            );
+            return true;
+
         } else {
             logger.error("Folder for service {} not found. Skipping letter {}", letter.getService(), letter.getId());
-        }
 
-        return serviceFolder.isPresent();
+            letter.setStatus(LetterStatus.Skipped);
+            repo.saveAndFlush(letter);
+
+            return false;
+        }
     }
 
-    private void updateLetterInDb(Letter letter) {
-        repo.saveAndFlush(letter);
+    private void uploadLetter(Letter letter, String folder, SFTPClient sftpClient) {
+        FileToSend file = new FileToSend(
+            FinalPackageFileNameHelper.generateName(letter),
+            letter.getFileContent(),
+            isSmokeTest(letter)
+        );
 
-        logger.info("Marked letter {} as {}", letter.getId(), letter.getStatus());
+        ftp.upload(file, folder, sftpClient);
+
+        logger.info(
+            "Uploaded letter id: {}, checksum: {}, file name: {}, additional data: {}",
+            letter.getId(),
+            letter.getChecksum(),
+            file.filename,
+            letter.getAdditionalData()
+        );
     }
 
     private boolean isSmokeTest(Letter letter) {

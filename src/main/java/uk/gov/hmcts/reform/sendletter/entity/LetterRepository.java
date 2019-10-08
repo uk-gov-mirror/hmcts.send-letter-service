@@ -14,7 +14,7 @@ import java.util.UUID;
 @SuppressWarnings("checkstyle:LineLength")
 public interface LetterRepository extends JpaRepository<Letter, UUID> {
 
-    List<Letter> findFirst3ByStatus(LetterStatus status);
+    Optional<Letter> findFirstByStatusOrderByCreatedAtAsc(LetterStatus status);
 
     List<Letter> findByStatus(LetterStatus status);
 

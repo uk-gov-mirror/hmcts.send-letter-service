@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
 import net.schmizz.sshj.sftp.SFTPClient;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -76,10 +74,13 @@ class UploadLettersTaskTest {
     void should_handle_smoke_test_letters() {
         // given
         given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
-        givenDbContains(
-            letterOfType(SMOKE_TEST_LETTER_TYPE),
-            letterOfType("not_" + SMOKE_TEST_LETTER_TYPE)
-        );
+
+        given(repo.countByStatus(eq(Created))).willReturn(2);
+
+        given(repo.findFirstByStatusOrderByCreatedAtAsc(eq(Created)))
+            .willReturn(Optional.of(letterOfType(SMOKE_TEST_LETTER_TYPE)))
+            .willReturn(Optional.of(letterOfType("not_" + SMOKE_TEST_LETTER_TYPE)))
+            .willReturn(Optional.empty());
 
         // when
         task().run();
@@ -115,7 +116,7 @@ class UploadLettersTaskTest {
         task().run();
 
         verify(ftpClient, never()).runWith(any());
-        verify(repo, never()).findByStatus(eq(Created));
+        verify(repo, never()).countByStatus(eq(Created));
     }
 
     @Test
@@ -124,7 +125,14 @@ class UploadLettersTaskTest {
         Letter letterA = letterForService("service_A");
         Letter letterB = letterForService("service_B");
         Letter letterC = letterForService("service_C");
-        givenDbContains(letterA, letterB, letterC);
+
+        given(repo.countByStatus(eq(Created))).willReturn(3);
+
+        given(repo.findFirstByStatusOrderByCreatedAtAsc(eq(Created)))
+            .willReturn(Optional.of(letterA))
+            .willReturn(Optional.of(letterB))
+            .willReturn(Optional.of(letterC))
+            .willReturn(Optional.empty());
 
         // and
         given(serviceFolderMapping.getFolderFor(letterA.getService())).willReturn(Optional.of("folder_A"));
@@ -176,14 +184,6 @@ class UploadLettersTaskTest {
             "9c61b7da4e6c94416be51136122ed01acea9884f",
             now()
         );
-    }
-
-    @SuppressWarnings("unchecked")
-    private void givenDbContains(Letter... letters) {
-        // Return letter on first call, then empty list.
-        given(repo.findFirst3ByStatus(eq(Created)))
-            .willReturn(Arrays.asList(letters))
-            .willReturn(Lists.newArrayList());
     }
 
     private UploadLettersTask task() {
