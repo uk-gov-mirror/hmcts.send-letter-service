@@ -180,7 +180,7 @@ repositories {
 }
 
 def versions = [
-  bouncycastle: '1.63',
+  bouncycastle: '1.64',
   junit: '5.5.2',
   junitPlatform: '1.5.2',
   mockitoJupiter: '3.0.0',

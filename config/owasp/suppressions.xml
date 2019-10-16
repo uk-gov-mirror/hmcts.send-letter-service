@@ -24,20 +24,17 @@
         <cve>CVE-2018-1258</cve>
     </suppress>
 
-    <suppress>
-        <notes><![CDATA[ file name: jackson-databind-2.9.10.jar No newer version available. ]]></notes>
+    <suppress until="2019-10-31">
+        <notes><![CDATA[ file name: jackson-databind-2.9.10.jar ]]></notes>
         <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
-        <cpe>cpe:/a:fasterxml:jackson-databind</cpe>
+        <vulnerabilityName>CVE-2019-16942</vulnerabilityName>
+        <vulnerabilityName>CVE-2019-16943</vulnerabilityName>
     </suppress>
 
     <!-- PGP! -->
-
     <suppress>
-        <notes><![CDATA[
-            File name: bcpg-jdk15on-1.63.jar
-            No newer version available.
-        ]]></notes>
-        <gav regex="true">^org\.bouncycastle:bcpg-jdk15on:1\.63$</gav>
+        <notes><![CDATA[ file name: bcpg-jdk15on-1.64.jar ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcpg\-jdk15on@.*$</packageUrl>
         <cve>CVE-2005-0366</cve>
     </suppress>
 
