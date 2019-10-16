@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.sendletter.model.in.Doc;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
 import uk.gov.hmcts.reform.sendletter.services.pdf.DuplexPreparator;
 import uk.gov.hmcts.reform.sendletter.services.pdf.IHtmlToPdfConverter;
@@ -46,6 +47,30 @@ class PdfCreatorTest {
         assertThatThrownBy(() -> pdfCreator.createFromTemplates(null))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("documents");
+    }
+
+    @Test
+    void should_handle_documents_with_number_of_copies_specified() throws Exception {
+        // given
+        byte[] test1Pdf = toByteArray(getResource("test1.pdf"));
+        byte[] test2Pdf = toByteArray(getResource("test2.pdf"));
+
+        given(duplexPreparator.prepare(test1Pdf)).willReturn(test1Pdf);
+        given(duplexPreparator.prepare(test2Pdf)).willReturn(test2Pdf);
+
+        Doc doc1 = new Doc(test1Pdf, 5);
+        Doc doc2 = new Doc(test2Pdf, 10);
+
+        // when
+        byte[] result = pdfCreator.createFromBase64PdfWithCopies(asList(doc1, doc2));
+
+        // then
+        verify(duplexPreparator, times(doc1.copies)).prepare(eq(doc1.content));
+        verify(duplexPreparator, times(doc2.copies)).prepare(eq(doc2.content));
+
+        try (PDDocument doc = PDDocument.load(result)) {
+            assertThat(doc.getNumberOfPages()).isEqualTo(doc1.copies + doc2.copies);
+        }
     }
 
     @Test

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.exception.DuplexException;
+import uk.gov.hmcts.reform.sendletter.model.in.Doc;
 import uk.gov.hmcts.reform.sendletter.services.pdf.DuplexPreparator;
 import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 
@@ -35,6 +36,22 @@ class PdfCreatorTest {
 
         // when
         byte[] pdfContent = pdfCreator.createFromBase64Pdfs(pdfs);
+
+        // then
+        assertThat(pdfContent).isNotNull();
+        // and no exception is thrown
+    }
+
+    @Test
+    void should_handle_base64_encoded_pdfs_with_number_of_copies() throws Exception {
+        // given
+        List<Doc> docs = asList(
+            new Doc(toByteArray(getResource("pdfs/test1.pdf")), 1),
+            new Doc(toByteArray(getResource("pdfs/test2.pdf")), 10)
+        );
+
+        // when
+        byte[] pdfContent = pdfCreator.createFromBase64PdfWithCopies(docs);
 
         // then
         assertThat(pdfContent).isNotNull();

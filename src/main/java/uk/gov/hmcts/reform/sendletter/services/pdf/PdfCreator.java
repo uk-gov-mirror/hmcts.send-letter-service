@@ -2,8 +2,11 @@ package uk.gov.hmcts.reform.sendletter.services.pdf;
 
 import org.apache.http.util.Asserts;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.sendletter.model.in.Doc;
 import uk.gov.hmcts.reform.sendletter.model.in.Document;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -41,6 +44,19 @@ public class PdfCreator {
             .collect(toList());
 
         return PdfMerger.mergeDocuments(docs);
+    }
+
+    public byte[] createFromBase64PdfWithCopies(List<Doc> docs) {
+        Asserts.notNull(docs, "base64decodedDocs");
+
+        List<byte[]> pdfs = docs
+            .stream()
+            .map(d -> Collections.nCopies(d.copies, d.content))
+            .flatMap(Collection::stream)
+            .map(duplexPreparator::prepare)
+            .collect(toList());
+
+        return PdfMerger.mergeDocuments(pdfs);
     }
 
     private byte[] generatePdf(Document document) {
