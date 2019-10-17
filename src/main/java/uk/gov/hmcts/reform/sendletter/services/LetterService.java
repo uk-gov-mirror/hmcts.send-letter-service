@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.sendletter.exception.UnsupportedLetterRequestTypeExce
 import uk.gov.hmcts.reform.sendletter.model.PdfDoc;
 import uk.gov.hmcts.reform.sendletter.model.in.ILetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsAndNumberOfCopiesRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.encryption.PgpEncryptionUtil;
@@ -159,6 +160,11 @@ public class LetterService {
             return pdfCreator.createFromTemplates(((LetterRequest) letter).documents);
         } else if (letter instanceof LetterWithPdfsRequest) {
             return pdfCreator.createFromBase64Pdfs(((LetterWithPdfsRequest) letter).documents);
+        } else if (letter instanceof LetterWithPdfsAndNumberOfCopiesRequest) {
+            return pdfCreator
+                .createFromBase64PdfWithCopies(
+                    ((LetterWithPdfsAndNumberOfCopiesRequest) letter).documents
+                );
         } else {
             throw new UnsupportedLetterRequestTypeException();
         }

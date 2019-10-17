@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.sendletter.exception.UnsupportedLetterRequestTypeExce
 import uk.gov.hmcts.reform.sendletter.model.PdfDoc;
 import uk.gov.hmcts.reform.sendletter.model.in.ILetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
+import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsAndNumberOfCopiesRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.services.encryption.UnableToLoadPgpPublicKeyException;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
@@ -126,6 +127,27 @@ class LetterServiceTest {
 
         // then
         verify(pdfCreator).createFromBase64Pdfs(letter.documents);
+        verify(zipper).zip(any(PdfDoc.class));
+    }
+
+    @Test
+    void should_generate_final_pdf_from_when_model_with_number_of_copies_is_passed() throws Exception {
+        // given
+        thereAreNoDuplicates();
+
+        // and
+        given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
+        createLetterService(true, new String(loadPublicKey()));
+
+        LetterWithPdfsAndNumberOfCopiesRequest letter = SampleData.letterWithPdfAndCopiesRequest();
+
+        when(zipper.zip(any(PdfDoc.class))).thenReturn(Resources.toByteArray(getResource("unencrypted.zip")));
+
+        // when
+        service.save(letter, "some_service");
+
+        // then
+        verify(pdfCreator).createFromBase64PdfWithCopies(letter.documents);
         verify(zipper).zip(any(PdfDoc.class));
     }
 
