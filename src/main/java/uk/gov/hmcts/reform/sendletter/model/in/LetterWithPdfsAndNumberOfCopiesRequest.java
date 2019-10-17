@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
@@ -13,6 +14,7 @@ public class LetterWithPdfsAndNumberOfCopiesRequest implements Serializable, ILe
 
     private static final long serialVersionUID = 1471737409853792378L;
 
+    @Valid
     @Size(min = 1, max = 30)
     public final List<Doc> documents;
 
