@@ -138,3 +138,7 @@ variable "deployment_namespace" {
 variable "common_tags" {
   type = "map"
 }
+
+variable "managed_identity_object_id" {
+  default = ""
+}

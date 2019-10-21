@@ -115,6 +115,8 @@ module "send-letter-key-vault" {
   # dcd_cc-dev group object ID
   product_group_object_id = "38f9dea6-e861-4a50-9e73-21e64f563537"
   common_tags             = "${var.common_tags}"
+
+  managed_identity_object_id = "${var.managed_identity_object_id}"
 }
 
 data "azurerm_key_vault" "s2s_key_vault" {
