@@ -154,6 +154,12 @@ resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
   value        = "${module.db.postgresql_database}"
 }
 
+resource "azurerm_key_vault_secret" "APP-INSTRUMENTATION-KEY" {
+  key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
+  name         = "app-insights-instrumentation-key"
+  value        = "${azurerm_application_insights.appinsights.instrumentation_key}"
+}
+
 # endregion
 
 data "azurerm_key_vault_secret" "smtp_username" {
