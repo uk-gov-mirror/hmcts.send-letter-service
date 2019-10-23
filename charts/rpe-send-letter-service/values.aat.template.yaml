@@ -1,0 +1,5 @@
+java:
+  # Don't modify below here
+  image: ${IMAGE_NAME}
+  ingressHost: ${SERVICE_FQDN}
+  devApplicationInsightsInstrumentKey: "71df5a0f-ebbe-445c-b1d1-d10d349f0970"
