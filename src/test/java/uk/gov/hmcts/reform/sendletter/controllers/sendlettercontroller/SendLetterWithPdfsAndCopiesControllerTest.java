@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.sendletter.controllers.MediaTypes;
 import uk.gov.hmcts.reform.sendletter.controllers.SendLetterController;
 import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
+import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsAndNumberOfCopiesRequest;
 import uk.gov.hmcts.reform.sendletter.services.AuthService;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
@@ -75,6 +76,14 @@ public class SendLetterWithPdfsAndCopiesControllerTest {
 
         sendLetter(Resources.toString(getResource("controller/letter/v3/valid_letter.json"), UTF_8))
             .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void should_return_401_if_service_throws_UnauthenticatedException() throws Exception {
+        given(authService.authenticate(anyString())).willThrow(new UnauthenticatedException("Hello"));
+
+        sendLetter(Resources.toString(getResource("controller/letter/v3/valid_letter.json"), UTF_8))
+            .andExpect(status().isUnauthorized());
     }
 
     private ResultActions sendLetter(String json) throws Exception {
