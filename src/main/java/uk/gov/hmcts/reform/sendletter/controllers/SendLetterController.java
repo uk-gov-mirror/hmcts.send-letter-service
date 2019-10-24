@@ -54,7 +54,8 @@ public class SendLetterController {
     @ApiOperation(value = "Send letter to print and post service")
     @ApiResponses({
         @ApiResponse(code = 200, response = SendLetterResponse.class, message = "Successfully sent letter"),
-        @ApiResponse(code = 401, message = ControllerResponseMessage.RESPONSE_401)
+        @ApiResponse(code = 401, message = ControllerResponseMessage.RESPONSE_401),
+        @ApiResponse(code = 403, message = ControllerResponseMessage.RESPONSE_403)
     })
     public ResponseEntity<SendLetterResponse> sendLetter(
         @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
@@ -71,7 +72,8 @@ public class SendLetterController {
     @ApiOperation(value = "Send letter to print and post service")
     @ApiResponses({
         @ApiResponse(code = 200, response = SendLetterResponse.class, message = "Successfully sent letter"),
-        @ApiResponse(code = 401, message = ControllerResponseMessage.RESPONSE_401)
+        @ApiResponse(code = 401, message = ControllerResponseMessage.RESPONSE_401),
+        @ApiResponse(code = 403, message = ControllerResponseMessage.RESPONSE_403)
     })
     public ResponseEntity<SendLetterResponse> sendLetter(
         @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
@@ -88,7 +90,8 @@ public class SendLetterController {
     @ApiOperation(value = "Send letter to print and post service")
     @ApiResponses({
         @ApiResponse(code = 200, response = SendLetterResponse.class, message = "Successfully sent letter"),
-        @ApiResponse(code = 401, message = ControllerResponseMessage.RESPONSE_401)
+        @ApiResponse(code = 401, message = ControllerResponseMessage.RESPONSE_401),
+        @ApiResponse(code = 403, message = ControllerResponseMessage.RESPONSE_403)
     })
     public ResponseEntity<SendLetterResponse> sendLetter(
         @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
