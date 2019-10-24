@@ -51,9 +51,9 @@ public class PdfCreator {
 
         List<byte[]> pdfs = docs
             .stream()
+            .map(doc -> new Doc(duplexPreparator.prepare(doc.content), doc.copies))
             .map(d -> Collections.nCopies(d.copies, d.content))
             .flatMap(Collection::stream)
-            .map(duplexPreparator::prepare)
             .collect(toList());
 
         return PdfMerger.mergeDocuments(pdfs);
