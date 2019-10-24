@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
@@ -19,6 +18,7 @@ import java.util.UUID;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Resources.getResource;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,9 +54,9 @@ public class StaleLetterControllerTest {
         given(staleLetterService.getStaleLetters()).willReturn(letters);
 
         mockMvc
-            .perform(get("/stale-letters").accept(MediaType.APPLICATION_JSON_VALUE))
+            .perform(get("/stale-letters").accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(content().contentType(APPLICATION_JSON_VALUE))
             .andExpect(
                 content().json(
                     Resources.toString(
@@ -75,7 +75,7 @@ public class StaleLetterControllerTest {
         mockMvc
             .perform(
                 get("/stale-letters")
-                    .accept(MediaType.APPLICATION_JSON_VALUE)
+                    .accept(APPLICATION_JSON_VALUE)
             )
             .andExpect(status().is5xxServerError());
     }
