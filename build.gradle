@@ -270,7 +270,7 @@ dependencies {
   integrationTestCompile sourceSets.test.runtimeClasspath
   integrationTestCompile group: 'org.apache.sshd', name: 'sshd-scp', version: '2.3.0'
   integrationTestCompile group: 'org.apache.sshd', name: 'sshd-sftp', version: '2.3.0'
-  integrationTestCompile group: 'org.testcontainers', name: 'postgresql', version: '1.12.2' // brings in junit4. testcontainers depend on it
+  integrationTestCompile group: 'org.testcontainers', name: 'postgresql', version: '1.12.3' // brings in junit4. testcontainers depend on it
   integrationTestCompile group: 'org.awaitility', name: 'awaitility', version: '4.0.1', withoutJunit4
 
   smokeTestCompile sourceSets.main.runtimeClasspath
