@@ -42,9 +42,9 @@ withPipeline(type , product, component) {
     env.TEST_FTP_FINGERPRINT = 'SHA256:3tX3DIkqd1Loz2alHfnt+qjHocfxk0YUOZHlnf9Zgdk'
     env.FTP_TARGET_FOLDER = 'TO_XEROX'
     env.TEST_FTP_REPORTS_FOLDER = 'FROM_XEROX'
-    env.TEST_ENCRYPTION_ENABLED = false
+    env.TEST_ENCRYPTION_ENABLED = true
   }
-  
+
   after('test') {
     builder.gradle('integration')
   }
