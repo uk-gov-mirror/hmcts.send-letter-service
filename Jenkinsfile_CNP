@@ -54,6 +54,6 @@ withPipeline(type , product, component) {
   enableAksStagingDeployment()
   enableDockerBuild()
   installCharts()
-  disableLegacyDeploymentOnAAT()
+  disableLegacyDeployment()
   loadVaultSecrets(secrets)
 }
