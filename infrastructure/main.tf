@@ -59,6 +59,7 @@ module "send-letter-service" {
   asp_rg                 = "${var.product}-${var.component}-${var.env}"
   instance_size          = "${local.sku_size}"
   java_container_version = "9.0"
+  enable_ase             = "${var.enable_ase}"
 
   app_settings = {
     S2S_URL                         = "${local.s2s_url}"
