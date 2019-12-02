@@ -10,7 +10,7 @@ module "send-letter-service-liveness-alert" {
   app_insights_query = <<EOF
 requests
 | where name == "GET /health" and resultCode != "200"
-| where url contains "send-letter-service"
+| where cloud_RoleName == "Send Letter Service"
 EOF
 
   frequency_in_minutes       = 15
