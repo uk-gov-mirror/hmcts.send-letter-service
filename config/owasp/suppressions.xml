@@ -35,7 +35,7 @@
 
     <suppress>
         <notes><![CDATA[ no fix available ]]></notes>
-        <gav regex="true">^org\.testcontainers:postgresql:1\.12\.4$</gav>
+        <gav regex="true">^org\.testcontainers:postgresql:1\.12\.5$</gav>
         <cpe>cpe:/a:postgresql:postgresql</cpe>
     </suppress>
 
