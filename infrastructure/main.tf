@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "1.23.0"
+  version = "=1.42.0"
 }
 
 # Make sure the resource group exists
