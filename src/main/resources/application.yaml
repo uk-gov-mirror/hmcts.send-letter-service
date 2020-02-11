@@ -73,6 +73,8 @@ reports:
       display-name: SSCS
     - service: finrem_document_generator
       display-name: FINREM
+    - service: fpl_case_service
+      display-name: FPLA
 
 flyway:
   user: ${LETTER_TRACKING_DB_USER_NAME}
@@ -104,6 +106,9 @@ ftp:
       folder: SSCS
     - service: finrem_document_generator
       folder: FINREM
+    - service: fpl_case_service
+      # change the folder name once folder is created for FPLA
+      folder: BULKPRINT
 
 scheduling:
   enabled: ${SCHEDULING_ENABLED:false}
