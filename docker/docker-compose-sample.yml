@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  send-letter-service:
+    depends_on:
+      - send-letter-database
+      - send-letter-sftp
+    env_file:
+      - env.list
+    environment:
+      S2S_URL: http://service-auth-provider-api:8080
+    image: hmctspublic.azurecr.io/rpe/send-letter-service:latest
+    links:
+      - send-letter-database
+      - send-letter-sftp
+      - service-auth-provider-api
+    ports:
+      - 8485:8485
+  send-letter-database:
+    build:
+      context: database
+    environment:
+      POSTGRES_DB: letter_tracking
+      POSTGRES_USER: letterservice
+      POSTGRES_PASSWORD: password
+    ports:
+      - 5432:5432
+    volumes:
+      - send-letter-database:/var/lib/postgresql/data
+  send-letter-sftp:
+    build:
+      context: sftp
+    command: sftp:pass:1001
+    healthcheck:
+      retries: 40
+    ports:
+      - 22:22
+    volumes:
+      - ./sftp/data/incoming:/home/sftp/incoming
+  service-auth-provider-api:
+    image: hmctspublic.azurecr.io/rpe/service-auth-provider:latest
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    ports:
+      - 4552:8080
+    environment:
+      SERVER_PORT: 8080
+      JAVA_OPTS: -Xms8m -Xmx256m -Djava.security.egd=file:/dev/./urandom -XX:MaxMetaspaceSize=128m
+      JWT_KEY: wThK0f0/lh3FlxFcL4xUWDMI5C1J9KyQBgXV4wseh1e5J1uYJIjvTvArHxQDrYoHJ23xFxjHkOnvNbR5dXRoxA==
+      MICROSERVICEKEYS_SEND_LETTER_TESTS: AAAAAAAAAAAAAAAA
+      TESTING_SUPPORT_ENABLED: 'true'
+
+volumes:
+  send-letter-database:

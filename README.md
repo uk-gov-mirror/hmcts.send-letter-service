@@ -7,6 +7,14 @@
 
 [Swagger API Specs](https://hmcts.github.io/reform-api-docs/swagger.html?url=https://hmcts.github.io/reform-api-docs/specs/send-letter-service.json)
 
+## Table of Contents
+
+* [Running the application](#running-the-application)
+    * [Locally](#locally)
+    * [Docker environment](#docker-environment)
+* [Onboarding new services](#onboarding-new-services)
+* [License](#license)
+
 ## Running the application
 
 ### Locally
@@ -21,47 +29,64 @@ $ ./gradlew bootRun
 
 ### Docker environment
 
-Be sure DB configuration is accommodated for application defaults otherwise - change as needed via `./docker/env.list`.
-In case `send-letter-database` does not exist in your docker environment, follow these steps:
+For convenience there is a sample docker compose configuration file in [docker](docker/docker-compose-sample.yml) folder.
+It should be sufficient to run service with single microservice set up: `send_letter_tests`.
 
 ```bash
-$ docker build -t send-letter-database ./docker/database/
-
-$ docker run -d -i -t --name bsp-send-letter-database --hostname send-letter-database --env-file ./docker/env.list send-letter-database
+$ docker-compose -f /home/doncem/workspace/hmcts/send-letter-service/docker/docker-compose-sample.yml up
 ```
-
-Important note: `--hostname send-letter-database` will be used to link it to service `run` command and also used with default value provided in application config.
-There is no need to provide full `--env-file` for the DB container. Only `LETTER_TRACKING_DB_PASSWORD=password` is required
-
-Launch the service from image hosted in Azure Container Registry:
-
-```bash
-$ docker run -t -i --name bsp-send-letter-service -p 8485:8485 --link bsp-send-letter-database --env-file ./docker/env.list hmcts/send-letter-service
-```
-
-After successful completion of last 2 `run` steps you should be able to see similar output
-
-```bash
-$ docker ps -a
-```
-
-CONTAINER ID | IMAGE | COMMAND | CREATED | STATUS | PORTS | NAMES
------------- | ----- | ------- | ------- | ------ | ----- | -----
-9e3fc00c1824 | hmcts/send-letter-service | "/usr/bin/java -jar …" | 4 minutes ago | Up 4 minutes (healthy) | 0.0.0.0:8485->8485/tcp | bsp-send-letter-service
-e68f86e63c93 | send-letter-database | "docker-entrypoint.s…" | 36 minutes ago | Up 36 minutes (healthy) | 5432/tcp | bsp-send-letter-database
 
 Test:
 
 ```bash
 $ curl http://localhost:8485/health
 ```
+
 ```json
 {"status":"UP","details":{"diskSpace":{"status":"UP","details":{"total":62725623808,"free":57405022208,"threshold":10485760}},"db":{"status":"UP","details":{"database":"PostgreSQL","hello":1}},"liveness":{"status":"UP"},"refreshScope":{"status":"UP"},"hystrix":{"status":"UP"}}}
 ```
 
+```bash
+curl -X POST -H "Content-Type: application/json" "http://localhost:4552/lease" -d '{"microservice":"send_letter_tests","oneTimePassword":"OTP"}'
+
+S2S_TOKEN
+
+curl -X POST -H "Content-Type: application/vnd.uk.gov.hmcts.letter-service.in.letter.v2+json" -H "ServiceAuthorization: Bearer S2S_TOKEN" "http://localhost:8485/letters" -d '{"documents":["aGVsbG8="],"type":"BPS001"}'
+
+{"letter_id":"f015a4dd-cfa5-4b2b-9fb0-e43ad6ceea35"}
+```
+
+Document provided in sample is not actual document.
+It has to be valid PDF.
+
+Swagger spec can be found [here](https://hmcts.github.io/reform-api-docs/swagger.html?url=https://hmcts.github.io/reform-api-docs/specs/send-letter-service.json).
+
 ## Onboarding new services
 
-Services team need to contact Bulk Scanning and Printing team to onboard their service.
+Services will have to have secrets configured with [service-auth-provider-app](https://github.com/hmcts/service-auth-provider-app).
+Once microservice is successfully configured it can be included in [application config](src/main/resources/application.yaml).
+There are 2 places: reports and ftp configuration
+
+### Reports
+
+```yaml
+reports:
+  service-config:
+    - service: send_letter_tests
+      display-name: Bulk Print # what name to display in the report file
+```
+
+### FTP
+
+```yaml
+ftp:
+  service-folders:
+  - service: send_letter_tests
+    folder: BULKPRINT
+```
+
+**Note!**
+This can only be deployed once ftp provider has created folder in all relevant environments.
 
 ## License
 
