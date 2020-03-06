@@ -203,10 +203,6 @@ dependencyManagement {
     dependencySet(group: 'org.mockito', version: versions.mockitoJupiter) {
       entry 'mockito-core'
     }
-    // remove once aligned with testcontainers
-    dependencySet(group: 'org.testcontainers', version: '1.12.4') {
-      entry 'database-commons'
-    }
   }
 }
 
