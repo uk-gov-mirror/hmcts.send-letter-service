@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.tasks.reports;
 
-import net.javacrumbs.shedlock.core.SchedulerLock;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,7 +58,7 @@ public class DailyLetterUploadSummaryReport {
         }
     }
 
-    @SchedulerLock(name = "daily-letter-upload-summary", lockAtLeastFor = 5_000)
+    @SchedulerLock(name = "daily-letter-upload-summary", lockAtLeastFor = "PT5S")
     @Scheduled(cron = "${reports.upload-summary.cron}", zone = EUROPE_LONDON)
     public void send() {
         if (recipients.length == 0) {
