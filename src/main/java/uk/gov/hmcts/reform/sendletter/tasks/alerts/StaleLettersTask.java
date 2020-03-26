@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.tasks;
+package uk.gov.hmcts.reform.sendletter.tasks.alerts;
 
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;

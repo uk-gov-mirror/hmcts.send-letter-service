@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.tasks;
+package uk.gov.hmcts.reform.sendletter.tasks.alerts;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

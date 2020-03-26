@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.controllers;
+package uk.gov.hmcts.reform.sendletter.controllers.reports;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;

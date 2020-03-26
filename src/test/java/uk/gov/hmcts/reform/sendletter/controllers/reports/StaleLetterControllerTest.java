@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.controllers;
+package uk.gov.hmcts.reform.sendletter.controllers.reports;
 
 import com.google.common.io.Resources;
 import org.junit.jupiter.api.Test;
