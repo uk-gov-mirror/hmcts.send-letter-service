@@ -41,14 +41,16 @@
 
     <suppress>
         <notes><![CDATA[Related to Groovy LDAP API which is not used by the service]]></notes>
-        <gav regex="true">^org\.codehaus\.groovy:groovy-(json|xml):2\.5\.9$</gav>
+        <gav regex="true">^org\.codehaus\.groovy:groovy-(json|xml):2\.5\.10$</gav>
         <cve>CVE-2016-6497</cve>
     </suppress>
 
     <suppress>
         <notes><![CDATA[ file name: handlebars-4.1.2.jar: handlebars-v4.0.4.js ]]></notes>
-        <packageUrl regex="true">^pkg:javascript/handlebars\.js@.*$</packageUrl>
+        <packageUrl regex="true">^pkg:javascript/handlebars@.*$</packageUrl>
         <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
+        <vulnerabilityName>Disallow calling helperMissing and blockHelperMissing directly</vulnerabilityName>
+        <vulnerabilityName>Prototype pollution</vulnerabilityName>
     </suppress>
 
 </suppressions>

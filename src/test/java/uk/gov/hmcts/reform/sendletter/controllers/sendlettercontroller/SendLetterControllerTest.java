@@ -144,7 +144,7 @@ class SendLetterControllerTest {
 
         List<String> supportedContentTypes = asList(
             MediaTypes.LETTER_V1,
-            MediaType.APPLICATION_JSON_UTF8_VALUE
+            MediaType.APPLICATION_JSON_VALUE
         );
 
         for (String type : supportedContentTypes) {
@@ -165,7 +165,7 @@ class SendLetterControllerTest {
     private ResultActions sendLetter(String json) throws Exception {
         return mockMvc.perform(
             post("/letters")
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .header("ServiceAuthorization", "auth-header-value")
                 .content(json)
         );
@@ -174,7 +174,7 @@ class SendLetterControllerTest {
     private ResultActions sendLetterWithoutAuthHeader(String json) throws Exception {
         return mockMvc.perform(
             post("/letters")
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(json)
         );
     }
