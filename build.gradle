@@ -257,7 +257,7 @@ dependencies {
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot, withoutJunit4
   testCompile group: 'com.icegreen', name: 'greenmail', version: '1.5.11', withoutJunit4
   testCompile group: 'org.apache.commons', name: 'commons-email', version: '1.5'
-  testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+  testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
   testCompile group: 'org.apache.pdfbox', name: 'preflight', version: versions.pdfbox, withoutJunit4
   testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockitoJupiter
   testCompile group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.25.1', withoutJunit4
