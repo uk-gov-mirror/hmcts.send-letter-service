@@ -218,7 +218,7 @@ dependencies {
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: versions.springBoot
 
   compile group: 'org.flywaydb', name: 'flyway-core', version: '5.2.4'
-  compile group: 'org.postgresql', name: 'postgresql', version: '42.2.11'
+  compile group: 'org.postgresql', name: 'postgresql', version: '42.2.12'
 
   compile group: 'net.javacrumbs.shedlock', name: 'shedlock-provider-jdbc-template', version: versions.shedlock
   compile group: 'net.javacrumbs.shedlock', name: 'shedlock-spring', version: versions.shedlock
