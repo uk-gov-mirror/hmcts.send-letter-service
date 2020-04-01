@@ -107,8 +107,7 @@ ftp:
     - service: finrem_document_generator
       folder: FINREM
     - service: fpl_case_service
-      # change the folder name once folder is created for FPLA
-      folder: BULKPRINT
+      folder: FPL
 
 scheduling:
   enabled: ${SCHEDULING_ENABLED:false}
