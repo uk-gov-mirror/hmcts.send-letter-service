@@ -87,6 +87,6 @@ public class StaleLetterControllerTest {
         LocalDateTime createdAt,
         LocalDateTime sentToPrintAt
     ) {
-        return new BasicLetterInfo(id, "checksum", service, status, "type", null, createdAt, sentToPrintAt);
+        return new BasicLetterInfo(id, "checksum", service, status, "type", null, createdAt, sentToPrintAt, null);
     }
 }

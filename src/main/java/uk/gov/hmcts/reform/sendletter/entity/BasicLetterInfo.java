@@ -13,6 +13,7 @@ public class BasicLetterInfo {
     private String encryptionKeyFingerprint;
     private LocalDateTime createdAt;
     private LocalDateTime sentToPrintAt;
+    private LocalDateTime printedAt;
 
     public BasicLetterInfo(
         UUID id,
@@ -22,7 +23,8 @@ public class BasicLetterInfo {
         String type,
         String encryptionKeyFingerprint,
         LocalDateTime createdAt,
-        LocalDateTime sentToPrintAt
+        LocalDateTime sentToPrintAt,
+        LocalDateTime printedAt
     ) {
         this.id = id;
         this.checksum = checksum;
@@ -32,6 +34,7 @@ public class BasicLetterInfo {
         this.encryptionKeyFingerprint = encryptionKeyFingerprint;
         this.createdAt = createdAt;
         this.sentToPrintAt = sentToPrintAt;
+        this.printedAt = printedAt;
     }
 
     public UUID getId() {
@@ -96,5 +99,13 @@ public class BasicLetterInfo {
 
     public void setSentToPrintAt(LocalDateTime sentToPrintAt) {
         this.sentToPrintAt = sentToPrintAt;
+    }
+
+    public LocalDateTime getPrintedAt() {
+        return printedAt;
+    }
+
+    public void setPrintedAt(LocalDateTime printedAt) {
+        this.printedAt = printedAt;
     }
 }

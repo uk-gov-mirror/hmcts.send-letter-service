@@ -35,8 +35,8 @@ class PendingLettersServiceTest {
         // given
         List<BasicLetterInfo> letters =
             asList(
-                new BasicLetterInfo(randomUUID(), "c1", "s1", Created, "t1", "f1", now(), now().minusSeconds(1)),
-                new BasicLetterInfo(randomUUID(), "c2", "s2", Created, "t1", "f2", now().minusSeconds(1), now())
+                new BasicLetterInfo(randomUUID(), "c1", "s1", Created, "t1", "f1", now(), now().minusSeconds(1), null),
+                new BasicLetterInfo(randomUUID(), "c2", "s2", Created, "t1", "f2", now().minusSeconds(1), now(), null)
             );
 
         given(repo.findPendingLetters()).willReturn(letters);
