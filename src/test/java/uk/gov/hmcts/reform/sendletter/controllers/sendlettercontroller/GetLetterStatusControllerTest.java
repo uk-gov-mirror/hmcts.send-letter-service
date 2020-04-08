@@ -43,7 +43,7 @@ class GetLetterStatusControllerTest {
     @BeforeEach
     void setUp() {
         ZonedDateTime now = ZonedDateTime.of(2000, 2, 12, 1, 2, 3, 123_000_000, ZoneId.systemDefault());
-        letterStatus = new LetterStatus(UUID.randomUUID(), "Created", "some-message-id", now, now, now, false);
+        letterStatus = new LetterStatus(UUID.randomUUID(), "Created", "some-message-id", now, now, now);
     }
 
     @Test
@@ -61,8 +61,7 @@ class GetLetterStatusControllerTest {
                     + "\"checksum\":\"" + letterStatus.checksum + "\","
                     + "\"created_at\":\"2000-02-12T01:02:03.123Z\","
                     + "\"sent_to_print_at\":\"2000-02-12T01:02:03.123Z\","
-                    + "\"printed_at\":\"2000-02-12T01:02:03.123Z\","
-                    + "\"has_failed\": false"
+                    + "\"printed_at\":\"2000-02-12T01:02:03.123Z\""
                     + "}"
             ));
     }

@@ -179,8 +179,7 @@ public class LetterService {
                 letter.getChecksum(),
                 toDateTime(letter.getCreatedAt()),
                 toDateTime(letter.getSentToPrintAt()),
-                toDateTime(letter.getPrintedAt()),
-                letter.isFailed()
+                toDateTime(letter.getPrintedAt())
             ))
             .orElseThrow(() -> new LetterNotFoundException(id));
     }

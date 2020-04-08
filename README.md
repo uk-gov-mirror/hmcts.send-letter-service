@@ -178,8 +178,7 @@ Here's what a response body should look like:
     "checksum": "401b30e3b8b5d629635a5c613cdb7919",
     "created_at": "2020-01-12T01:02:03.123Z",
     "sent_to_print_at": "2020-01-13T01:02:03.123Z",
-    "printed_at": "2020-01-14T01:02:03.123Z",
-    "has_failed": false
+    "printed_at": "2020-01-14T01:02:03.123Z"
 }
 ```
 
