@@ -13,6 +13,9 @@ public class LetterInfo {
     @JsonProperty("service")
     public final String service;
 
+    @JsonProperty("type")
+    public final String type;
+
     @JsonProperty("status")
     public final String status;
 
@@ -28,6 +31,7 @@ public class LetterInfo {
     public LetterInfo(
         UUID id,
         String service,
+        String type,
         String status,
         LocalDateTime createdAt,
         LocalDateTime sentToPrintAt,
@@ -35,6 +39,7 @@ public class LetterInfo {
     ) {
         this.id = id;
         this.service = service;
+        this.type = type;
         this.status = status;
         this.createdAt = createdAt;
         this.sentToPrintAt = sentToPrintAt;

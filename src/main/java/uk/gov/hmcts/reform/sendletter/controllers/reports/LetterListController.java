@@ -34,6 +34,7 @@ public class LetterListController {
                 .map(l -> new LetterInfo(
                     l.getId(),
                     l.getService(),
+                    l.getType(),
                     l.getStatus(),
                     l.getCreatedAt(),
                     l.getSentToPrintAt(),

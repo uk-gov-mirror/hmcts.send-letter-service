@@ -35,6 +35,7 @@ class LetterListControllerTest {
         BasicLetterInfo letter1 = letter(
             UUID.fromString("9b9c019d-78e7-479d-afc6-a7b5b585c47e"),
             "Posted",
+            "type_A",
             "service_A",
             LocalDateTime.of(2020, MAY, 17, 7, 0, 0),
             LocalDateTime.of(2020, MAY, 17, 8, 0, 0),
@@ -44,6 +45,7 @@ class LetterListControllerTest {
         BasicLetterInfo letter2 = letter(
             UUID.fromString("db4c7ec5-c2ae-4bd7-b2b6-f743234f55bf"),
             "Uploaded",
+            "type_B",
             "service_B",
             LocalDateTime.of(2020, MAY, 17, 10, 0, 0),
             LocalDateTime.of(2020, MAY, 17, 11, 0, 0),
@@ -64,6 +66,7 @@ class LetterListControllerTest {
                     + "  {"
                     + "    'id': '9b9c019d-78e7-479d-afc6-a7b5b585c47e',"
                     + "    'service': 'service_A',"
+                    + "    'type': 'type_A',"
                     + "    'status': 'Posted',"
                     + "    'created_at': '2020-05-17T07:00:00',"
                     + "    'sent_to_print_at': '2020-05-17T08:00:00',"
@@ -72,6 +75,7 @@ class LetterListControllerTest {
                     + "  {"
                     + "    'id': 'db4c7ec5-c2ae-4bd7-b2b6-f743234f55bf',"
                     + "    'service': 'service_B',"
+                    + "    'type': 'type_B',"
                     + "    'status': 'Uploaded',"
                     + "    'created_at': '2020-05-17T10:00:00',"
                     + "    'sent_to_print_at': '2020-05-17T11:00:00',"
@@ -120,6 +124,7 @@ class LetterListControllerTest {
     private BasicLetterInfo letter(
         UUID id,
         String status,
+        String type,
         String service,
         LocalDateTime createdAt,
         LocalDateTime sentToPrintAt,
@@ -129,6 +134,7 @@ class LetterListControllerTest {
         when(letter.getId()).thenReturn(id);
         when(letter.getStatus()).thenReturn(status);
         when(letter.getService()).thenReturn(service);
+        when(letter.getType()).thenReturn(type);
         when(letter.getCreatedAt()).thenReturn(createdAt);
         when(letter.getSentToPrintAt()).thenReturn(sentToPrintAt);
         when(letter.getPrintedAt()).thenReturn(printedAt);
