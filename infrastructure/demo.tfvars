@@ -1,3 +1,3 @@
 vault_section = "preprod"
 enable_ase = false
-managed_identity_object_id = "74e34a26-d5fd-473a-9ef7-e5e89e228a20"
+managed_identity_object_id = "4c08cb3f-9e6d-46bf-ae33-1b82ae1504af"
