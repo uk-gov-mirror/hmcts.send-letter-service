@@ -3,3 +3,19 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   devApplicationInsightsInstrumentKey: "71df5a0f-ebbe-445c-b1d1-d10d349f0970"
+  keyVaults:
+    rpe-send-letter:
+      secrets:
+        - ftp-user
+        - ftp-private-key
+        - ftp-public-key
+        - upload-summary-report-recipients
+        - send-letter-service-staging-db-password
+        - send-letter-service-staging-db-user
+        - send-letter-service-staging-db-name
+        - send-letter-service-staging-db-host
+        - send-letter-service-staging-db-port
+        - encryption-public-key
+        - app-insights-instrumentation-key
+        - reports-email-password
+        - reports-email-username

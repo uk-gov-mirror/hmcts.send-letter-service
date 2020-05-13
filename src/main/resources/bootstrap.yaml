@@ -14,6 +14,11 @@ spring:
         send-letter-service-POSTGRES-PORT: LETTER_TRACKING_DB_PORT
         send-letter-service-POSTGRES-HOST: LETTER_TRACKING_DB_HOST
         send-letter-service-POSTGRES-USER: LETTER_TRACKING_DB_USER_NAME
+        send-letter-service-staging-db-user: LETTER_TRACKING_DB_USER_NAME
+        send-letter-service-staging-db-password: LETTER_TRACKING_DB_PASSWORD
+        send-letter-service-staging-db-host: LETTER_TRACKING_DB_HOST
+        send-letter-service-staging-db-port: LETTER_TRACKING_DB_PORT
+        send-letter-service-staging-db-name: LETTER_TRACKING_DB_NAME
         encryption-public-key: ENCRYPTION_PUBLIC_KEY
         app-insights-instrumentation-key: azure.application-insights.instrumentation-key
         reports-email-username: SMTP_USERNAME
