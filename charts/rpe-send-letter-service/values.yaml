@@ -2,6 +2,7 @@ java:
   applicationPort: 8485
   ingressHost: rpe-send-letter-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
   aadIdentityName: send-letter
+  readinessPath: '/health/readiness'
   keyVaults:
     rpe-send-letter:
       secrets:
