@@ -6,13 +6,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.PdfHelper;
 import uk.gov.hmcts.reform.sendletter.SampleData;
-import uk.gov.hmcts.reform.sendletter.config.SpyOnJpaConfig;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
@@ -29,15 +27,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Uploaded;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
-@ImportAutoConfiguration(SpyOnJpaConfig.class)
 class LetterServiceTest {
 
     private static final String SERVICE_NAME = "bulkprint";
@@ -65,7 +59,7 @@ class LetterServiceTest {
 
     @AfterEach
     void tearDown() {
-        reset(letterRepository);
+        letterRepository.deleteAll();
     }
 
     @Test
@@ -94,9 +88,6 @@ class LetterServiceTest {
 
         // then
         assertThat(id1).isEqualByComparingTo(id2);
-
-        // and
-        verify(letterRepository).save(any(Letter.class));
     }
 
     @Test
@@ -116,9 +107,6 @@ class LetterServiceTest {
 
         // then
         assertThat(id1).isNotEqualByComparingTo(id2);
-
-        // and
-        verify(letterRepository, times(2)).save(any(Letter.class));
     }
 
     @Test
