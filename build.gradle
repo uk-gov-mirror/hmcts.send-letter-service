@@ -185,7 +185,6 @@ def versions = [
   junitPlatform: '1.5.2',
   mockitoJupiter: '3.1.0',
   reformLogging: '5.1.0',
-  springBoot: plugins.getPlugin('org.springframework.boot').class.package.implementationVersion,
   springfoxSwagger: '2.9.2'
 ]
 
@@ -201,11 +200,6 @@ dependencyManagement {
     dependencySet(group: 'org.mockito', version: versions.mockitoJupiter) {
       entry 'mockito-core'
     }
-    // CVE-2020-9488. remove once dependency is resolved by spring boot logging
-    dependencySet(group: 'org.apache.logging.log4j', version: '2.13.3') {
-      entry 'log4j-to-slf4j'
-      entry 'log4j-api'
-    }
   }
 }
 
@@ -214,11 +208,11 @@ dependencies {
     exclude group: 'junit', module: 'junit'
   }
 
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: versions.springBoot
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-json', version: versions.springBoot
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: versions.springBoot
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-json'
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-mail'
 
   compile group: 'org.flywaydb', name: 'flyway-core', version: '5.2.4'
   compile group: 'org.postgresql', name: 'postgresql', version: '42.2.12'
@@ -234,7 +228,6 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.1'
   compile group: 'uk.gov.hmcts.reform', name: 'reform-api-standards', version: '0.4.0'
   compile group: 'uk.gov.hmcts.reform', name: 'pdf-generator', version: '1.0.2'
-  compile group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version:'0.0.5'
   compile group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
 
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.2.RELEASE'
@@ -245,7 +238,7 @@ dependencies {
   compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.19'
   compile group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
 
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: versions.springBoot
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
   compile group: 'com.vladmihalcea', name: 'hibernate-types-5', version: '2.9.10'
   compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: versions.bouncycastle
   compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: versions.bouncycastle
@@ -257,7 +250,7 @@ dependencies {
   testCompile group: 'org.junit.platform', name: 'junit-platform-commons', version: versions.junitPlatform
   testCompile group: 'org.junit.platform', name: 'junit-platform-engine', version: versions.junitPlatform
 
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot, withoutJunit4
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', withoutJunit4
   testCompile group: 'com.icegreen', name: 'greenmail', version: '1.5.13', withoutJunit4
   testCompile group: 'org.apache.commons', name: 'commons-email', version: '1.5'
   testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
