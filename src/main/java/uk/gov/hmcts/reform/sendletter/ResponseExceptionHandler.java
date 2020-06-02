@@ -57,7 +57,11 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(err -> new FieldError(err.getField(), err.getDefaultMessage()))
                 .collect(toList());
 
-        return badRequest().body(new ModelValidationError(fieldErrors));
+        ModelValidationError error = new ModelValidationError(fieldErrors);
+
+        log.info("Bad request: {}", error);
+
+        return badRequest().body(error);
     }
 
     @ExceptionHandler(InvalidTokenException.class)

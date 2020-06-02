@@ -9,4 +9,9 @@ public class ModelValidationError {
     public ModelValidationError(List<FieldError> errors) {
         this.errors = errors;
     }
+
+    @Override
+    public String toString() {
+        return "ModelValidationError{errors=" + errors + "}";
+    }
 }

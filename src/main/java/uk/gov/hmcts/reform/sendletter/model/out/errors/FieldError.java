@@ -14,4 +14,9 @@ public class FieldError {
         this.fieldName = fieldName;
         this.message = message;
     }
+
+    @Override
+    public String toString() {
+        return "FieldError{fieldName='" + fieldName + "', message='" + message + "'}";
+    }
 }
