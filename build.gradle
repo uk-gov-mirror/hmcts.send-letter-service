@@ -208,71 +208,71 @@ dependencies {
     exclude group: 'junit', module: 'junit'
   }
 
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-json'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-mail'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
 
-  compile group: 'org.flywaydb', name: 'flyway-core', version: '5.2.4'
-  compile group: 'org.postgresql', name: 'postgresql', version: '42.2.14'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '5.2.4'
+  implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.14'
 
-  compile group: 'net.javacrumbs.shedlock', name: 'shedlock-provider-jdbc-template', version: '4.12.0'
-  compile group: 'net.javacrumbs.shedlock', name: 'shedlock-spring', version: '4.12.0'
+  implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-provider-jdbc-template', version: '4.12.0'
+  implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-spring', version: '4.12.0'
 
-  compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
-  compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
+  implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
+  implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
 
-  compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
-  compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
-  compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
-  compile group: 'uk.gov.hmcts.reform', name: 'reform-api-standards', version: '0.4.0'
-  compile group: 'uk.gov.hmcts.reform', name: 'pdf-generator', version: '1.0.2'
-  compile group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.1.0'
+  implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
+  implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
+  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
+  implementation group: 'uk.gov.hmcts.reform', name: 'reform-api-standards', version: '0.4.0'
+  implementation group: 'uk.gov.hmcts.reform', name: 'pdf-generator', version: '1.0.2'
+  implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.1.0'
 
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.3.RELEASE'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.3.RELEASE'
 
-  compile group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
+  implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
 
-  compile group: 'com.hierynomus', name: 'sshj', version: '0.29.0'
-  compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.20'
-  compile group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
+  implementation group: 'com.hierynomus', name: 'sshj', version: '0.29.0'
+  implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.20'
+  implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
 
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
-  compile group: 'com.vladmihalcea', name: 'hibernate-types-5', version: '2.9.12'
-  compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: versions.bouncycastle
-  compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: versions.bouncycastle
-  compile group: 'org.bouncycastle', name: 'bcpg-jdk15on', version: versions.bouncycastle
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+  implementation group: 'com.vladmihalcea', name: 'hibernate-types-5', version: '2.9.12'
+  implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: versions.bouncycastle
+  implementation group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: versions.bouncycastle
+  implementation group: 'org.bouncycastle', name: 'bcpg-jdk15on', version: versions.bouncycastle
 
-  testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
-  testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
-  testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
-  testCompile group: 'org.junit.platform', name: 'junit-platform-commons', version: versions.junitPlatform
-  testCompile group: 'org.junit.platform', name: 'junit-platform-engine', version: versions.junitPlatform
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
+  testImplementation group: 'org.junit.platform', name: 'junit-platform-commons', version: versions.junitPlatform
+  testImplementation group: 'org.junit.platform', name: 'junit-platform-engine', version: versions.junitPlatform
 
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', withoutJunit4
-  testCompile group: 'com.icegreen', name: 'greenmail', version: '1.5.13', withoutJunit4
-  testCompile group: 'org.apache.commons', name: 'commons-email', version: '1.5'
-  testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
-  testCompile group: 'org.apache.pdfbox', name: 'preflight', version: '2.0.20', withoutJunit4
-  testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockitoJupiter
-  testCompile group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.25.1', withoutJunit4
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', withoutJunit4
+  testImplementation group: 'com.icegreen', name: 'greenmail', version: '1.5.13', withoutJunit4
+  testImplementation group: 'org.apache.commons', name: 'commons-email', version: '1.5'
+  testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
+  testImplementation group: 'org.apache.pdfbox', name: 'preflight', version: '2.0.20', withoutJunit4
+  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockitoJupiter
+  testImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.25.1', withoutJunit4
 
-  integrationTestCompile sourceSets.main.runtimeClasspath
-  integrationTestCompile sourceSets.test.runtimeClasspath
-  integrationTestCompile group: 'org.apache.sshd', name: 'sshd-scp', version: '2.4.0'
-  integrationTestCompile group: 'org.apache.sshd', name: 'sshd-sftp', version: '2.4.0'
-  integrationTestCompile group: 'org.testcontainers', name: 'postgresql', version: '1.14.3' // brings in junit4. testcontainers depend on it
-  integrationTestCompile group: 'org.awaitility', name: 'awaitility', version: '4.0.3', withoutJunit4
+  integrationTestImplementation sourceSets.main.runtimeClasspath
+  integrationTestImplementation sourceSets.test.runtimeClasspath
+  integrationTestImplementation group: 'org.apache.sshd', name: 'sshd-scp', version: '2.4.0'
+  integrationTestImplementation group: 'org.apache.sshd', name: 'sshd-sftp', version: '2.4.0'
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.14.3' // brings in junit4. testcontainers depend on it
+  integrationTestImplementation group: 'org.awaitility', name: 'awaitility', version: '4.0.3', withoutJunit4
 
-  smokeTestCompile sourceSets.main.runtimeClasspath
-  smokeTestCompile sourceSets.test.runtimeClasspath
-  smokeTestCompile group: 'io.rest-assured', name: 'rest-assured'
+  smokeTestImplementation sourceSets.main.runtimeClasspath
+  smokeTestImplementation sourceSets.test.runtimeClasspath
+  smokeTestImplementation group: 'io.rest-assured', name: 'rest-assured'
 
-  functionalTestCompile sourceSets.main.runtimeClasspath
-  functionalTestCompile sourceSets.test.runtimeClasspath
-  functionalTestCompile group: 'io.rest-assured', name: 'rest-assured'
+  functionalTestImplementation sourceSets.main.runtimeClasspath
+  functionalTestImplementation sourceSets.test.runtimeClasspath
+  functionalTestImplementation group: 'io.rest-assured', name: 'rest-assured'
 }
 
 mainClassName = 'uk.gov.hmcts.reform.sendletter.Application'
