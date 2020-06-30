@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
-import org.apache.sshd.common.session.Session;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.scp.ScpCommandFactory;
@@ -62,7 +61,7 @@ public final class LocalSftpServer implements AutoCloseable {
         sshd = SshServer.setUpDefaultServer();
         sshd.setFileSystemFactory(new VirtualFileSystemFactory() {
             @Override
-            protected Path computeRootDir(Session session) throws IOException  {
+            public Path getDefaultHomeDir() {
                 return rootFolder.toPath();
             }
         });
