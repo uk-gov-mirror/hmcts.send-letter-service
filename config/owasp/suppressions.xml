@@ -19,17 +19,9 @@
     </suppress>
 
     <suppress>
-        <notes><![CDATA[ file name: wiremock-jre8-2.25.1.jar: jquery-3.4.1.min.js ]]></notes>
+        <notes><![CDATA[ file name: wiremock-jre8-2.27.0.jar: jquery-3.4.1.min.js ]]></notes>
         <packageUrl regex="true">^pkg:javascript/jquery@.*$</packageUrl>
         <vulnerabilityName>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</vulnerabilityName>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[ file name: handlebars-4.1.2.jar: handlebars-v4.0.4.js ]]></notes>
-        <packageUrl regex="true">^pkg:javascript/handlebars@.*$</packageUrl>
-        <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
-        <vulnerabilityName>Disallow calling helperMissing and blockHelperMissing directly</vulnerabilityName>
-        <vulnerabilityName>Prototype pollution</vulnerabilityName>
     </suppress>
 
 </suppressions>
