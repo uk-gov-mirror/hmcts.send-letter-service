@@ -142,7 +142,3 @@ variable "common_tags" {
 variable "managed_identity_object_id" {
   default = ""
 }
-
-variable "enable_ase" {
-  default = false
-}

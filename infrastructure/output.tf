@@ -1,9 +1,5 @@
 #region Data for tests
 
-output "test_s2s_url" {
-  value = "${local.s2s_url}"
-}
-
 output "test_s2s_name" {
   value = "send_letter_tests"
 }
