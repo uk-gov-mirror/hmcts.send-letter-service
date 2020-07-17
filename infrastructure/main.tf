@@ -45,17 +45,32 @@ module "db" {
   subscription    = "${var.subscription}"
 }
 
+module "db-v11" {
+  source             = "git@github.com:hmcts/cnp-module-postgres?ref=master"
+  product            = "${var.component}-db"
+  location           = "${var.location_db}"
+  env                = "${var.env}"
+  database_name      = "send_letter"
+  postgresql_user    = "send_letter"
+  postgresql_version = "11"
+  sku_name           = "GP_Gen5_2"
+  sku_tier           = "GeneralPurpose"
+  common_tags        = "${var.common_tags}"
+  subscription       = "${var.subscription}"
+}
+
 module "staging-db" {
-  source          = "git@github.com:hmcts/cnp-module-postgres?ref=master"
-  product         = "${var.component}-staging-db"
-  location        = "${var.location_db}"
-  env             = "${var.env}"
-  database_name   = "send_letter"
-  postgresql_user = "send_letter"
-  sku_name        = "GP_Gen5_2"
-  sku_tier        = "GeneralPurpose"
-  common_tags     = "${var.common_tags}"
-  subscription    = "${var.subscription}"
+  source             = "git@github.com:hmcts/cnp-module-postgres?ref=master"
+  product            = "${var.component}-staging-db"
+  location           = "${var.location_db}"
+  env                = "${var.env}"
+  database_name      = "send_letter"
+  postgresql_user    = "send_letter"
+  postgresql_version = "11"
+  sku_name           = "GP_Gen5_2"
+  sku_tier           = "GeneralPurpose"
+  common_tags        = "${var.common_tags}"
+  subscription       = "${var.subscription}"
 }
 
 module "send-letter-service" {
@@ -166,6 +181,36 @@ resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
   key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
   name         = "${var.component}-POSTGRES-DATABASE"
   value        = "${module.db.postgresql_database}"
+}
+
+resource "azurerm_key_vault_secret" "postgres_user_v11" {
+  key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
+  name         = "${var.component}-db-user-v11"
+  value        = "${module.db-v11.user_name}"
+}
+
+resource "azurerm_key_vault_secret" "postgres_pass_v11" {
+  key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
+  name         = "${var.component}-db-pass-v11"
+  value        = "${module.db-v11.postgresql_password}"
+}
+
+resource "azurerm_key_vault_secret" "postgres_host_v11" {
+  key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
+  name         = "${var.component}-db-host-v11"
+  value        = "${module.db-v11.host_name}"
+}
+
+resource "azurerm_key_vault_secret" "postgres_port_v11" {
+  key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
+  name         = "${var.component}-db-port-v11"
+  value        = "${module.db-v11.postgresql_listen_port}"
+}
+
+resource "azurerm_key_vault_secret" "postgres_database_v11" {
+  key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
+  name         = "${var.component}-db-database-v11"
+  value        = "${module.db-v11.postgresql_database}"
 }
 
 resource "azurerm_key_vault_secret" "APP-INSTRUMENTATION-KEY" {
