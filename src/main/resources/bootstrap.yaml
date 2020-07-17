@@ -9,6 +9,11 @@ spring:
         ftp-private-key: FTP_PRIVATE_KEY
         ftp-public-key: FTP_PUBLIC_KEY
         upload-summary-report-recipients: UPLOAD_SUMMARY_REPORT_RECIPIENTS
+        send-letter-service-db-database-v11: DB_NAME
+        send-letter-service-db-host-v11: DB_HOST
+        send-letter-service-db-pass-v11: DB_PASSWORD
+        send-letter-service-db-port-v11: DB_PORT
+        send-letter-service-db-user-v11: DB_USER
         send-letter-service-POSTGRES-PASS: LETTER_TRACKING_DB_PASSWORD
         send-letter-service-POSTGRES-DATABASE: LETTER_TRACKING_DB_NAME
         send-letter-service-POSTGRES-PORT: LETTER_TRACKING_DB_PORT
