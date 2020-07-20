@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
 
@@ -92,32 +91,30 @@ public class MarkLettersPostedTask {
     }
 
     private void markAsPosted(LetterPrintStatus letterPrintStatus, String reportFileName) {
-        Optional<LetterStatus> optional = dataAccessService.findLetterStatus(letterPrintStatus.id);
-
-        // from java9 `ifPresentOrElse` is available. note for future
-        if (optional.isPresent()) {
-            LetterStatus status = optional.get();
-
-            if (status.equals(LetterStatus.Uploaded)) {
-                dataAccessService.markLetterAsPosted(
+        dataAccessService
+            .findLetterStatus(letterPrintStatus.id)
+            .ifPresentOrElse(
+                status -> {
+                    if (status.equals(LetterStatus.Uploaded)) {
+                        dataAccessService.markLetterAsPosted(
+                            letterPrintStatus.id,
+                            letterPrintStatus.printedAt.toLocalDateTime()
+                        );
+                        logger.info("Marked letter {} as posted", letterPrintStatus.id);
+                    } else {
+                        logger.warn(
+                            "Failed to mark letter {} as posted - unexpected status: {}. Report file name: {}",
+                            letterPrintStatus.id,
+                            status,
+                            reportFileName
+                        );
+                    }
+                },
+                () -> logger.error(
+                    "Failed to mark letter {} as posted - unknown letter. Report file name: {}",
                     letterPrintStatus.id,
-                    letterPrintStatus.printedAt.toLocalDateTime()
-                );
-                logger.info("Marked letter {} as posted", letterPrintStatus.id);
-            } else {
-                logger.warn(
-                    "Failed to mark letter {} as posted - unexpected status: {}. Report file name: {}",
-                    letterPrintStatus.id,
-                    status,
                     reportFileName
-                );
-            }
-        } else {
-            logger.error(
-                "Failed to mark letter {} as posted - unknown letter. Report file name: {}",
-                letterPrintStatus.id,
-                reportFileName
+                )
             );
-        }
     }
 }
