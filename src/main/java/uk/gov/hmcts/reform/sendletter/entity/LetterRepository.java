@@ -54,6 +54,17 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
     @Query("UPDATE Letter l SET l.status = 'Posted', l.printedAt = :printedAt, l.fileContent = null WHERE l.id = :id")
     int markLetterAsPosted(@Param("id") UUID id, @Param("printedAt") LocalDateTime printedAt);
 
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Letter l"
+        + " SET l.fileContent = null "
+        + " WHERE l.createdAt < :createdBefore "
+        + " AND l.status = :status"
+    )
+    int clearFileContent(
+        @Param("createdBefore") LocalDateTime createdBefore,
+        @Param("status") LetterStatus status
+    );
+
     Optional<Letter> findByIdAndService(UUID id, String service);
 
     int countByStatus(LetterStatus status);
