@@ -126,6 +126,11 @@ file-cleanup:
   cron: ${FILE_CLEANUP_CRON:0 15 * * * *}
   ttl: 12h
 
+old-letter-content-cleanup:
+  enabled: ${OLD_LETTER_CONTENT_CLEANUP_ENABLED:false}
+  cron: ${OLD_LETTER_CONTENT_CLEANUP_CRON:0 0 7 * * *}
+  ttl: P31D
+
 encryption:
   enabled: ${ENCRYPTION_ENABLED:false}
   publicKey: ${ENCRYPTION_PUBLIC_KEY:}
