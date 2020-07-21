@@ -33,7 +33,7 @@ For convenience there is a sample docker compose configuration file in [docker](
 It should be sufficient to run service with single microservice set up: `send_letter_tests`.
 
 ```bash
-$ docker-compose -f /home/doncem/workspace/hmcts/send-letter-service/docker/docker-compose-sample.yml up
+$ docker-compose -f docker/docker-compose-sample.yml up
 ```
 
 Test:
