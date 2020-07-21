@@ -33,7 +33,7 @@ properties([
   pipelineTriggers([[$class: 'GitHubPushTrigger']])
 ])
 
-def channel = '#bsp-build-notices'
+def channel = '#bulk-print-build-notices'
 
 withParameterizedPipeline(params.TYPE, params.PRODUCT_NAME, params.APP, params.ENVIRONMENT, params.SUBSCRIPTION) {
   enableDbMigration('rpe-send-letter')
