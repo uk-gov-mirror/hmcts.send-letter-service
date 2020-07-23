@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.services.LetterDataAccessService;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class ClearOldLetterContentTaskTest {
 
-    @Mock LetterRepository letterRepo;
+    @Mock LetterDataAccessService letterService;
     @Mock Clock clock;
 
     @Test
@@ -29,13 +29,13 @@ class ClearOldLetterContentTaskTest {
         given(clock.getZone()).willReturn(UTC);
         var ttl = Duration.ofDays(30);
 
-        var task = new ClearOldLetterContentTask(letterRepo, ttl, clock);
+        var task = new ClearOldLetterContentTask(letterService, ttl, clock);
 
         // when
         task.run();
 
         // then
-        verify(letterRepo).clearFileContent(
+        verify(letterService).clearFileContent(
             now.minusDays(30),
             LetterStatus.Uploaded
         );

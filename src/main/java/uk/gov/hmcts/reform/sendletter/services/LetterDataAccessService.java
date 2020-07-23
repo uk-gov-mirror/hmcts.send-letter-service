@@ -11,8 +11,7 @@ import java.util.UUID;
 
 /**
  * Service to wrap data access layer automatically proxied via JPA interfaces.
- * Since execution of {@link LetterRepository#markLetterAsPosted} is {@code @Modifying},
- * public accessor to it's execution has to be {@code @Transactional}.
+ * {@code @Modifying} repo methods have to be called from  {@code @Transactional} service methods.
  * This service may serve same wrapping layer idea in case JPA -> JDBC happens.
  */
 @Service
@@ -31,5 +30,10 @@ public class LetterDataAccessService {
     @Transactional
     public void markLetterAsPosted(UUID id, LocalDateTime printedAt) {
         repository.markLetterAsPosted(id, printedAt);
+    }
+
+    @Transactional
+    public int clearFileContent(LocalDateTime createdBefore, LetterStatus status) {
+        return repository.clearFileContent(createdBefore, status);
     }
 }

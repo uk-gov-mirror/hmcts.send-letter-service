@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.services.LetterDataAccessService;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -27,16 +27,16 @@ public class ClearOldLetterContentTask {
     private static final String TASK_NAME = "ClearOldLetterContent";
     private static final Logger logger = LoggerFactory.getLogger(ClearOldLetterContentTask.class);
 
-    private final LetterRepository letterRepository;
+    private final LetterDataAccessService letterService;
     private final Duration ttl;
     private final Clock clock;
 
     public ClearOldLetterContentTask(
-        LetterRepository letterRepository,
+        LetterDataAccessService letterService,
         @Value("${old-letter-content-cleanup.ttl}") Duration ttl,
         Clock clock
     ) {
-        this.letterRepository = letterRepository;
+        this.letterService = letterService;
         this.ttl = ttl;
         this.clock = clock;
     }
@@ -47,7 +47,7 @@ public class ClearOldLetterContentTask {
         var cutoff = LocalDateTime.now(clock).minus(ttl);
 
         logger.info("Starting {} task. Cutoff: {}", TASK_NAME, cutoff);
-        int count = letterRepository.clearFileContent(cutoff, LetterStatus.Uploaded);
+        int count = letterService.clearFileContent(cutoff, LetterStatus.Uploaded);
         logger.info("Completed {} task. Cleared content of {} letters.", TASK_NAME, count);
     }
 }

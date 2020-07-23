@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.services.LetterDataAccessService;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -33,7 +34,7 @@ class ClearOldLetterContentTaskTest {
         repository.saveAndFlush(letter);
 
         var task = new ClearOldLetterContentTask(
-            repository,
+            new LetterDataAccessService(repository),
             Duration.ofSeconds(0), // clear immediately
             Clock.systemDefaultZone()
         );
