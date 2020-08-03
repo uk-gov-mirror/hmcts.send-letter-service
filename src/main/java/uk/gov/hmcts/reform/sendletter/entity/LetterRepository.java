@@ -65,7 +65,5 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
         @Param("status") LetterStatus status
     );
 
-    Optional<Letter> findByIdAndService(UUID id, String service);
-
     int countByStatus(LetterStatus status);
 }

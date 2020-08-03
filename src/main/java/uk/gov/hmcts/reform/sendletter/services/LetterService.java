@@ -170,9 +170,9 @@ public class LetterService {
         }
     }
 
-    public LetterStatus getStatus(UUID id, String serviceName) {
+    public LetterStatus getStatus(UUID id) {
         return letterRepository
-            .findByIdAndService(id, serviceName)
+            .findById(id)
             .map(letter -> new LetterStatus(
                 id,
                 letter.getStatus().name(),

@@ -25,14 +25,4 @@ class LetterTest {
         assertThat(letters.size()).isEqualTo(1);
         assertThat(letters.get(0).getStatus()).isEqualTo(LetterStatus.Created);
     }
-
-    @Test
-    void finds_letters_by_id_and_service() {
-        repository.save(SampleData.letterEntity("a.service"));
-        Letter second = SampleData.letterEntity("different");
-        repository.save(second);
-
-        Letter found = repository.findByIdAndService(second.getId(), second.getService()).get();
-        assertThat(found.getId()).isEqualTo(second.getId());
-    }
 }

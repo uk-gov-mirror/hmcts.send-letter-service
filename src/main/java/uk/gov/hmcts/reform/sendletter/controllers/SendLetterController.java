@@ -107,15 +107,12 @@ public class SendLetterController {
     @ApiOperation(value = "Get letter status")
     @ApiResponses({
         @ApiResponse(code = 200, response = LetterStatus.class, message = "Success"),
-        @ApiResponse(code = 401, message = ControllerResponseMessage.RESPONSE_401),
         @ApiResponse(code = 404, message = "Letter not found")
     })
     public ResponseEntity<LetterStatus> getLetterStatus(
-        @PathVariable String id,
-        @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader
+        @PathVariable String id
     ) {
-        String serviceName = authService.authenticate(serviceAuthHeader);
-        LetterStatus letterStatus = letterService.getStatus(getLetterIdFromString(id), serviceName);
+        LetterStatus letterStatus = letterService.getStatus(getLetterIdFromString(id));
 
         return ok(letterStatus);
     }

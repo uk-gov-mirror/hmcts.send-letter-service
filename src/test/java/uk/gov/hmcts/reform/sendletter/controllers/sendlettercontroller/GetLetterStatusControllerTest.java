@@ -8,7 +8,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.sendletter.controllers.SendLetterController;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
@@ -20,10 +19,8 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.never;
-import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -49,8 +46,7 @@ class GetLetterStatusControllerTest {
     @Test
     void should_return_letter_status_when_it_is_found_in_database() throws Exception {
 
-        given(authService.authenticate("auth-header-value")).willReturn("service-name");
-        given(service.getStatus(letterStatus.id, "service-name")).willReturn(letterStatus);
+        given(service.getStatus(letterStatus.id)).willReturn(letterStatus);
 
         getLetter(letterStatus.id)
             .andExpect(status().isOk())
@@ -68,8 +64,7 @@ class GetLetterStatusControllerTest {
 
     @Test
     void should_return_404_client_error_when_letter_is_not_found_in_database() throws Exception {
-        given(authService.authenticate("auth-header-value")).willReturn("service-name");
-        willThrow(LetterNotFoundException.class).given(service).getStatus(letterStatus.id, "service-name");
+        willThrow(LetterNotFoundException.class).given(service).getStatus(letterStatus.id);
 
         getLetter(letterStatus.id).andExpect(status().is(HttpStatus.NOT_FOUND.value()));
     }
@@ -79,17 +74,7 @@ class GetLetterStatusControllerTest {
         getLetter("0987654321").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
         getLetter("X558ff55-37R0-4p6e-80fo-5Lb05b650c44").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
 
-        verify(authService, times(2)).authenticate(anyString());
-        verify(service, never()).getStatus(any(UUID.class), anyString());
-    }
-
-    @Test
-    void should_return_401_client_error_when_authorisation_header_is_invalid() throws Exception {
-        willThrow(InvalidTokenException.class).given(authService).authenticate("auth-header-value");
-
-        getLetter(letterStatus.id).andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
-
-        verify(service, never()).getStatus(any(UUID.class), anyString());
+        verify(service, never()).getStatus(any(UUID.class));
     }
 
     private ResultActions getLetter(String letterId) throws Exception {
