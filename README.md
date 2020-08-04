@@ -47,7 +47,7 @@ $ curl http://localhost:8485/health
 ```
 
 ```bash
-curl -X POST -H "Content-Type: application/json" "http://localhost:4552/lease" -d '{"microservice":"send_letter_tests","oneTimePassword":"OTP"}'
+curl -X POST -H "Content-Type: application/json" "http://localhost:4552/testing-support/lease" -d '{"microservice":"send_letter_tests"}'
 
 S2S_TOKEN
 
@@ -161,20 +161,20 @@ Once the request to send a letter is accepted, the status of the letter can be c
 Here's an example command that sends the request:
 
 ```
-curl -X GET -H "ServiceAuthorization: Bearer {s2s_token}" "http://rpe-send-letter-service-{env}.service.core-compute-{env}.internal/letters/{id}"
+curl -X GET  "http://rpe-send-letter-service-{env}.service.core-compute-{env}.internal/letters/{id}"
 ```
 
 where
 * `env` is the environment name
 * `id` is the ID of the letter in Send Letter Service, as returned by send letter endpoint
-* `s2s_token` is the service authentication token retrieved from [S2S](https://github.com/hmcts/service-auth-provider-app)
 
 Here's what a response body should look like:
 
 ```
 {
     "id": "0001307e-69e5-4ffe-b5f6-1acd73db95bb",
-    "status": "Created",
+    "status": "Posted",
+    "message_id": "4fd61ac3f28b4df5ef1a5c10dffa2eb7",
     "checksum": "401b30e3b8b5d629635a5c613cdb7919",
     "created_at": "2020-01-12T01:02:03.123Z",
     "sent_to_print_at": "2020-01-13T01:02:03.123Z",
