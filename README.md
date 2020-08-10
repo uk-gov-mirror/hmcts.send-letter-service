@@ -29,11 +29,10 @@ $ ./gradlew bootRun
 
 ### Docker environment
 
-For convenience there is a sample docker compose configuration file in [docker](docker/docker-compose-sample.yml) folder.
-It should be sufficient to run service with single microservice set up: `send_letter_tests`.
-
+For convenience there is a docker compose configuration file docker-compose-sample.yml.
+Default properties have been provided to allow the functional and smoke tests to be run against the docker images.
 ```bash
-$ docker-compose -f docker/docker-compose-sample.yml up
+$ docker-compose up -d
 ```
 
 Test:

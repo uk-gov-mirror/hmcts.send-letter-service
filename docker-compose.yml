@@ -1,4 +1,4 @@
-version: '3'
+version: '3.1'
 
 services:
   send-letter-service:
@@ -6,7 +6,7 @@ services:
       - send-letter-database
       - send-letter-sftp
     env_file:
-      - env.list
+      - docker/env.list
     environment:
       S2S_URL: http://service-auth-provider-api:8080
     image: hmctspublic.azurecr.io/rpe/send-letter-service:latest
@@ -18,7 +18,7 @@ services:
       - 8485:8485
   send-letter-database:
     build:
-      context: database
+      context: docker/database
     environment:
       POSTGRES_DB: letter_tracking
       POSTGRES_USER: letterservice
@@ -29,14 +29,16 @@ services:
       - send-letter-database:/var/lib/postgresql/data
   send-letter-sftp:
     build:
-      context: sftp
-    command: sftp:pass:1001
+      context: docker/sftp
+    command: sftp::1001
     healthcheck:
       retries: 40
     ports:
-      - 22:22
+      - "22:22"
     volumes:
-      - ./sftp/data/incoming:/home/sftp/incoming
+      - .docker/sftp/data/incoming:/home/sftp/incoming
+      - .docker/sftp/data/incoming/BULKPRINT:/home/sftp/incoming/BULKPRINT
+      - .docker/sftp/data/SMOKE_TEST:/home/sftp/SMOKE_TEST
   service-auth-provider-api:
     image: hmctspublic.azurecr.io/rpe/service-auth-provider:latest
     healthcheck:
