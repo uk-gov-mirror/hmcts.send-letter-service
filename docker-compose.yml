@@ -64,7 +64,7 @@ services:
     healthcheck:
       retries: 40
     ports:
-      - "22:22"
+      - "12222:22"
   service-auth-provider-api:
     image: hmctspublic.azurecr.io/rpe/service-auth-provider:latest
     healthcheck:
