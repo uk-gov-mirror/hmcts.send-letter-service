@@ -23,6 +23,7 @@ public class LetterRequest implements Serializable, ILetterRequest {
     @NotEmpty
     public final String type;
 
+    @ApiModelProperty(value = "Optional field where services can store any additional information about the letter")
     @JsonProperty("additional_data")
     public final Map<String, Object> additionalData;
 

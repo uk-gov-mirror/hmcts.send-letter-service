@@ -22,6 +22,7 @@ public class LetterWithPdfsAndNumberOfCopiesRequest implements Serializable, ILe
     @NotEmpty
     public final String type;
 
+    @ApiModelProperty(value = "Optional field where services can store any additional information about the letter")
     public final Map<String, Object> additionalData;
 
     public LetterWithPdfsAndNumberOfCopiesRequest(
