@@ -1,19 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 
-    <suppress until="2020-08-19">
+    <suppress until="2020-10-19">
         <packageUrl regex="true">^pkg:maven/org\.bouncycastle/bcpg\-jdk15on@.*$</packageUrl>
         <cpe>cpe:/a:openpgp:openpgp</cpe>
         <cpe>cpe:/a:pgp:openpgp</cpe>
         <cpe>cpe:/a:pgp:pgp</cpe>
     </suppress>
 
-    <suppress until="2020-08-19">
-        <packageUrl regex="true">^pkg:maven/org\.apache\.sling/org\.apache\.sling\.javax\.activation@.*$</packageUrl>
-        <cpe>cpe:/a:apache:sling</cpe>
-    </suppress>
-
-    <suppress until="2020-08-19">
+    <suppress until="2020-10-20">
         <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-crypto@.*$</packageUrl>
         <cpe>cpe:/a:pivotal_software:spring_security</cpe>
     </suppress>
