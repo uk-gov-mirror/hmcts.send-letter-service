@@ -8,13 +8,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileInfo;
+import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.function.Function;
 
@@ -26,13 +30,16 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DeleteOldFilesTaskTest {
 
     @Mock private FtpClient ftp;
     @Mock private SFTPClient sftpClient;
     @Mock private ServiceFolderMapping serviceFolderMapping;
+    @Mock private FtpAvailabilityChecker availabilityChecker;
 
     @BeforeEach
     @SuppressWarnings("unchecked") // {@code invocation.getArgument(0)} has Object. But we know what it is
@@ -40,6 +47,32 @@ class DeleteOldFilesTaskTest {
         given(ftp.runWith(any())).willAnswer(invocation ->
             ((Function<SFTPClient, Void>) invocation.getArgument(0)).apply(sftpClient)
         );
+        given(availabilityChecker.isFtpAvailable(any(LocalTime.class))).willReturn(true);
+    }
+
+    @Test
+    void should_handle_ftpException() {
+
+        given(serviceFolderMapping.getFolders())
+            .willReturn(ImmutableSet.of("SERVICE"));
+
+        given(ftp.listLetters("SERVICE", sftpClient)).willThrow(FtpException.class);
+
+        DeleteOldFilesTask deleteOldFilesTask =
+            new DeleteOldFilesTask(ftp, serviceFolderMapping, Duration.ZERO, availabilityChecker);
+        deleteOldFilesTask.run();
+        verify(ftp, times(1)).runWith(any());
+        verify(ftp, never()).deleteFile(any(),any());
+    }
+
+    @Test
+    void should_not_start_process_if_ftp_is_not_available() {
+        given(availabilityChecker.isFtpAvailable(any(LocalTime.class))).willReturn(false);
+
+        DeleteOldFilesTask deleteOldFilesTask =
+            new DeleteOldFilesTask(ftp, serviceFolderMapping, Duration.ZERO, availabilityChecker);
+        deleteOldFilesTask.run();
+        verifyNoInteractions(ftp);
     }
 
     @Test
@@ -58,7 +91,7 @@ class DeleteOldFilesTaskTest {
             ));
 
         // when
-        new DeleteOldFilesTask(ftp, serviceFolderMapping, ttl).run();
+        new DeleteOldFilesTask(ftp, serviceFolderMapping, ttl, availabilityChecker).run();
 
         // then
         verify(ftp).runWith(any());
@@ -82,7 +115,7 @@ class DeleteOldFilesTaskTest {
             .willReturn(ImmutableList.of(new FileInfo("b.zip", secondAgo())));
 
         // when
-        new DeleteOldFilesTask(ftp, serviceFolderMapping, Duration.ZERO).run();
+        new DeleteOldFilesTask(ftp, serviceFolderMapping, Duration.ZERO, availabilityChecker).run();
 
         // then
         verify(ftp, times(2)).runWith(any());
@@ -109,7 +142,7 @@ class DeleteOldFilesTaskTest {
         willThrow(FtpException.class).given(ftp).deleteFile("error2.zip", sftpClient);
 
         // when
-        new DeleteOldFilesTask(ftp, serviceFolderMapping, Duration.ZERO).run();
+        new DeleteOldFilesTask(ftp, serviceFolderMapping, Duration.ZERO, availabilityChecker).run();
 
         // then
         verify(ftp).runWith(any());

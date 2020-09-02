@@ -11,9 +11,12 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileInfo;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
+import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 
 import java.time.Duration;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import static java.time.Instant.now;
@@ -34,42 +37,53 @@ public class DeleteOldFilesTask {
     private final FtpClient ftp;
     private final ServiceFolderMapping serviceFolderMapping;
     private final Duration ttl;
+    private final IFtpAvailabilityChecker ftpAvailabilityChecker;
 
     // region constructor
     public DeleteOldFilesTask(
         FtpClient ftp,
         ServiceFolderMapping serviceFolderMapping,
-        @Value("${file-cleanup.ttl}") Duration ttl
+        @Value("${file-cleanup.ttl}") Duration ttl,
+        IFtpAvailabilityChecker ftpAvailabilityChecker
     ) {
         this.ftp = ftp;
         this.serviceFolderMapping = serviceFolderMapping;
         this.ttl = ttl;
+        this.ftpAvailabilityChecker = ftpAvailabilityChecker;
     }
     // endregion
 
     @SchedulerLock(name = TASK_NAME)
     @Scheduled(cron = "${file-cleanup.cron}", zone = EUROPE_LONDON)
     public void run() {
+        if (!ftpAvailabilityChecker.isFtpAvailable(LocalTime.now(ZoneId.of(EUROPE_LONDON)))) {
+            logger.info("Not processing '{}' task due to FTP downtime window", TASK_NAME);
+            return;
+        }
         logger.info("Starting {} task", TASK_NAME);
         serviceFolderMapping
             .getFolders()
             .forEach(folder -> {
-                // new connection per folder
-                ftp.runWith(sftpClient -> {
-                    List<FileInfo> filesToDelete =
-                        ftp.listLetters(folder, sftpClient)
-                            .stream()
-                            .filter(f -> f.modifiedAt.isBefore(now().minus(ttl)))
-                            .collect(toList());
+                try {
+                    // new connection per folder
+                    ftp.runWith(sftpClient -> {
+                        List<FileInfo> filesToDelete =
+                            ftp.listLetters(folder, sftpClient)
+                                .stream()
+                                .filter(f -> f.modifiedAt.isBefore(now().minus(ttl)))
+                                .collect(toList());
 
-                    if (!filesToDelete.isEmpty()) {
-                        deleteFiles(folder, filesToDelete, sftpClient);
-                    } else {
-                        logger.info("No files to delete found");
-                    }
+                        if (!filesToDelete.isEmpty()) {
+                            deleteFiles(folder, filesToDelete, sftpClient);
+                        } else {
+                            logger.info("No files to delete found");
+                        }
 
-                    return null;
-                });
+                        return null;
+                    });
+                } catch (Exception e) {
+                    logger.error(folder, e);
+                }
             });
         logger.info("Completed {} task", TASK_NAME);
     }

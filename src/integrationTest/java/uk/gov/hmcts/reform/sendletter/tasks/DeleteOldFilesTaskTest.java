@@ -8,21 +8,31 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
+import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 
 import java.time.Duration;
+import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class DeleteOldFilesTaskTest {
 
     @Mock ServiceFolderMapping serviceFolderMapping;
 
+    @Mock
+    private FtpAvailabilityChecker availabilityChecker;
+
     @Test
     void should_delete_files() throws Exception {
+
+        when(availabilityChecker.isFtpAvailable(any(LocalTime.class))).thenReturn(true);
+
         try (LocalSftpServer server = LocalSftpServer.create()) {
             // given
             given(serviceFolderMapping.getFolders())
@@ -43,7 +53,7 @@ class DeleteOldFilesTaskTest {
             });
 
             // when
-            new DeleteOldFilesTask(ftp, serviceFolderMapping, Duration.ZERO).run();
+            new DeleteOldFilesTask(ftp, serviceFolderMapping, Duration.ZERO, availabilityChecker).run();
 
             //then
             ftp.runWith(sftpClient -> {
