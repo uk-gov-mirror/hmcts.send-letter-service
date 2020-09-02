@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,15 +38,17 @@ class LetterServiceTest {
     private static final String SERVICE_NAME = "bulkprint";
 
     private LetterService service;
+    private ObjectMapper objectMapper;
 
     @Autowired
     private LetterRepository letterRepository;
+
 
     @BeforeEach
     void setUp() {
         ServiceFolderMapping serviceFolderMapping = mock(ServiceFolderMapping.class);
         BDDMockito.given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder_name"));
-
+        objectMapper = new ObjectMapper();
         service = new LetterService(
             new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert),
             letterRepository,
@@ -68,6 +71,33 @@ class LetterServiceTest {
 
         Letter result = letterRepository.findById(id).get();
 
+        assertThat(result.isEncrypted()).isFalse();
+        assertThat(result.getEncryptionKeyFingerprint()).isNull();
+        PdfHelper.validateZippedPdf(result.getFileContent());
+    }
+
+    @Test
+    void generatesLetterWithAddionalDataAndSaveZippedPdf() throws IOException {
+        UUID id = service.save(SampleData.letterWithPdfsRequestWithAdditionalData(), SERVICE_NAME);
+
+        Letter result = letterRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Letter not found " + id.toString()));
+        assertThat(result.isEncrypted()).isFalse();
+        assertThat(result.getEncryptionKeyFingerprint()).isNull();
+        PdfHelper.validateZippedPdf(result.getFileContent());
+
+        String expectedAdditionData = "{\"reference\":\"ABD-123-WAZ\",\"count\":10,\"additionInfo\":\"present\"}";
+        JsonNode expectedAdditionalData = objectMapper.readTree(expectedAdditionData);
+        assertThat(result.getAdditionalData()).isEqualTo(expectedAdditionalData);
+    }
+
+    @Test
+    void generatesLetterWithNoAddionalDataAndSaveZippedPdf() throws IOException {
+        UUID id = service.save(SampleData.letterWithPdfsRequestWithNoAdditionalData(), SERVICE_NAME);
+
+        Letter result = letterRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Letter not found " + id.toString()));
+        assertThat(result.getAdditionalData()).isEmpty();
         assertThat(result.isEncrypted()).isFalse();
         assertThat(result.getEncryptionKeyFingerprint()).isNull();
         PdfHelper.validateZippedPdf(result.getFileContent());

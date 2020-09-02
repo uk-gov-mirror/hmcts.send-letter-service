@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.http.util.Asserts;
@@ -30,7 +32,11 @@ import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static java.time.LocalDateTime.now;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
@@ -40,6 +46,7 @@ import static uk.gov.hmcts.reform.sendletter.services.LetterChecksumGenerator.ge
 public class LetterService {
 
     private static final Logger log = LoggerFactory.getLogger(LetterService.class);
+    private static final String YES = "yes";
 
     private final PdfCreator pdfCreator;
     private final LetterRepository letterRepository;
@@ -48,6 +55,7 @@ public class LetterService {
     private final boolean isEncryptionEnabled;
     private final PGPPublicKey pgpPublicKey;
     private final ServiceFolderMapping serviceFolderMapping;
+
 
     public LetterService(
         PdfCreator pdfCreator,
@@ -72,7 +80,7 @@ public class LetterService {
         String checksum = generateChecksum(letter);
         Asserts.notEmpty(serviceName, "serviceName");
 
-        if (!serviceFolderMapping.getFolderFor(serviceName).isPresent()) {
+        if (serviceFolderMapping.getFolderFor(serviceName).isEmpty()) {
             throw new ServiceNotConfiguredException("No configuration for service " + serviceName + " found");
         }
 
@@ -170,7 +178,20 @@ public class LetterService {
         }
     }
 
-    public LetterStatus getStatus(UUID id) {
+    public LetterStatus getStatus(UUID id, String isAdditonalDataRequired) {
+        Function<JsonNode, Map<String, Object>> additionDataFunction = additionalData -> {
+            if (YES.equalsIgnoreCase(isAdditonalDataRequired)) {
+                return Optional.ofNullable(additionalData)
+                    .map(data -> mapper.convertValue(data, new TypeReference<Map<String, Object>>(){}))
+                    .orElse(Collections.emptyMap());
+            }
+            return null;
+        };
+
+        return getStatus(id, additionDataFunction);
+    }
+
+    private LetterStatus getStatus(UUID id, Function<JsonNode, Map<String, Object>> additionalDataEvaluator) {
         return letterRepository
             .findById(id)
             .map(letter -> new LetterStatus(
@@ -179,7 +200,8 @@ public class LetterService {
                 letter.getChecksum(),
                 toDateTime(letter.getCreatedAt()),
                 toDateTime(letter.getSentToPrintAt()),
-                toDateTime(letter.getPrintedAt())
+                toDateTime(letter.getPrintedAt()),
+                additionalDataEvaluator.apply(letter.getAdditionalData())
             ))
             .orElseThrow(() -> new LetterNotFoundException(id));
     }

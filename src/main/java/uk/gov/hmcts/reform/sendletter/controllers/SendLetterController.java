@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
@@ -110,9 +111,10 @@ public class SendLetterController {
         @ApiResponse(code = 404, message = "Letter not found")
     })
     public ResponseEntity<LetterStatus> getLetterStatus(
-        @PathVariable String id
+        @PathVariable String id,
+        @RequestParam(name = "include-additional-info", defaultValue = "no") String isAdditionalInfoRequired
     ) {
-        LetterStatus letterStatus = letterService.getStatus(getLetterIdFromString(id));
+        LetterStatus letterStatus = letterService.getStatus(getLetterIdFromString(id), isAdditionalInfoRequired);
 
         return ok(letterStatus);
     }
