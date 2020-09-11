@@ -61,7 +61,7 @@ module "db-v11" {
 
 module "staging-db" {
   source             = "git@github.com:hmcts/cnp-module-postgres?ref=master"
-  product            = "${var.component}-staging-db"
+  product            = "${var.component}-stg-db"
   location           = "${var.location_db}"
   env                = "${var.env}"
   database_name      = "send_letter"
