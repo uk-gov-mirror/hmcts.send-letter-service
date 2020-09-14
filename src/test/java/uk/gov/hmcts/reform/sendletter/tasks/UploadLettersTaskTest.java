@@ -79,7 +79,7 @@ class UploadLettersTaskTest {
 
         given(repo.findFirstByStatusOrderByCreatedAtAsc(eq(Created)))
             .willReturn(Optional.of(letterOfType(SMOKE_TEST_LETTER_TYPE,1)))
-            .willReturn(Optional.of(letterOfType("not_" + SMOKE_TEST_LETTER_TYPE,1)))
+            .willReturn(Optional.of(letterOfType("not_" + SMOKE_TEST_LETTER_TYPE, 1)))
             .willReturn(Optional.empty());
 
         // when
@@ -122,9 +122,9 @@ class UploadLettersTaskTest {
     @Test
     void should_skip_letter_if_folder_for_its_service_is_not_configured() {
         // given
-        Letter letterA = letterForService("service_A",1);
-        Letter letterB = letterForService("service_B",1);
-        Letter letterC = letterForService("service_C",1);
+        Letter letterA = letterForService("service_A", 1);
+        Letter letterB = letterForService("service_B", 1);
+        Letter letterC = letterForService("service_C", 1);
 
         given(repo.countByStatus(eq(Created))).willReturn(3);
 

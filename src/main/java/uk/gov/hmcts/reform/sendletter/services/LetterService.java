@@ -105,7 +105,6 @@ public class LetterService {
         );
 
         LocalDateTime createdAtTime = now();
-        int copies = getCopies(letter);
         Letter dbLetter = new Letter(
             id,
             messageId,
@@ -116,7 +115,7 @@ public class LetterService {
             isEncryptionEnabled,
             getEncryptionKeyFingerprint(),
             createdAtTime,
-            copies
+            getCopies(letter)
         );
 
         letterRepository.save(dbLetter);

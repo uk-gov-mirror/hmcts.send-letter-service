@@ -58,7 +58,7 @@ public class PendingLetterSearchTest {
     @Test
     public void should_set_properties_correctly() {
         // given
-        Letter letter = SampleData.letterEntity("service", LocalDateTime.now(), "type", "fingerprint",1);
+        Letter letter = SampleData.letterEntity("service", LocalDateTime.now(), "type", "fingerprint", 1);
         letter.setStatus(Created);
         Letter savedLetter = repository.save(letter);
 
