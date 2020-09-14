@@ -216,7 +216,8 @@ public class LetterService {
                 toDateTime(letter.getCreatedAt()),
                 toDateTime(letter.getSentToPrintAt()),
                 toDateTime(letter.getPrintedAt()),
-                additionalDataEvaluator.apply(letter.getAdditionalData())
+                additionalDataEvaluator.apply(letter.getAdditionalData()),
+                letter.getCopies()
             ))
             .orElseThrow(() -> new LetterNotFoundException(id));
     }

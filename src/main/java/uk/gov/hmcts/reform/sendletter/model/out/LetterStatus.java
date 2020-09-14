@@ -35,6 +35,10 @@ public class LetterStatus {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public final Map<String, Object> additionalData;
 
+    @JsonProperty("copies")
+    public final int copies;
+
+
     public LetterStatus(
         final UUID id,
         final String status,
@@ -42,7 +46,8 @@ public class LetterStatus {
         final ZonedDateTime createdAt,
         final ZonedDateTime sentToPrintAt,
         final ZonedDateTime printedAt,
-        final Map<String, Object> additionalData
+        final Map<String, Object> additionalData,
+        final int copies
     ) {
         this.id = id;
         this.status = status;
@@ -52,5 +57,6 @@ public class LetterStatus {
         this.sentToPrintAt = sentToPrintAt;
         this.printedAt = printedAt;
         this.additionalData = additionalData;
+        this.copies =  copies;
     }
 }
