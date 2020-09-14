@@ -31,7 +31,9 @@ class LetterStatusTest {
                 ZonedDateTime.now().plusHours(2), additionalData,1);
         JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
-                .hasJsonPath("$.additional_data");
+                .hasJsonPath("$.additional_data")
+                .hasJsonPath("$.copies")
+                .hasJsonPathValue("[?(@.copies==1)]");
     }
 
     @Test
@@ -42,7 +44,9 @@ class LetterStatusTest {
                 ZonedDateTime.now().plusHours(2), Collections.emptyMap(),10);
         JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
-                .hasJsonPath("$.additional_data");
+                .hasJsonPath("$.additional_data")
+                .hasJsonPath("$.copies")
+                .hasJsonPathValue("[?(@.copies==10)]");
     }
 
     @Test
@@ -53,6 +57,8 @@ class LetterStatusTest {
                 ZonedDateTime.now().plusHours(2), null, 12);
         JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
-                .doesNotHaveJsonPath("$.additional_data");
+                .doesNotHaveJsonPath("$.additional_data")
+                .hasJsonPath("$.copies")
+                .hasJsonPathValue("[?(@.copies==12)]");
     }
 }
