@@ -30,6 +30,7 @@ import static java.util.stream.Collectors.toList;
 
 public final class SampleData {
     private static final String ENCODED_PDF_FILE = "encodedPdfFile.txt";
+    private static final String ENCODED_PDF_FILE2 = "encodedPdfFile2.txt";
 
     public static LetterRequest letterRequest() {
         try {
@@ -61,17 +62,14 @@ public final class SampleData {
         );
     }
 
-    public static LetterWithPdfsAndNumberOfCopiesRequest letterWithPdfAndCopiesRequest(int copies1, int copies2) {
+    public static LetterWithPdfsAndNumberOfCopiesRequest letterWithPdfAndCopiesRequest(int copies1, int copies2)
+            throws IOException {
         return new LetterWithPdfsAndNumberOfCopiesRequest(
             asList(
-                new Doc(
-                    Base64.getEncoder().encode("hello".getBytes()),
-                        copies1
-                ),
-                new Doc(
-                    Base64.getEncoder().encode("world".getBytes()),
-                        copies2
-                )
+                new Doc(Base64.getDecoder().decode(Resources.toString(getResource(ENCODED_PDF_FILE),
+                                Charsets.UTF_8)), copies1),
+                new Doc(Base64.getDecoder().decode(Resources.toString(getResource(ENCODED_PDF_FILE2),
+                            Charsets.UTF_8)), copies2)
             ),
             "some_type",
             Maps.newHashMap()

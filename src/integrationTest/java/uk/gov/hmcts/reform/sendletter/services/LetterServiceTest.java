@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
@@ -71,6 +72,19 @@ class LetterServiceTest {
 
         Letter result = letterRepository.findById(id).get();
 
+        assertThat(result.isEncrypted()).isFalse();
+        assertThat(result.getEncryptionKeyFingerprint()).isNull();
+        PdfHelper.validateZippedPdf(result.getFileContent());
+    }
+
+    @Test
+    void generatesLetterWithAddionalCopiesAndSaveZippedPdf() throws IOException {
+        UUID id = service.save(SampleData.letterWithPdfAndCopiesRequest(4,10), SERVICE_NAME);
+
+        Letter result = letterRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Letter not found " + id.toString()));
+
+        assertEquals(14, result.getCopies());
         assertThat(result.isEncrypted()).isFalse();
         assertThat(result.getEncryptionKeyFingerprint()).isNull();
         PdfHelper.validateZippedPdf(result.getFileContent());
