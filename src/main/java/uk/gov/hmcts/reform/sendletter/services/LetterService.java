@@ -105,7 +105,7 @@ public class LetterService {
         );
 
         LocalDateTime createdAtTime = now();
-
+        int copies = getCopies(letter);
         Letter dbLetter = new Letter(
             id,
             messageId,
@@ -115,7 +115,8 @@ public class LetterService {
             isEncryptionEnabled ? encryptZipContents(letter, serviceName, id, zipContent, createdAtTime) : zipContent,
             isEncryptionEnabled,
             getEncryptionKeyFingerprint(),
-            createdAtTime
+            createdAtTime,
+            copies
         );
 
         letterRepository.save(dbLetter);
@@ -177,6 +178,21 @@ public class LetterService {
             throw new UnsupportedLetterRequestTypeException();
         }
     }
+
+    private int getCopies(ILetterRequest letter) {
+        if (letter instanceof LetterRequest) {
+            return ((LetterRequest) letter).documents.size();
+        } else if (letter instanceof LetterWithPdfsRequest) {
+            return ((LetterWithPdfsRequest) letter).documents.size();
+        } else if (letter instanceof LetterWithPdfsAndNumberOfCopiesRequest) {
+            return copies.apply((LetterWithPdfsAndNumberOfCopiesRequest) letter);
+        } else {
+            throw new UnsupportedLetterRequestTypeException();
+        }
+    }
+
+    private Function<LetterWithPdfsAndNumberOfCopiesRequest, Integer> copies =
+        request -> request.documents.stream().mapToInt(doc -> doc.copies).sum();
 
     public LetterStatus getStatus(UUID id, String isAdditonalDataRequired) {
         Function<JsonNode, Map<String, Object>> additionDataFunction = additionalData -> {

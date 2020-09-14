@@ -139,7 +139,7 @@ class LetterServiceTest {
         given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
         createLetterService(true, new String(loadPublicKey()));
 
-        LetterWithPdfsAndNumberOfCopiesRequest letter = SampleData.letterWithPdfAndCopiesRequest();
+        LetterWithPdfsAndNumberOfCopiesRequest letter = SampleData.letterWithPdfAndCopiesRequest(3,8);
 
         when(zipper.zip(any(PdfDoc.class))).thenReturn(Resources.toByteArray(getResource("unencrypted.zip")));
 

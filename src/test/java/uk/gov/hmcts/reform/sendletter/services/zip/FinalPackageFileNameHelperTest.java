@@ -25,7 +25,8 @@ class FinalPackageFileNameHelperTest {
             null,
             false,
             null,
-            now()
+            now(),
+            1
         );
 
         // when
@@ -69,7 +70,8 @@ class FinalPackageFileNameHelperTest {
             null,
             false,
             null,
-            now()
+            now(),
+            1
         );
 
         // when
@@ -91,7 +93,8 @@ class FinalPackageFileNameHelperTest {
             null,
             false,
             null,
-            now()
+            now(),
+            1
         );
 
         // when
@@ -112,7 +115,8 @@ class FinalPackageFileNameHelperTest {
             null,
             false,
             null,
-            now()
+            now(),
+            1
         );
 
         Letter encryptedLetter = new Letter(
@@ -124,7 +128,8 @@ class FinalPackageFileNameHelperTest {
             null,
             true,
             "752c14ea195c369bac3c3b7896975ee9fd15eeb7",
-            now()
+            now(),
+            1
         );
 
         assertThat(FinalPackageFileNameHelper.generateName(zippedLetter)).endsWith(".zip");

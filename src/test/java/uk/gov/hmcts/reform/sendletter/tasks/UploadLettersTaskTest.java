@@ -78,8 +78,8 @@ class UploadLettersTaskTest {
         given(repo.countByStatus(eq(Created))).willReturn(2);
 
         given(repo.findFirstByStatusOrderByCreatedAtAsc(eq(Created)))
-            .willReturn(Optional.of(letterOfType(SMOKE_TEST_LETTER_TYPE)))
-            .willReturn(Optional.of(letterOfType("not_" + SMOKE_TEST_LETTER_TYPE)))
+            .willReturn(Optional.of(letterOfType(SMOKE_TEST_LETTER_TYPE,1)))
+            .willReturn(Optional.of(letterOfType("not_" + SMOKE_TEST_LETTER_TYPE,1)))
             .willReturn(Optional.empty());
 
         // when
@@ -122,9 +122,9 @@ class UploadLettersTaskTest {
     @Test
     void should_skip_letter_if_folder_for_its_service_is_not_configured() {
         // given
-        Letter letterA = letterForService("service_A");
-        Letter letterB = letterForService("service_B");
-        Letter letterC = letterForService("service_C");
+        Letter letterA = letterForService("service_A",1);
+        Letter letterB = letterForService("service_B",1);
+        Letter letterC = letterForService("service_C",1);
 
         given(repo.countByStatus(eq(Created))).willReturn(3);
 
@@ -164,15 +164,15 @@ class UploadLettersTaskTest {
         verifyNoMoreInteractions(ftpClient);
     }
 
-    private Letter letterOfType(String type) {
-        return letter("cmc", type);
+    private Letter letterOfType(String type, int copies) {
+        return letter("cmc", type, copies);
     }
 
-    private Letter letterForService(String serviceName) {
-        return letter(serviceName, "type");
+    private Letter letterForService(String serviceName, int copies) {
+        return letter(serviceName, "type", copies);
     }
 
-    private Letter letter(String service, String type) {
+    private Letter letter(String service, String type, int copies) {
         return new Letter(
             UUID.randomUUID(),
             "msgId",
@@ -182,7 +182,8 @@ class UploadLettersTaskTest {
             "hello".getBytes(),
             true,
             "9c61b7da4e6c94416be51136122ed01acea9884f",
-            now()
+            now(),
+            copies
         );
     }
 

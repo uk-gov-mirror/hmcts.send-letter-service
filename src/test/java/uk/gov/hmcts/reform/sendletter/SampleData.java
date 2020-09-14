@@ -61,16 +61,16 @@ public final class SampleData {
         );
     }
 
-    public static LetterWithPdfsAndNumberOfCopiesRequest letterWithPdfAndCopiesRequest() {
+    public static LetterWithPdfsAndNumberOfCopiesRequest letterWithPdfAndCopiesRequest(int copies1, int copies2) {
         return new LetterWithPdfsAndNumberOfCopiesRequest(
             asList(
                 new Doc(
                     Base64.getEncoder().encode("hello".getBytes()),
-                    1
+                        copies1
                 ),
                 new Doc(
                     Base64.getEncoder().encode("world".getBytes()),
-                    10
+                        copies2
                 )
             ),
             "some_type",
@@ -83,7 +83,7 @@ public final class SampleData {
     }
 
     public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(String service, LocalDateTime createdAt) {
-        return letterEntity(service, createdAt, "letterType1", null);
+        return letterEntity(service, createdAt, "letterType1", null, 1);
     }
 
     public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(
@@ -91,14 +91,15 @@ public final class SampleData {
         LocalDateTime createdAt,
         String type
     ) {
-        return letterEntity(service, createdAt, type, null);
+        return letterEntity(service, createdAt, type, null, 1);
     }
 
     public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(
         String service,
         LocalDateTime createdAt,
         String type,
-        String fingerprint
+        String fingerprint,
+        int copies
     ) {
         try {
             return new uk.gov.hmcts.reform.sendletter.entity.Letter(
@@ -110,7 +111,8 @@ public final class SampleData {
                 new byte[1],
                 false,
                 fingerprint,
-                createdAt
+                createdAt,
+                copies
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
