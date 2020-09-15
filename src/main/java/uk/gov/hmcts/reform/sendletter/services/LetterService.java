@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 import static java.time.LocalDateTime.now;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
@@ -179,18 +180,18 @@ public class LetterService {
     }
 
     private int getCopies(ILetterRequest letter) {
+        int letterCount = -1;
         if (letter instanceof LetterRequest) {
-            return ((LetterRequest) letter).documents.size();
+            letterCount = ((LetterRequest) letter).documents.size();
         } else if (letter instanceof LetterWithPdfsRequest) {
-            return ((LetterWithPdfsRequest) letter).documents.size();
+            letterCount = ((LetterWithPdfsRequest) letter).documents.size();
         } else if (letter instanceof LetterWithPdfsAndNumberOfCopiesRequest) {
-            return copies.apply((LetterWithPdfsAndNumberOfCopiesRequest) letter);
-        } else {
-            throw new UnsupportedLetterRequestTypeException();
+            letterCount = copies.applyAsInt((LetterWithPdfsAndNumberOfCopiesRequest) letter);
         }
+        return letterCount;
     }
 
-    private Function<LetterWithPdfsAndNumberOfCopiesRequest, Integer> copies =
+    private ToIntFunction<LetterWithPdfsAndNumberOfCopiesRequest> copies =
         request -> request.documents.stream().mapToInt(doc -> doc.copies).sum();
 
     public LetterStatus getStatus(UUID id, String isAdditonalDataRequired) {

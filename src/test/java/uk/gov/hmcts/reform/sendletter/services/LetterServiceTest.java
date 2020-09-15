@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.SampleData;
+import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.sendletter.exception.UnsupportedLetterRequestTypeException;
@@ -65,6 +67,35 @@ class LetterServiceTest {
     }
 
     @Test
+    void should_generate_final_pdf_with_requested_no_of_copies_when_encryption_enabled() throws Exception {
+        // given
+        thereAreNoDuplicates();
+
+        // and
+        given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
+        createLetterService(false, new String(loadPublicKey()));
+
+        final LetterWithPdfsAndNumberOfCopiesRequest letterWithPdfsAndNumberOfCopiesRequest =
+                SampleData.letterWithPdfAndCopiesRequest(5, 10);
+
+        byte[] inputZipFile = Resources.toByteArray(getResource("unencrypted.zip"));
+
+        when(zipper.zip(any(PdfDoc.class))).thenReturn(inputZipFile);
+
+        // when
+        service.save(letterWithPdfsAndNumberOfCopiesRequest, "some_service");
+
+        // then
+        verify(pdfCreator).createFromBase64PdfWithCopies(letterWithPdfsAndNumberOfCopiesRequest.documents);
+        verify(zipper).zip(any(PdfDoc.class));
+
+        ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
+        verify(letterRepository).save(letterArgumentCaptor.capture());
+
+        assertThat(letterArgumentCaptor.getValue().getCopies()).isEqualTo(15);
+    }
+
+    @Test
     void should_generate_final_pdf_from_embedded_pdfs_when_new_model_is_passed() throws Exception {
         // given
         thereAreNoDuplicates();
@@ -80,6 +111,11 @@ class LetterServiceTest {
 
         // then
         verify(pdfCreator).createFromBase64Pdfs(letter.documents);
+
+        ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
+        verify(letterRepository).save(letterArgumentCaptor.capture());
+
+        assertThat(letterArgumentCaptor.getValue().getCopies()).isEqualTo(1);
     }
 
     @Test
@@ -104,6 +140,11 @@ class LetterServiceTest {
         // then
         verify(pdfCreator).createFromTemplates(letter.documents);
         verify(zipper).zip(any(PdfDoc.class));
+
+        ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
+        verify(letterRepository).save(letterArgumentCaptor.capture());
+
+        assertThat(letterArgumentCaptor.getValue().getCopies()).isEqualTo(1);
     }
 
     @Test
@@ -128,6 +169,11 @@ class LetterServiceTest {
         // then
         verify(pdfCreator).createFromBase64Pdfs(letter.documents);
         verify(zipper).zip(any(PdfDoc.class));
+
+        ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
+        verify(letterRepository).save(letterArgumentCaptor.capture());
+
+        assertThat(letterArgumentCaptor.getValue().getCopies()).isEqualTo(1);
     }
 
     @Test
@@ -149,6 +195,11 @@ class LetterServiceTest {
         // then
         verify(pdfCreator).createFromBase64PdfWithCopies(letter.documents);
         verify(zipper).zip(any(PdfDoc.class));
+
+        ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
+        verify(letterRepository).save(letterArgumentCaptor.capture());
+
+        assertThat(letterArgumentCaptor.getValue().getCopies()).isEqualTo(11);
     }
 
     @Test
