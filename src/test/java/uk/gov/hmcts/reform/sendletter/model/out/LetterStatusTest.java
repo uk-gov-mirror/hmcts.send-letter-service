@@ -28,11 +28,12 @@ class LetterStatusTest {
         Map<String, Object> additionalData = Map.of("reference", "ABD-123-WAZ", "count", 10, "additionInfo", "present");
         LetterStatus letterStatus = new LetterStatus(uuid, "TEST", "abc",
                 ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
-                ZonedDateTime.now().plusHours(2), additionalData);
+                ZonedDateTime.now().plusHours(2), additionalData,1);
         JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
-        System.out.println(jsonContent);
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
-                .hasJsonPath("$.additional_data");
+                .hasJsonPath("$.additional_data")
+                .hasJsonPath("$.copies")
+                .hasJsonPathValue("[?(@.copies==1)]");
     }
 
     @Test
@@ -40,11 +41,12 @@ class LetterStatusTest {
         UUID uuid = UUID.randomUUID();
         LetterStatus letterStatus = new LetterStatus(uuid, "TEST", "abc",
                 ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
-                ZonedDateTime.now().plusHours(2), Collections.emptyMap());
+                ZonedDateTime.now().plusHours(2), Collections.emptyMap(),10);
         JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
-        System.out.println(jsonContent);
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
-                .hasJsonPath("$.additional_data");
+                .hasJsonPath("$.additional_data")
+                .hasJsonPath("$.copies")
+                .hasJsonPathValue("[?(@.copies==10)]");
     }
 
     @Test
@@ -52,10 +54,11 @@ class LetterStatusTest {
         UUID uuid = UUID.randomUUID();
         LetterStatus letterStatus = new LetterStatus(uuid, "TEST", "abc",
                 ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
-                ZonedDateTime.now().plusHours(2), null);
+                ZonedDateTime.now().plusHours(2), null, 12);
         JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
-        System.out.println(jsonContent);
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
-                .doesNotHaveJsonPath("$.additional_data");
+                .doesNotHaveJsonPath("$.additional_data")
+                .hasJsonPath("$.copies")
+                .hasJsonPathValue("[?(@.copies==12)]");
     }
 }

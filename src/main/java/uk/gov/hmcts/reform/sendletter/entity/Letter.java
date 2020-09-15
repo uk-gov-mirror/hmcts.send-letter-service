@@ -41,6 +41,7 @@ public class Letter {
     private byte[] fileContent;
     private Boolean isEncrypted;
     private String encryptionKeyFingerprint;
+    private int copies;
 
     // For use by hibernate.
     private Letter() {
@@ -55,7 +56,8 @@ public class Letter {
         byte[] fileContent,
         Boolean isEncrypted,
         String encryptionKeyFingerprint,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        int copies
     ) {
         this.id = id;
         this.checksum = checksum;
@@ -67,6 +69,7 @@ public class Letter {
         this.isEncrypted = isEncrypted;
         this.encryptionKeyFingerprint = encryptionKeyFingerprint;
         this.createdAt = createdAt;
+        this.copies = copies;
     }
 
     public UUID getId() {
@@ -139,5 +142,13 @@ public class Letter {
 
     public void setEncryptionKeyFingerprint(String encryptionKeyFingerprint) {
         this.encryptionKeyFingerprint = encryptionKeyFingerprint;
+    }
+
+    public int getCopies() {
+        return copies;
+    }
+
+    public void setCopies(int copies) {
+        this.copies = copies;
     }
 }

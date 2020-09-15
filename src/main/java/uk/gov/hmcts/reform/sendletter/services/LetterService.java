@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 import static java.time.LocalDateTime.now;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
@@ -105,7 +106,6 @@ public class LetterService {
         );
 
         LocalDateTime createdAtTime = now();
-
         Letter dbLetter = new Letter(
             id,
             messageId,
@@ -115,7 +115,8 @@ public class LetterService {
             isEncryptionEnabled ? encryptZipContents(letter, serviceName, id, zipContent, createdAtTime) : zipContent,
             isEncryptionEnabled,
             getEncryptionKeyFingerprint(),
-            createdAtTime
+            createdAtTime,
+            getCopies(letter)
         );
 
         letterRepository.save(dbLetter);
@@ -178,6 +179,21 @@ public class LetterService {
         }
     }
 
+    private int getCopies(ILetterRequest letter) {
+        int letterCount = -1;
+        if (letter instanceof LetterRequest) {
+            letterCount = ((LetterRequest) letter).documents.size();
+        } else if (letter instanceof LetterWithPdfsRequest) {
+            letterCount = ((LetterWithPdfsRequest) letter).documents.size();
+        } else if (letter instanceof LetterWithPdfsAndNumberOfCopiesRequest) {
+            letterCount = copies.applyAsInt((LetterWithPdfsAndNumberOfCopiesRequest) letter);
+        }
+        return letterCount;
+    }
+
+    private ToIntFunction<LetterWithPdfsAndNumberOfCopiesRequest> copies =
+        request -> request.documents.stream().mapToInt(doc -> doc.copies).sum();
+
     public LetterStatus getStatus(UUID id, String isAdditonalDataRequired) {
         Function<JsonNode, Map<String, Object>> additionDataFunction = additionalData -> {
             if (YES.equalsIgnoreCase(isAdditonalDataRequired)) {
@@ -201,7 +217,8 @@ public class LetterService {
                 toDateTime(letter.getCreatedAt()),
                 toDateTime(letter.getSentToPrintAt()),
                 toDateTime(letter.getPrintedAt()),
-                additionalDataEvaluator.apply(letter.getAdditionalData())
+                additionalDataEvaluator.apply(letter.getAdditionalData()),
+                letter.getCopies()
             ))
             .orElseThrow(() -> new LetterNotFoundException(id));
     }
