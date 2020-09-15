@@ -247,6 +247,9 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'pdf-generator', version: '1.0.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.1.0'
 
+  compile 'org.projectlombok:lombok:1.18.12'
+  annotationProcessor 'org.projectlombok:lombok:1.18.10'
+
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.4.RELEASE'
 
   implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
@@ -277,6 +280,9 @@ dependencies {
   testImplementation group: 'org.apache.pdfbox', name: 'preflight', version: '2.0.20', withoutJunit4
   testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockitoJupiter
   testImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.27.0', withoutJunit4
+
+  testCompileOnly 'org.projectlombok:lombok:1.18.12'
+  testAnnotationProcessor "org.projectlombok:lombok:1.18.8"
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath

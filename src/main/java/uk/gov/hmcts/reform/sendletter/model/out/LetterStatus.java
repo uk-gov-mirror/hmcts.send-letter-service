@@ -3,11 +3,18 @@ package uk.gov.hmcts.reform.sendletter.model.out;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
 
+@Builder(toBuilder = true)
+@Getter
+@Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LetterStatus {
 
     public final UUID id;
@@ -37,26 +44,4 @@ public class LetterStatus {
 
     @JsonProperty("copies")
     public final int copies;
-
-
-    public LetterStatus(
-        final UUID id,
-        final String status,
-        final String checksum,
-        final ZonedDateTime createdAt,
-        final ZonedDateTime sentToPrintAt,
-        final ZonedDateTime printedAt,
-        final Map<String, Object> additionalData,
-        final int copies
-    ) {
-        this.id = id;
-        this.status = status;
-        this.checksum = checksum;
-        this.messageId = checksum;
-        this.createdAt = createdAt;
-        this.sentToPrintAt = sentToPrintAt;
-        this.printedAt = printedAt;
-        this.additionalData = additionalData;
-        this.copies =  copies;
-    }
 }

@@ -26,22 +26,39 @@ class LetterStatusTest {
     void testAdditionalDataPresent() throws IOException {
         UUID uuid = UUID.randomUUID();
         Map<String, Object> additionalData = Map.of("reference", "ABD-123-WAZ", "count", 10, "additionInfo", "present");
-        LetterStatus letterStatus = new LetterStatus(uuid, "TEST", "abc",
-                ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
-                ZonedDateTime.now().plusHours(2), additionalData,1);
+        LetterStatus letterStatus =
+                        LetterStatus.builder()
+                        .id(uuid)
+                        .status("TEST")
+                        .messageId("abc")
+                        .createdAt(ZonedDateTime.now())
+                        .sentToPrintAt(ZonedDateTime.now().plusHours(1))
+                        .printedAt(ZonedDateTime.now().plusHours(2))
+                        .additionalData(additionalData)
+                        .copies(10)
+                        .build();
+
         JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
                 .hasJsonPath("$.additional_data")
                 .hasJsonPath("$.copies")
-                .hasJsonPathValue("[?(@.copies==1)]");
+                .hasJsonPathValue("[?(@.copies==10)]");
     }
 
     @Test
     void testWithEmptyAdditionalData() throws IOException {
         UUID uuid = UUID.randomUUID();
-        LetterStatus letterStatus = new LetterStatus(uuid, "TEST", "abc",
-                ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
-                ZonedDateTime.now().plusHours(2), Collections.emptyMap(),10);
+        LetterStatus letterStatus =
+                LetterStatus.builder()
+                        .id(uuid)
+                        .status("TEST")
+                        .messageId("abc")
+                        .createdAt(ZonedDateTime.now())
+                        .sentToPrintAt(ZonedDateTime.now().plusHours(1))
+                        .printedAt(ZonedDateTime.now().plusHours(2))
+                        .additionalData(Collections.emptyMap())
+                        .copies(10)
+                        .build();
         JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
                 .hasJsonPath("$.additional_data")
@@ -52,9 +69,15 @@ class LetterStatusTest {
     @Test
     void testWithNullAdditionalDataPresent() throws IOException {
         UUID uuid = UUID.randomUUID();
-        LetterStatus letterStatus = new LetterStatus(uuid, "TEST", "abc",
-                ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
-                ZonedDateTime.now().plusHours(2), null, 12);
+        LetterStatus letterStatus =  LetterStatus.builder()
+                .id(uuid)
+                .status("TEST")
+                .messageId("abc")
+                .createdAt(ZonedDateTime.now())
+                .sentToPrintAt(ZonedDateTime.now().plusHours(1))
+                .printedAt(ZonedDateTime.now().plusHours(2))
+                .copies(12)
+                .build();
         JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
                 .doesNotHaveJsonPath("$.additional_data")

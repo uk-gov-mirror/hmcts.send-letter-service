@@ -210,16 +210,16 @@ public class LetterService {
     private LetterStatus getStatus(UUID id, Function<JsonNode, Map<String, Object>> additionalDataEvaluator) {
         return letterRepository
             .findById(id)
-            .map(letter -> new LetterStatus(
-                id,
-                letter.getStatus().name(),
-                letter.getChecksum(),
-                toDateTime(letter.getCreatedAt()),
-                toDateTime(letter.getSentToPrintAt()),
-                toDateTime(letter.getPrintedAt()),
-                additionalDataEvaluator.apply(letter.getAdditionalData()),
-                letter.getCopies()
-            ))
+            .map(letter -> LetterStatus.builder()
+            .id(id)
+            .status(letter.getStatus().name())
+            .checksum(letter.getChecksum())
+            .createdAt(toDateTime(letter.getCreatedAt()))
+            .sentToPrintAt(toDateTime(letter.getSentToPrintAt()))
+            .printedAt(toDateTime(letter.getPrintedAt()))
+            .additionalData(additionalDataEvaluator.apply(letter.getAdditionalData()))
+            .copies(letter.getCopies())
+            .build())
             .orElseThrow(() -> new LetterNotFoundException(id));
     }
 
