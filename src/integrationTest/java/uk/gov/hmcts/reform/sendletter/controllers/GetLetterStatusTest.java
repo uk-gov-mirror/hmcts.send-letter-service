@@ -144,8 +144,8 @@ class GetLetterStatusTest {
                 .andExpect(jsonPath("$.status").value(LetterStatus.Created.name()))
                 .andExpect(jsonPath("$.checksum").isNotEmpty())
                 .andExpect(jsonPath("$.created_at").isNotEmpty())
-                .andExpect(jsonPath("$.sent_to_print_at").isEmpty())
-                .andExpect(jsonPath("$.printed_at").isEmpty())
+                .andExpect(jsonPath("$.sent_to_print_at").doesNotExist())
+                .andExpect(jsonPath("$.printed_at").doesNotExist())
                 .andExpect(jsonPath("$.additional_data.reference").value("ABD-123-WAZ"))
                 .andExpect(jsonPath("$.additional_data.count").value(10))
                 .andExpect(jsonPath("$.additional_data.additionInfo").value("present"));
