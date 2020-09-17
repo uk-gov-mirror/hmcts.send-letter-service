@@ -41,7 +41,7 @@ public class Letter {
     private byte[] fileContent;
     private Boolean isEncrypted;
     private String encryptionKeyFingerprint;
-    private int copies;
+    private Integer copies;
 
     // For use by hibernate.
     private Letter() {
@@ -57,7 +57,7 @@ public class Letter {
         Boolean isEncrypted,
         String encryptionKeyFingerprint,
         LocalDateTime createdAt,
-        int copies
+        Integer copies
     ) {
         this.id = id;
         this.checksum = checksum;
@@ -144,11 +144,11 @@ public class Letter {
         this.encryptionKeyFingerprint = encryptionKeyFingerprint;
     }
 
-    public int getCopies() {
+    public Integer getCopies() {
         return copies;
     }
 
-    public void setCopies(int copies) {
+    public void setCopies(Integer copies) {
         this.copies = copies;
     }
 }

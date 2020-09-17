@@ -84,7 +84,7 @@ class LetterServiceTest {
         Letter result = letterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Letter not found " + id.toString()));
 
-        assertEquals(14, result.getCopies());
+        assertEquals(14, result.getCopies().intValue());
         assertThat(result.isEncrypted()).isFalse();
         assertThat(result.getEncryptionKeyFingerprint()).isNull();
         PdfHelper.validateZippedPdf(result.getFileContent());
