@@ -1,11 +1,11 @@
 provider "azurerm" {
-  features {}
+  version = "=1.42.0"
 }
 
 # Make sure the resource group exists
 resource "azurerm_resource_group" "rg" {
   name     = "${var.product}-${var.component}-${var.env}"
-  location = var.location_app
+  location = "${var.location_app}"
 }
 
 locals {
@@ -133,7 +133,7 @@ module "send-letter-service" {
 
 # region save DB details to Azure Key Vault
 module "send-letter-key-vault" {
-  source              = "git@github.com:hmcts/cnp-module-key-vault?ref=azurermv2"
+  source              = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
   name                = "${local.vaultName}"
   product             = "${var.product}"
   env                 = "${var.env}"
@@ -186,7 +186,7 @@ resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
 resource "azurerm_key_vault_secret" "APP-INSTRUMENTATION-KEY" {
   key_vault_id = "${module.send-letter-key-vault.key_vault_id}"
   name         = "app-insights-instrumentation-key"
-  value        = azurerm_application_insights.appinsights.instrumentation_key
+  value        = "${azurerm_application_insights.appinsights.instrumentation_key}"
 }
 
 # endregion
