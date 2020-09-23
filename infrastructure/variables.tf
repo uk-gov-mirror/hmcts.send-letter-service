@@ -17,13 +17,11 @@ variable "location_db" {
 }
 
 variable "appinsights_location" {
-  type        = "string"
   default     = "West Europe"
   description = "Location for Application Insights"
 }
 
 variable "application_type" {
-  type        = "string"
   default     = "web"
   description = "Type of Application Insights (web/Other)"
 }
@@ -36,7 +34,6 @@ variable "capacity" {
 }
 
 variable "vault_section" {
-  type = "string"
   description = "Name of the environment-specific section in Vault key path, i.e. secret/{vault_section}/..."
   default = "test"
 }
@@ -52,7 +49,6 @@ variable "client_id" {
 variable "subscription" {}
 
 variable "jenkins_AAD_objectId" {
-  type        = "string"
   description = "(Required) The Azure AD object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault. The object ID must be unique for the list of access policies."
 }
 
@@ -108,7 +104,6 @@ variable "ftp_reports_cron" {
 }
 
 variable "smtp_host" {
-  type        = "string"
   default     = "false"
   description = "SMTP host for sending out reports via JavaMailSender"
 }
