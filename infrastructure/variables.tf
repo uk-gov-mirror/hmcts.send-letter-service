@@ -1,71 +1,71 @@
-variable "product" {
+variable product {
 }
 
-variable "raw_product" {
+variable raw_product {
   default = "rpe" // jenkins-library overrides product for PRs and adds e.g. pr-118-rpe-...
 }
 
-variable "component" {
+variable component {
 }
 
-variable "location_app" {
+variable location_app {
   default = "UK South"
 }
 
-variable "location_db" {
+variable location_db {
   default = "UK South"
 }
 
-variable "appinsights_location" {
+variable appinsights_location {
   default     = "West Europe"
   description = "Location for Application Insights"
 }
 
-variable "application_type" {
+variable application_type {
   default     = "web"
   description = "Type of Application Insights (web/Other)"
 }
 
-variable "env" {
+variable env {
 }
 
-variable "capacity" {
+variable capacity {
   default = "1"
 }
 
-variable "vault_section" {
+variable vault_section {
   description = "Name of the environment-specific section in Vault key path, i.e. secret/{vault_section}/..."
   default = "test"
 }
 
-variable "ilbIp" {}
+variable ilbIp {}
 
-variable "tenant_id" {}
+variable tenant_id {}
 
-variable "client_id" {
+variable client_id {
   description = "(Required) The object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault. The object ID must be unique for the list of access policies. This is usually sourced from environment variables and not normally required to be specified."
 }
 
-variable "subscription" {}
+variable subscription {}
 
-variable "jenkins_AAD_objectId" {
+variable jenkins_AAD_objectId {
   description = "(Required) The Azure AD object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault. The object ID must be unique for the list of access policies."
 }
 
 variable encyption_enabled {
-  default = "true"
+  default = true
 }
 
 variable scheduling_enabled {
   default = "true"
 }
 
-variable "file_cleanup_enabled" {
+variable file_cleanup_enabled {
   default = "false"
   description = "Determines whether old files should be deleted from the FTP server. Should only be enabled on AAT."
 }
 
-variable "file_cleanup_cron" {
+variable file_cleanup_cron {
   default     = "0 15 * * * *"
   description = "Crontab value for task to be run"
 }
@@ -75,64 +75,64 @@ variable scheduling_lock_at_most_for {
   description = "For how long to keep the lock of the specific task"
 }
 
-variable "ftp_hostname" {
+variable ftp_hostname {
   default = "cmseft.services.xerox.com"
 }
 
-variable "ftp_port" {
+variable ftp_port {
   default = "22"
 }
 
-variable "ftp_fingerprint" {
+variable ftp_fingerprint {
   default = "SHA256:3tX3DIkqd1Loz2alHfnt+qjHocfxk0YUOZHlnf9Zgdk"
 }
 
-variable "ftp_target_folder" {
+variable ftp_target_folder {
   default = "TO_XEROX"
 }
 
-variable "ftp_smoke_test_target_folder" {
+variable ftp_smoke_test_target_folder {
   default = "SMOKE_TEST"
 }
 
-variable "ftp_reports_folder" {
+variable ftp_reports_folder {
   default = "FROM_XEROX"
 }
 
-variable "ftp_reports_cron" {
+variable ftp_reports_cron {
   default = "0 30 * * * *"
 }
 
-variable "smtp_host" {
+variable smtp_host {
   default     = "false"
   description = "SMTP host for sending out reports via JavaMailSender"
 }
 
 # region reports
 
-variable "upload_summary_report_cron" {
+variable upload_summary_report_cron {
   default     = "0 0 19 * * *"
   description = "Cron signature for job to send daily summary report of uploaded letters"
 }
 
 variable "upload_summary_report_enabled" {
-  default = "false"
+  default = false
 }
 
 # endregion
 
-variable "deployment_namespace" {
+variable deployment_namespace {
   default = ""
 }
 
-variable "common_tags" {
+variable common_tags {
   type = map(string)
 }
 
-variable "managed_identity_object_id" {
+variable managed_identity_object_id {
   default = ""
 }
 
-variable "enable_ase" {
+variable enable_ase {
   default = false
 }
