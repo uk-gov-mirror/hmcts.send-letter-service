@@ -251,7 +251,7 @@ dependencies {
 
   implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
 
-  implementation group: 'com.hierynomus', name: 'sshj', version: '0.29.0'
+  implementation group: 'com.hierynomus', name: 'sshj', version: '0.30.0'
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.21'
   implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
 
