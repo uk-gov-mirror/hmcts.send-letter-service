@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -29,6 +31,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Uploaded;
 
@@ -40,13 +45,14 @@ class LetterServiceTest {
 
     private LetterService service;
     private ObjectMapper objectMapper;
+    private AsyncService asyncService;
 
     @Autowired
     private LetterRepository letterRepository;
 
-
     @BeforeEach
     void setUp() {
+        asyncService = spy(AsyncService.class);
         ServiceFolderMapping serviceFolderMapping = mock(ServiceFolderMapping.class);
         BDDMockito.given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder_name"));
         objectMapper = new ObjectMapper();
@@ -57,7 +63,8 @@ class LetterServiceTest {
             new ObjectMapper(),
             false,
             null,
-            serviceFolderMapping
+            serviceFolderMapping,
+            asyncService
         );
     }
 
@@ -66,20 +73,25 @@ class LetterServiceTest {
         letterRepository.deleteAll();
     }
 
-    @Test
-    void generates_and_saves_zipped_pdf() throws IOException {
-        UUID id = service.save(SampleData.letterRequest(), SERVICE_NAME);
+    @ParameterizedTest
+    @ValueSource(strings = {"false", "true"})
+    void generates_and_saves_zipped_pdf(String async) throws IOException {
+        UUID id = service.save(SampleData.letterRequest(), SERVICE_NAME, async);
 
         Letter result = letterRepository.findById(id).get();
 
         assertThat(result.isEncrypted()).isFalse();
         assertThat(result.getEncryptionKeyFingerprint()).isNull();
         PdfHelper.validateZippedPdf(result.getFileContent());
+        if (Boolean.parseBoolean(async)) {
+            verify(asyncService).run(any());
+        }
     }
 
-    @Test
-    void generatesLetterWithAddionalCopiesAndSaveZippedPdf() throws IOException {
-        UUID id = service.save(SampleData.letterWithPdfAndCopiesRequest(4,10), SERVICE_NAME);
+    @ParameterizedTest
+    @ValueSource(strings = {"false", "true"})
+    void generatesLetterWithAddionalCopiesAndSaveZippedPdf(String async) throws IOException {
+        UUID id = service.save(SampleData.letterWithPdfAndCopiesRequest(4,10), SERVICE_NAME, async);
 
         Letter result = letterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Letter not found " + id.toString()));
@@ -90,9 +102,10 @@ class LetterServiceTest {
         PdfHelper.validateZippedPdf(result.getFileContent());
     }
 
-    @Test
-    void generatesLetterWithAddionalDataAndSaveZippedPdf() throws IOException {
-        UUID id = service.save(SampleData.letterWithPdfsRequestWithAdditionalData(), SERVICE_NAME);
+    @ParameterizedTest
+    @ValueSource(strings = {"false", "true"})
+    void generatesLetterWithAddionalDataAndSaveZippedPdf(String async) throws IOException {
+        UUID id = service.save(SampleData.letterWithPdfsRequestWithAdditionalData(), SERVICE_NAME, async);
 
         Letter result = letterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Letter not found " + id.toString()));
@@ -103,11 +116,16 @@ class LetterServiceTest {
         String expectedAdditionData = "{\"reference\":\"ABD-123-WAZ\",\"count\":10,\"additionInfo\":\"present\"}";
         JsonNode expectedAdditionalData = objectMapper.readTree(expectedAdditionData);
         assertThat(result.getAdditionalData()).isEqualTo(expectedAdditionalData);
+
+        if (Boolean.parseBoolean(async)) {
+            verify(asyncService).run(any());
+        }
     }
 
-    @Test
-    void generatesLetterWithNoAddionalDataAndSaveZippedPdf() throws IOException {
-        UUID id = service.save(SampleData.letterWithPdfsRequestWithNoAdditionalData(), SERVICE_NAME);
+    @ParameterizedTest
+    @ValueSource(strings = {"false", "true"})
+    void generatesLetterWithNoAddionalDataAndSaveZippedPdf(String async) throws IOException {
+        UUID id = service.save(SampleData.letterWithPdfsRequestWithNoAdditionalData(), SERVICE_NAME, async);
 
         Letter result = letterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Letter not found " + id.toString()));
@@ -115,30 +133,40 @@ class LetterServiceTest {
         assertThat(result.isEncrypted()).isFalse();
         assertThat(result.getEncryptionKeyFingerprint()).isNull();
         PdfHelper.validateZippedPdf(result.getFileContent());
+
+        if (Boolean.parseBoolean(async)) {
+            verify(asyncService).run(any());
+        }
     }
 
-    @Test
-    void returns_same_id_on_resubmit() {
+    @ParameterizedTest
+    @ValueSource(strings = {"false","true"})
+    void returns_same_id_on_resubmit(String async) {
         // given
         LetterRequest sampleRequest = SampleData.letterRequest();
-        UUID id1 = service.save(sampleRequest, SERVICE_NAME);
+        UUID id1 = service.save(sampleRequest, SERVICE_NAME, async);
         Letter letter = letterRepository.findById(id1).get();
 
         // and
         assertThat(letter.getStatus()).isEqualByComparingTo(Created);
 
         // when
-        UUID id2 = service.save(sampleRequest, SERVICE_NAME);
+        UUID id2 = service.save(sampleRequest, SERVICE_NAME, async);
 
         // then
         assertThat(id1).isEqualByComparingTo(id2);
+
+        if (Boolean.parseBoolean(async)) {
+            verify(asyncService).run(any());
+        }
     }
 
-    @Test
-    void saves_an_new_letter_if_previous_one_has_been_sent_to_print() {
+    @ParameterizedTest
+    @ValueSource(strings = {"false", "true"})
+    void saves_an_new_letter_if_previous_one_has_been_sent_to_print(String async) {
         // given
         LetterRequest sampleRequest = SampleData.letterRequest();
-        UUID id1 = service.save(sampleRequest, SERVICE_NAME);
+        UUID id1 = service.save(sampleRequest, SERVICE_NAME, async);
         Letter letter = letterRepository.findById(id1).get();
 
         // and
@@ -147,21 +175,27 @@ class LetterServiceTest {
         // when
         letter.setStatus(Uploaded);
         letterRepository.saveAndFlush(letter);
-        UUID id2 = service.save(sampleRequest, SERVICE_NAME);
+        UUID id2 = service.save(sampleRequest, SERVICE_NAME, async);
 
         // then
         assertThat(id1).isNotEqualByComparingTo(id2);
+
+        if (Boolean.parseBoolean(async)) {
+            verify(asyncService, times(2)).run(any());
+        }
     }
 
-    @Test
-    void should_not_allow_null_service_name() {
-        assertThatThrownBy(() -> service.save(SampleData.letterRequest(), null))
+    @ParameterizedTest
+    @ValueSource(strings = {"false", "true"})
+    void should_not_allow_null_service_name(String async) {
+        assertThatThrownBy(() -> service.save(SampleData.letterRequest(), null, async))
             .isInstanceOf(IllegalStateException.class);
     }
 
-    @Test
-    void should_not_allow_empty_service_name() {
-        assertThatThrownBy(() -> service.save(SampleData.letterRequest(), ""))
+    @ParameterizedTest
+    @ValueSource(strings = {"false", "true"})
+    void should_not_allow_empty_service_name(String async) {
+        assertThatThrownBy(() -> service.save(SampleData.letterRequest(), "", async))
             .isInstanceOf(IllegalStateException.class);
     }
 

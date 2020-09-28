@@ -60,11 +60,12 @@ public class SendLetterController {
     })
     public ResponseEntity<SendLetterResponse> sendLetter(
         @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
+        @RequestParam(name = "isAsync", defaultValue = "false") String isAsync,
         @ApiParam(value = "Letter consisting of documents and type", required = true)
         @Valid @RequestBody LetterRequest letter
     ) {
         String serviceName = authService.authenticate(serviceAuthHeader);
-        UUID letterId = letterService.save(letter, serviceName);
+        UUID letterId = letterService.save(letter, serviceName, isAsync);
 
         return ok().body(new SendLetterResponse(letterId));
     }
@@ -78,11 +79,12 @@ public class SendLetterController {
     })
     public ResponseEntity<SendLetterResponse> sendLetter(
         @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
+        @RequestParam(name = "isAsync", defaultValue = "false") String isAsync,
         @ApiParam(value = "Letter consisting of documents and type", required = true)
         @Valid @RequestBody LetterWithPdfsRequest letter
     ) {
         String serviceName = authService.authenticate(serviceAuthHeader);
-        UUID letterId = letterService.save(letter, serviceName);
+        UUID letterId = letterService.save(letter, serviceName, isAsync);
 
         return ok().body(new SendLetterResponse(letterId));
     }
@@ -96,10 +98,11 @@ public class SendLetterController {
     })
     public ResponseEntity<SendLetterResponse> sendLetter(
         @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
+        @RequestParam(name = "isAsync", defaultValue = "false") String isAsync,
         @Valid @RequestBody LetterWithPdfsAndNumberOfCopiesRequest letter
     ) {
         String serviceName = authService.authenticate(serviceAuthHeader);
-        UUID letterId = letterService.save(letter, serviceName);
+        UUID letterId = letterService.save(letter, serviceName, isAsync);
 
         return ok().body(new SendLetterResponse(letterId));
     }
@@ -112,10 +115,9 @@ public class SendLetterController {
     })
     public ResponseEntity<LetterStatus> getLetterStatus(
         @PathVariable String id,
-        @RequestParam(name = "include-additional-info", defaultValue = "no") String isAdditionalInfoRequired
+        @RequestParam(name = "include-additional-info", defaultValue = "false") String isAdditionalInfoRequired
     ) {
         LetterStatus letterStatus = letterService.getStatus(getLetterIdFromString(id), isAdditionalInfoRequired);
-
         return ok(letterStatus);
     }
 

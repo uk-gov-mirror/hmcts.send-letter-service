@@ -42,7 +42,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @TestPropertySource("classpath:application.properties")
 abstract class FunctionalTestSuite {
-
     @Value("${s2s-url}")
     private String s2sUrl;
 
@@ -79,6 +78,9 @@ abstract class FunctionalTestSuite {
     @Value("${encryption.enabled}")
     Boolean isEncryptionEnabled;
 
+    static final int LETTER_STATUS_RETRY_COUNT = 40;
+    static final int LETTER_STATUS_RETRY_INTERVAL = 500;
+    
     /**
      * Sign in to s2s.
      *
@@ -108,21 +110,44 @@ abstract class FunctionalTestSuite {
     }
 
     String sendPrintLetterRequest(String jwt, String jsonBody) {
+        return post(jwt, jsonBody, "/letters");
+    }
+
+    private String post(String jwt, String jsonBody, String endPoint) {
         return RestAssured
-            .given()
-            .relaxedHTTPSValidation()
-            .header("ServiceAuthorization", "Bearer " + jwt)
-            .header(CONTENT_TYPE, getContentType())
-            .baseUri(sendLetterServiceUrl)
-            .body(jsonBody.getBytes())
-            .when()
-            .post("/letters")
-            .then()
-            .statusCode(200)
-            .extract()
-            .body()
-            .jsonPath()
-            .get("letter_id");
+                .given()
+                .relaxedHTTPSValidation()
+                .header("ServiceAuthorization", "Bearer " + jwt)
+                .header(CONTENT_TYPE, getContentType())
+                .baseUri(sendLetterServiceUrl)
+                .body(jsonBody.getBytes())
+                .when()
+                .post(endPoint)
+                .then()
+                .statusCode(200)
+                .extract()
+                .body()
+                .jsonPath()
+                .get("letter_id");
+    }
+
+    String sendPrintLetterRequestAsync(String jwt, String jsonBody) {
+        return post(jwt, jsonBody, "/letters?isAsync=true");
+    }
+
+    String getLetterStatus(String letterId) {
+        return RestAssured
+                .given()
+                .relaxedHTTPSValidation()
+                .baseUri(sendLetterServiceUrl)
+                .when()
+                .get("/letters/{id}", letterId)
+                .then()
+                .statusCode(200)
+                .extract()
+                .body()
+                .jsonPath()
+                .get("status");
     }
 
     String sampleLetterRequestJson(
@@ -141,9 +166,9 @@ abstract class FunctionalTestSuite {
         return object.toString();
     }
 
-    String samplePdfLetterRequestJson(String requestBodyFilename) throws IOException {
+    String samplePdfLetterRequestJson(String requestBodyFilename, String pdfFile) throws IOException {
         String requestBody = Resources.toString(getResource(requestBodyFilename), Charsets.UTF_8);
-        byte[] pdf = toByteArray(getResource("test.pdf"));
+        byte[] pdf = toByteArray(getResource(pdfFile));
 
         return requestBody.replace("{{pdf}}", new String(Base64.getEncoder().encode(pdf)));
     }
@@ -233,6 +258,7 @@ abstract class FunctionalTestSuite {
             }
         }
     }
+
 
     private Optional<RemoteResourceInfo> findSingleFileOnSftp(
         String letterId,

@@ -37,8 +37,7 @@ class GetLetterStatusControllerTest {
     @MockBean private AuthService authService;
 
     private LetterStatus letterStatus;
-    private static final String YES = "yes";
-    private static final String NO = "no";
+
 
     @BeforeEach
     void setUp() {
@@ -50,9 +49,9 @@ class GetLetterStatusControllerTest {
     @Test
     void should_return_letter_status_when_it_is_found_in_database() throws Exception {
 
-        given(service.getStatus(letterStatus.id, YES)).willReturn(letterStatus);
+        given(service.getStatus(letterStatus.id, "true")).willReturn(letterStatus);
 
-        getLetter(letterStatus.id, YES)
+        getLetter(letterStatus.id, "true")
             .andExpect(status().isOk())
             .andExpect(content().json(
                 "{"
@@ -69,22 +68,22 @@ class GetLetterStatusControllerTest {
 
     @Test
     void should_return_404_client_error_when_letter_is_not_found_in_database() throws Exception {
-        willThrow(LetterNotFoundException.class).given(service).getStatus(letterStatus.id, NO);
+        willThrow(LetterNotFoundException.class).given(service).getStatus(letterStatus.id, "false");
 
-        getLetter(letterStatus.id, NO).andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+        getLetter(letterStatus.id, "false").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
     }
 
     @Test
     void should_return_404_client_error_when_invalid_uuid_is_provided() throws Exception {
-        getLetter("0987654321", NO).andExpect(status().is(HttpStatus.NOT_FOUND.value()));
-        getLetter("X558ff55-37R0-4p6e-80fo-5Lb05b650c44", NO).andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+        getLetter("0987654321", "false").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+        getLetter("X558ff55-37R0-4p6e-80fo-5Lb05b650c44", "false").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
 
-        verify(service, never()).getStatus(any(UUID.class), eq(NO));
+        verify(service, never()).getStatus(any(UUID.class), eq("false"));
     }
 
     @Test
     void shouldInvokeGetStatusServiceWithDefaultValueWhenIncludeAdditionalInfoIsNull() throws Exception {
-        given(service.getStatus(letterStatus.id, NO)).willReturn(letterStatus);
+        given(service.getStatus(letterStatus.id, "false")).willReturn(letterStatus);
 
         getLetter(letterStatus.id, null)
                 .andExpect(status().isOk())
@@ -103,7 +102,7 @@ class GetLetterStatusControllerTest {
 
     @Test
     void shouldInvokeGetStatusServiceWithNoAdditionalInfoInRequestParam() throws Exception {
-        given(service.getStatus(letterStatus.id, NO)).willReturn(letterStatus);
+        given(service.getStatus(letterStatus.id, "false")).willReturn(letterStatus);
 
         mockMvc.perform(
                 get("/letters/" + letterStatus.id)

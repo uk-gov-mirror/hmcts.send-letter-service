@@ -2,7 +2,8 @@ package uk.gov.hmcts.reform.sendletter.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,14 +48,15 @@ class LetterServiceWithEncryptionEnabledTest {
         letterRepository.deleteAll();
     }
 
-    @Test
-    void generates_and_saves_encrypted_zip_when_encryption_is_enabled() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"false", "true"})
+    void generates_and_saves_encrypted_zip_when_encryption_is_enabled(String async) throws Exception {
         when(serviceFolderMapping.getFolderFor(any())).thenReturn(Optional.of("some_folder"));
 
         LetterRequest letterRequest = SampleData.letterRequest();
 
         PdfCreator pdfCreator = new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert);
-
+        AsyncService asyncService = new AsyncService();
         LetterService service = new LetterService(
             pdfCreator,
             letterRepository,
@@ -62,10 +64,11 @@ class LetterServiceWithEncryptionEnabledTest {
             new ObjectMapper(),
             true,
             encryptionPublicKey,
-            serviceFolderMapping
+            serviceFolderMapping,
+            asyncService
         );
 
-        UUID id = service.save(letterRequest, SERVICE_NAME);
+        UUID id = service.save(letterRequest, SERVICE_NAME, async);
 
         Letter letterInDb = letterRepository.findById(id).get();
 

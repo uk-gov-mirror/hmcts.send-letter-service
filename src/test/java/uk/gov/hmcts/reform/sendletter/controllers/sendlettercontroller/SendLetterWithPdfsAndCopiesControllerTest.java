@@ -1,7 +1,8 @@
 package uk.gov.hmcts.reform.sendletter.controllers.sendlettercontroller;
 
 import com.google.common.io.Resources;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.sendletter.services.LetterService;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Resources.getResource;
+import static java.lang.String.join;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,19 +35,21 @@ public class SendLetterWithPdfsAndCopiesControllerTest {
     @MockBean private LetterService letterService;
     @MockBean private AuthService authService;
 
-    @Test
-    void should_call_service() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"false","true"})
+    void should_call_service(String async) throws Exception {
         given(authService.authenticate(anyString())).willReturn("some_service_name");
 
         // when
-        sendLetter(Resources.toString(getResource("controller/letter/v3/valid_letter.json"), UTF_8));
+        sendLetter(Resources.toString(getResource("controller/letter/v3/valid_letter.json"), UTF_8), async);
 
         // then
-        verify(letterService).save(any(LetterWithPdfsAndNumberOfCopiesRequest.class), anyString());
+        verify(letterService).save(any(LetterWithPdfsAndNumberOfCopiesRequest.class), anyString(), eq(async));
     }
 
-    @Test
-    void should_authenticate_calls() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"false","true"})
+    void should_authenticate_calls(String async) throws Exception {
         given(authService.authenticate(anyString())).willReturn("some_service_name");
         final String authHeader = "auth-header-value";
 
@@ -61,34 +65,47 @@ public class SendLetterWithPdfsAndCopiesControllerTest {
         verify(authService).authenticate(eq(authHeader));
     }
 
-    @Test
-    void should_validate_number_of_copies() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"false","true"})
+    void should_validate_number_of_copies(String async) throws Exception {
         given(authService.authenticate(anyString())).willReturn("some_service_name");
 
-        sendLetter(Resources.toString(getResource("controller/letter/v3/invalid_copies.json"), UTF_8))
+        sendLetter(Resources.toString(getResource("controller/letter/v3/invalid_copies.json"), UTF_8), async)
             .andExpect(status().isBadRequest());
     }
 
-    @Test
-    void should_return_403_if_service_throws_ServiceNotConfiguredException() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"false","true"})
+    void should_return_403_if_service_throws_ServiceNotConfiguredException(String async) throws Exception {
         given(authService.authenticate(anyString())).willReturn("some_service_name");
-        given(letterService.save(any(), any())).willThrow(new ServiceNotConfiguredException("invalid service"));
+        given(letterService.save(any(), any(), eq(async)))
+                .willThrow(new ServiceNotConfiguredException("invalid service"));
 
-        sendLetter(Resources.toString(getResource("controller/letter/v3/valid_letter.json"), UTF_8))
+        sendLetter(Resources.toString(getResource("controller/letter/v3/valid_letter.json"), UTF_8), async)
             .andExpect(status().isForbidden());
     }
 
-    @Test
-    void should_return_401_if_service_throws_UnauthenticatedException() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"false","true"})
+    void should_return_401_if_service_throws_UnauthenticatedException(String async) throws Exception {
         given(authService.authenticate(anyString())).willThrow(new UnauthenticatedException("Hello"));
 
-        sendLetter(Resources.toString(getResource("controller/letter/v3/valid_letter.json"), UTF_8))
+        sendLetter(Resources.toString(getResource("controller/letter/v3/valid_letter.json"), UTF_8), async)
             .andExpect(status().isUnauthorized());
     }
 
-    private ResultActions sendLetter(String json) throws Exception {
+
+    private String getPostUrl(String async) {
+        String url = "/letters";
+        if (Boolean.parseBoolean(async)) {
+            url = join("", url, "?isAsync=true");
+        }
+        return url;
+    }
+
+    private ResultActions sendLetter(String json, String async) throws Exception {
         return mockMvc.perform(
-            post("/letters")
+            post(getPostUrl(async))
                 .contentType(MediaTypes.LETTER_V3)
                 .header("ServiceAuthorization", "auth-header-value")
                 .content(json)

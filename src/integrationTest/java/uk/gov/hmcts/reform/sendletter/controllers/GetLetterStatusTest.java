@@ -138,7 +138,7 @@ class GetLetterStatusTest {
         String letterId = jsonObject.getString("letter_id");
         mvc.perform(
                 get("/letters/" + letterId)
-                .param("include-additional-info", "yes"))
+                .param("include-additional-info", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.status").value(LetterStatus.Created.name()))

@@ -43,11 +43,10 @@ import static java.time.LocalDateTime.now;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
 import static uk.gov.hmcts.reform.sendletter.services.LetterChecksumGenerator.generateChecksum;
 
-@Service
+@Service(value = "LetterService")
 public class LetterService {
 
     private static final Logger log = LoggerFactory.getLogger(LetterService.class);
-    private static final String YES = "yes";
 
     private final PdfCreator pdfCreator;
     private final LetterRepository letterRepository;
@@ -56,16 +55,17 @@ public class LetterService {
     private final boolean isEncryptionEnabled;
     private final PGPPublicKey pgpPublicKey;
     private final ServiceFolderMapping serviceFolderMapping;
-
+    private final AsyncService asynService;
 
     public LetterService(
-        PdfCreator pdfCreator,
-        LetterRepository letterRepository,
-        Zipper zipper,
-        ObjectMapper mapper,
-        @Value("${encryption.enabled}") Boolean isEncryptionEnabled,
-        @Value("${encryption.publicKey}") String encryptionPublicKey,
-        ServiceFolderMapping serviceFolderMapping
+            PdfCreator pdfCreator,
+            LetterRepository letterRepository,
+            Zipper zipper,
+            ObjectMapper mapper,
+            @Value("${encryption.enabled}") Boolean isEncryptionEnabled,
+            @Value("${encryption.publicKey}") String encryptionPublicKey,
+            ServiceFolderMapping serviceFolderMapping,
+            AsyncService asynService
     ) {
         this.pdfCreator = pdfCreator;
         this.letterRepository = letterRepository;
@@ -74,10 +74,11 @@ public class LetterService {
         this.isEncryptionEnabled = isEncryptionEnabled;
         this.pgpPublicKey = loadPgpPublicKey(encryptionPublicKey);
         this.serviceFolderMapping = serviceFolderMapping;
+        this.asynService = asynService;
     }
 
     @Transactional
-    public UUID save(ILetterRequest letter, String serviceName) {
+    public UUID save(ILetterRequest letter, String serviceName, String isAsync) {
         String checksum = generateChecksum(letter);
         Asserts.notEmpty(serviceName, "serviceName");
 
@@ -92,10 +93,10 @@ public class LetterService {
                 log.info("Same message found already created. Returning letter id {} instead", id);
                 return id;
             })
-            .orElseGet(() -> saveNewLetter(letter, checksum, serviceName));
+            .orElseGet(() -> saveNewLetter(letter, checksum, serviceName, isAsync));
     }
 
-    private UUID saveNewLetter(ILetterRequest letter, String messageId, String serviceName) {
+    private UUID saveNewLetter(ILetterRequest letter, String messageId, String serviceName, String isAsync) {
         UUID id = UUID.randomUUID();
 
         byte[] zipContent = zipper.zip(
@@ -105,11 +106,26 @@ public class LetterService {
             )
         );
 
+        if (Boolean.parseBoolean(isAsync)) {
+            log.info("Saving letter id {} in async mode as flag value is {}", id, isAsync);
+            asynService.run(() -> saveLetter(letter, messageId, serviceName, id, zipContent));
+        } else {
+            log.info("Saving letter id {} in sync mode as flag value is {}", id, isAsync);
+            saveLetter(letter, messageId, serviceName, id, zipContent);
+        }
+
+        log.info("Returning letter id {} for service {}", id, serviceName);
+
+        return id;
+    }
+
+    @Transactional
+    public void saveLetter(ILetterRequest letter, String messageId, String serviceName, UUID id, byte[] zipContent) {
         LocalDateTime createdAtTime = now();
         Letter dbLetter = new Letter(
-            id,
-            messageId,
-            serviceName,
+                id,
+                messageId,
+                serviceName,
             mapper.valueToTree(letter.getAdditionalData()),
             letter.getType(),
             isEncryptionEnabled ? encryptZipContents(letter, serviceName, id, zipContent, createdAtTime) : zipContent,
@@ -120,10 +136,7 @@ public class LetterService {
         );
 
         letterRepository.save(dbLetter);
-
-        log.info("Created new letter {} for service {}", id, serviceName);
-
-        return id;
+        log.info("Created new letter record with id {} for service {}", id, serviceName);
     }
 
     private byte[] encryptZipContents(
@@ -195,16 +208,18 @@ public class LetterService {
         request -> request.documents.stream().mapToInt(doc -> doc.copies).sum();
 
     public LetterStatus getStatus(UUID id, String isAdditonalDataRequired) {
+        log.info("Getting letter status for id {} ", id);
         Function<JsonNode, Map<String, Object>> additionDataFunction = additionalData -> {
-            if (YES.equalsIgnoreCase(isAdditonalDataRequired)) {
+            if (Boolean.parseBoolean(isAdditonalDataRequired)) {
                 return Optional.ofNullable(additionalData)
                     .map(data -> mapper.convertValue(data, new TypeReference<Map<String, Object>>(){}))
                     .orElse(Collections.emptyMap());
             }
             return null;
         };
-
-        return getStatus(id, additionDataFunction);
+        LetterStatus status = getStatus(id, additionDataFunction);
+        log.info("Returning  letter status for letter {} ", status);
+        return status;
     }
 
     private LetterStatus getStatus(UUID id, Function<JsonNode, Map<String, Object>> additionalDataEvaluator) {

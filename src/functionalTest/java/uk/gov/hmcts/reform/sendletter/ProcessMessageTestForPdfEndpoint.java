@@ -14,7 +14,7 @@ class ProcessMessageTestForPdfEndpoint extends FunctionalTestSuite {
     void should_send_letter_and_upload_file_on_sftp_server_when_letter_contains_one_pdf_document() throws Exception {
         String letterId = sendPrintLetterRequest(
             signIn(),
-            samplePdfLetterRequestJson("letter-with-single-pdf.json")
+            samplePdfLetterRequestJson("letter-with-single-pdf.json", "test.pdf")
         );
 
         awaitAndVerifyFileOnSftp(letterId, (sftpFile, sftp) -> {
@@ -30,7 +30,7 @@ class ProcessMessageTestForPdfEndpoint extends FunctionalTestSuite {
     void should_send_letter_and_upload_file_on_sftp_server_when_letter_contains_two_pdf_document() throws Exception {
         String letterId = sendPrintLetterRequest(
             signIn(),
-            samplePdfLetterRequestJson("letter-with-two-pdfs.json")
+            samplePdfLetterRequestJson("letter-with-two-pdfs.json", "test.pdf")
         );
 
         awaitAndVerifyFileOnSftp(letterId, (sftpFile, sftp) -> {
