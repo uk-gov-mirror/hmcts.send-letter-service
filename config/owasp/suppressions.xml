@@ -137,4 +137,8 @@
         <cve>CVE-2020-7968</cve>
         <cve>CVE-2020-7973</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[ CVE-2020-5421  ]]></notes>
+        <cve>CVE-2020-5421</cve>
+    </suppress>
 </suppressions>
