@@ -136,6 +136,13 @@
         <cve>CVE-2020-13315</cve>
         <cve>CVE-2020-7968</cve>
         <cve>CVE-2020-7973</cve>
+        <cve>CVE-2020-13296</cve>
+        <cve>CVE-2020-13319</cve>
+        <cve>CVE-2020-13320</cve>
+        <cve>CVE-2020-13321</cve>
+        <cve>CVE-2020-13329</cve>
+        <cve>CVE-2020-13330</cve>
+        <cve>CVE-2020-13331</cve>
     </suppress>
     <suppress>
         <notes><![CDATA[ CVE-2020-5421  ]]></notes>
