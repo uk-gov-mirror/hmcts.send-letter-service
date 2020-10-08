@@ -20,14 +20,16 @@ public class DuplexPreparator {
     public byte[] prepare(byte[] pdf) {
         try (PDDocument pdDoc = PDDocument.load(pdf)) {
             if (pdDoc.getNumberOfPages() % 2 == 1) {
-                if(pdDoc.isEncrypted()) {
+                if (pdDoc.isEncrypted()) {
                     pdDoc.setAllSecurityToBeRemoved(true);
                 }
+
                 PDRectangle lastPageMediaBox = pdDoc.getPage(pdDoc.getNumberOfPages() - 1).getMediaBox();
                 pdDoc.addPage(new PDPage(lastPageMediaBox));
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 pdDoc.save(out);
-                if(pdDoc.isEncrypted()) {
+
+                if (pdDoc.isEncrypted()) {
                     AccessPermission ap = new AccessPermission();
                     StandardProtectionPolicy spp = new StandardProtectionPolicy("", "", ap);
                     pdDoc.protect(spp);
