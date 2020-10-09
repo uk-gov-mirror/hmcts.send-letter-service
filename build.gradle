@@ -213,7 +213,7 @@ dependencyManagement {
       entry 'tomcat-embed-websocket'
     }
     //CVE-2019-14900
-    dependencySet(group: 'org.hibernate', version: '5.4.21.Final') {
+    dependencySet(group: 'org.hibernate', version: '5.4.22.Final') {
       entry 'hibernate-core'
     }
   }
