@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties.ServiceFolderMapping;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
+import uk.gov.hmcts.reform.sendletter.services.ftp.RetryOnExceptionStrategy;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -22,13 +23,14 @@ public final class FtpHelper {
     // Instantiate an FtpClient with host key verification disabled,
     // so it will connect to a local ftp server without verifying the
     // server's public key.
+
     private static FtpClient getClient(int port, boolean verified) throws IOException {
         Supplier<SSHClient> s = () -> {
             SSHClient client = new SSHClient();
             client.addHostKeyVerifier((a, b, c) -> verified);
             return client;
         };
-        return new FtpClient(s, getFtpConfig(port));
+        return new FtpClient(s, getFtpConfig(port), new RetryOnExceptionStrategy());
     }
 
     public static FtpClient getFailingClient(int port) throws IOException {

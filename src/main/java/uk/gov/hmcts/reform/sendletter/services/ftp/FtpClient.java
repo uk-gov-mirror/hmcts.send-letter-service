@@ -33,31 +33,32 @@ import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_REPOR
 import static uk.gov.hmcts.reform.sendletter.logging.DependencyCommand.FTP_REPORT_DOWNLOADED;
 import static uk.gov.hmcts.reform.sendletter.logging.DependencyName.FTP_CLIENT;
 import static uk.gov.hmcts.reform.sendletter.logging.DependencyType.FTP;
+import static uk.gov.hmcts.reform.sendletter.services.ftp.RetryOnExceptionStrategy.DEFAULT_RETRIES;
 
 @Component
 @EnableConfigurationProperties(FtpConfigProperties.class)
 public class FtpClient {
 
     private static final Logger logger = LoggerFactory.getLogger(FtpClient.class);
-
     private final FtpConfigProperties configProperties;
-
     private final Supplier<SSHClient> sshClientSupplier;
+    private RetryOnExceptionStrategy retry;
 
     // region constructor
     public FtpClient(
         Supplier<SSHClient> sshClientSupplier,
-        FtpConfigProperties configProperties
+        FtpConfigProperties configProperties,
+        RetryOnExceptionStrategy retry
     ) {
         this.sshClientSupplier = sshClientSupplier;
         this.configProperties = configProperties;
+        this.retry = retry;
     }
     // endregion
 
     @Dependency(name = FTP_CLIENT, command = FTP_FILE_UPLOADED, type = FTP)
     public void upload(FileToSend file, String serviceFolder, SFTPClient sftpClient) {
         logger.info("Uploading file {} to SFTP server", file.filename);
-
         String folder = file.isSmokeTest
             ? configProperties.getSmokeTestTargetFolder()
             : String.join("/", configProperties.getTargetFolder(), serviceFolder);
@@ -65,27 +66,36 @@ public class FtpClient {
         String path = String.join("/", folder, file.getName());
         Instant start = Instant.now();
 
-        try {
-            sftpClient.getFileTransfer().upload(file, path);
+        while (retry.shouldRetry()) {
+            try {
+                sftpClient.getFileTransfer().upload(file, path);
 
-            logger.info(
-                "File {} uploaded. Time: {}, Size: {}, Folder: {}",
-                file.filename,
-                ChronoUnit.MILLIS.between(start, Instant.now()) + "ms",
-                file.content.length / 1024 + "KB",
-                serviceFolder
-            );
-        } catch (IOException exc) {
-            if (exc.getCause() instanceof TimeoutException) {
-                logger.error("Timeout error while uploading file. Deleting corrupt file. Path: {}", path, exc);
-                // deleting as file is corrupt and will break printing provider
-                deleteFile(path, sftpClient);
-                // this ^ can also cause FtpException. In case not - we will have the following FtpException
-            } else {
-                logger.error("Error uploading file. Path: {}", path, exc);
+                logger.info(
+                    "File {} uploaded. Time: {}, Size: {}, Folder: {}",
+                    file.filename,
+                    ChronoUnit.MILLIS.between(start, Instant.now()) + "ms",
+                    file.content.length / 1024 + "KB",
+                    serviceFolder
+                );
+                break;
+            } catch (IOException exc) {
+                if (exc.getCause() instanceof TimeoutException) {
+                    logger.error("Timeout error while uploading file. Deleting corrupt file. Path: {}", path, exc);
+                    // deleting as file is corrupt and will break printing provider
+                    deleteFile(path, sftpClient);
+                    // this ^ can also cause FtpException. In case not - we will have the following FtpException
+                } else {
+                    logger.error("Error uploading file. Path: {}", path, exc);
+                }
+
+                if (retry.errorOccured() == 0) {
+                    logger.error("Retry max number of times {} while uploading file. Path: {}", DEFAULT_RETRIES, path,
+                            exc);
+                    throw new FtpException(String.format("Unable to upload file %s.", file.filename), exc);
+                } else {
+                    logger.error("Retring times {} to upload file Path: {}", retry.numberOfTriesLeft(), path);
+                }
             }
-
-            throw new FtpException(String.format("Unable to upload file %s.", file.filename), exc);
         }
     }
 

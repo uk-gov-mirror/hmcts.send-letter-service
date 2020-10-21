@@ -137,3 +137,8 @@ encryption:
 
 stale-letters:
   min-age-in-business-days: 2
+
+file-upoad:
+  retries: ${DEFAULT_RETRIES:5}
+  wait-time-in-milli: ${DEFAULT_WAIT_TIME_IN_MILLI:2000}
+
