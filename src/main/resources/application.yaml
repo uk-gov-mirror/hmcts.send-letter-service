@@ -137,3 +137,6 @@ encryption:
 
 stale-letters:
   min-age-in-business-days: 2
+
+async:
+  threadpool-size: ${ASYNC_THREADPOOL_SIZE:20}
