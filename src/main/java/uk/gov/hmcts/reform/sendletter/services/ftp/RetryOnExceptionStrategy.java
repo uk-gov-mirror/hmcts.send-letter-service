@@ -6,10 +6,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class RetryOnExceptionStrategy {
 
-    @Value("${file-upoad.retries}")
     public static int DEFAULT_RETRIES;
-    @Value("${file-upoad.wait-time-in-milli}")
     public static long DEFAULT_WAIT_TIME_IN_MILLI;
+
+    @Value("${file-upoad.retries}")
+    public void setNumberOfTriesLeft(int numberOfTriesLeft) {
+        this.numberOfTriesLeft = numberOfTriesLeft;
+    }
+
+    @Value("${file-upoad.wait-time-in-milli}")
+    public void setTimeToWait(long timeToWait) {
+        this.timeToWait = timeToWait;
+    }
+
+
+
+
 
     private int numberOfTriesLeft;
     private long timeToWait;
