@@ -1,10 +1,14 @@
 package uk.gov.hmcts.reform.sendletter.services.ftp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RetryOnExceptionStrategy {
+
+    private static final Logger logger = LoggerFactory.getLogger(RetryOnExceptionStrategy.class);
 
     public static final int DEFAULT_RETRIES = 2;
     public static final long DEFAULT_WAIT_TIME_IN_MILLI = 1000;
@@ -53,8 +57,10 @@ public class RetryOnExceptionStrategy {
     private void waitUntilNextTry() {
         try {
             Thread.sleep(getTimeToWait());
-        } catch (InterruptedException ignored) {
-            //ignore
+        } catch (InterruptedException e) {
+            logger.error("Interrupted!", e);
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         }
     }
 }
