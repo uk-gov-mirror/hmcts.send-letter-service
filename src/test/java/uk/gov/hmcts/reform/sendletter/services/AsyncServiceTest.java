@@ -12,18 +12,21 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 @ExtendWith(MockitoExtension.class)
 class AsyncServiceTest {
     private AsyncService service = new AsyncService();
+    private AtomicInteger secondCounter = new AtomicInteger(0);
 
     @Test
     void testSuccess() {
         AtomicInteger counter = new AtomicInteger(0);
-        service.run(() -> counter.set(10));
+
+        service.run(() -> counter.set(10), () -> secondCounter.set(20));
 
         assertThat(counter.get()).isEqualTo(10);
+        assertThat(secondCounter.get()).isEqualTo(20);
     }
 
     @Test
     void testException() {
-        assertDoesNotThrow(() -> service.run(this::dividByZero));
+        assertDoesNotThrow(() -> service.run(this::dividByZero, () -> secondCounter.set(30)));
     }
 
     private void dividByZero() {

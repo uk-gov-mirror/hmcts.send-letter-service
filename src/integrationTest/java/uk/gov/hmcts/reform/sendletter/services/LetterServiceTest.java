@@ -84,7 +84,7 @@ class LetterServiceTest {
         assertThat(result.getEncryptionKeyFingerprint()).isNull();
         PdfHelper.validateZippedPdf(result.getFileContent());
         if (Boolean.parseBoolean(async)) {
-            verify(asyncService).run(any());
+            verify(asyncService).run(any(), any());
         }
     }
 
@@ -118,7 +118,7 @@ class LetterServiceTest {
         assertThat(result.getAdditionalData()).isEqualTo(expectedAdditionalData);
 
         if (Boolean.parseBoolean(async)) {
-            verify(asyncService).run(any());
+            verify(asyncService).run(any(), any());
         }
     }
 
@@ -135,7 +135,7 @@ class LetterServiceTest {
         PdfHelper.validateZippedPdf(result.getFileContent());
 
         if (Boolean.parseBoolean(async)) {
-            verify(asyncService).run(any());
+            verify(asyncService).run(any(), any());
         }
     }
 
@@ -157,7 +157,7 @@ class LetterServiceTest {
         assertThat(id1).isEqualByComparingTo(id2);
 
         if (Boolean.parseBoolean(async)) {
-            verify(asyncService).run(any());
+            verify(asyncService).run(any(), any());
         }
     }
 
@@ -181,7 +181,7 @@ class LetterServiceTest {
         assertThat(id1).isNotEqualByComparingTo(id2);
 
         if (Boolean.parseBoolean(async)) {
-            verify(asyncService, times(2)).run(any());
+            verify(asyncService, times(2)).run(any(), any());
         }
     }
 

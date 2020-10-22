@@ -9,9 +9,10 @@ import org.springframework.stereotype.Service;
 public class AsyncService {
     private static final Logger logger = LoggerFactory.getLogger(AsyncService.class);
 
-    @Async
-    public void run(final Runnable runnable) {
+    @Async(value = "AsyncExecutor")
+    public void run(final Runnable runnable, final Runnable infoLogger) {
         try {
+            infoLogger.run();
             runnable.run();
         } catch (RuntimeException e) {
             logger.error("Async task error", e);
