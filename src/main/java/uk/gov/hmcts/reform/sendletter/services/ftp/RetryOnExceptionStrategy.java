@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class RetryOnExceptionStrategy {
 
-    public static int DEFAULT_RETRIES = 2;
-    public static long DEFAULT_WAIT_TIME_IN_MILLI = 1000;
+    public final static int DEFAULT_RETRIES = 2;
+    public final static long DEFAULT_WAIT_TIME_IN_MILLI = 1000;
 
     @Value("${file-upoad.retries}")
     public void setNumberOfTriesLeft(int numberOfTriesLeft) {
