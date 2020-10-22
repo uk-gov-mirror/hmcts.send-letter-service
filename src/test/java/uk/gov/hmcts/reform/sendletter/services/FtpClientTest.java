@@ -200,17 +200,26 @@ class FtpClientTest {
     }
 
     @Test
-    void should_track_failure_when_trying_to_upload_new_file_retry() throws IOException {
+    void should_delete_corrupt_file_and_retry_in_case_upload_timed_out() throws IOException {
+
+        retry = new RetryOnExceptionStrategy(5, 2000);
+        client = new FtpClient(() -> sshClient, ftpProps, retry);
+
         // given
         given(sftpClient.getFileTransfer()).willReturn(sftpFileTransfer);
-        willThrow(IOException.class).given(sftpFileTransfer).upload(any(LocalSourceFile.class), anyString());
+        willThrow(new IOException(new TimeoutException("oh no")))
+                .given(sftpFileTransfer)
+                .upload(any(LocalSourceFile.class), anyString());
 
         // when
         Throwable exception = catchThrowable(() ->
-                client.upload(new FileToSend("goodbye.zip", "goodbye".getBytes(), false), "cmc", sftpClient)
+                client.upload(new FileToSend("massive.zip", "insane size".getBytes(), false), "cmc", sftpClient)
         );
 
         // then
-        assertThat(exception).isInstanceOf(FtpException.class);
+        assertThat(exception)
+                .isInstanceOf(FtpException.class)
+                .hasMessageStartingWith("Unable to upload file");
+        verify(sftpClient, times(5)).rm("null/cmc/massive.zip"); // we mocked mapping hence null
     }
 }
