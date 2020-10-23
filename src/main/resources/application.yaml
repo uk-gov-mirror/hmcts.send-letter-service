@@ -140,3 +140,8 @@ stale-letters:
 
 async:
   threadpool-size: ${ASYNC_THREADPOOL_SIZE:20}
+
+file-upoad:
+  retries: ${DEFAULT_RETRIES:5}
+  wait-time-in-ms: ${DEFAULT_WAIT_TIME_IN_MS:2000}
+
