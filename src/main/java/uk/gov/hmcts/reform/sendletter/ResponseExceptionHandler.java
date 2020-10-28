@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.sendletter.exception.UnauthenticatedException;
 import uk.gov.hmcts.reform.sendletter.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.sendletter.model.out.errors.ModelValidationError;
+import uk.gov.hmcts.reform.sendletter.services.encryption.UnableToPgpEncryptZipFileException;
 
 import java.util.List;
 
@@ -81,7 +82,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return status(BAD_REQUEST).body("Exception occurred while parsing letter contents");
     }
 
-    @ExceptionHandler(DuplexException.class)
+    @ExceptionHandler({DuplexException.class, UnableToPgpEncryptZipFileException.class})
     protected ResponseEntity<String> handleInvalidPdfException() {
         // only then pdf is actually checked hence invalid pdf message
         return status(BAD_REQUEST).body("Invalid pdf");

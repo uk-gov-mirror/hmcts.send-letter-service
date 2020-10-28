@@ -98,20 +98,15 @@ public class LetterService {
 
     private UUID saveNewLetter(ILetterRequest letter, String messageId, String serviceName, String isAsync) {
         UUID id = UUID.randomUUID();
-
-        byte[] zipContent = zipper.zip(
-            new PdfDoc(
-                FileNameHelper.generatePdfName(letter.getType(), serviceName, id),
-                getPdfContent(letter)
-            )
-        );
+        LocalDateTime createdAtTime = now();
+        byte[] zipContent = getFileContent(id, letter, serviceName, createdAtTime);
 
         if (Boolean.parseBoolean(isAsync)) {
             Runnable logger = () -> log.info("Saving letter id {} in async mode as flag value is {}", id, isAsync);
-            asynService.run(() -> saveLetter(letter, messageId, serviceName, id, zipContent), logger);
+            asynService.run(() -> saveLetter(letter, messageId, serviceName, id, zipContent, createdAtTime), logger);
         } else {
             log.info("Saving letter id {} in sync mode as flag value is {}", id, isAsync);
-            saveLetter(letter, messageId, serviceName, id, zipContent);
+            saveLetter(letter, messageId, serviceName, id, zipContent, createdAtTime);
         }
 
         log.info("Returning letter id {} for service {}", id, serviceName);
@@ -120,15 +115,16 @@ public class LetterService {
     }
 
     @Transactional
-    public void saveLetter(ILetterRequest letter, String messageId, String serviceName, UUID id, byte[] zipContent) {
-        LocalDateTime createdAtTime = now();
+    public void saveLetter(ILetterRequest letter, String messageId, String serviceName, UUID id,
+                           byte[] zipContent, LocalDateTime createdAtTime) {
+
         Letter dbLetter = new Letter(
-                id,
-                messageId,
-                serviceName,
+            id,
+            messageId,
+            serviceName,
             mapper.valueToTree(letter.getAdditionalData()),
             letter.getType(),
-            isEncryptionEnabled ? encryptZipContents(letter, serviceName, id, zipContent, createdAtTime) : zipContent,
+            zipContent,
             isEncryptionEnabled,
             getEncryptionKeyFingerprint(),
             createdAtTime,
@@ -139,6 +135,20 @@ public class LetterService {
         log.info("Created new letter record with id {} for service {}", id, serviceName);
     }
 
+    private byte[] getFileContent(UUID id, ILetterRequest letter, String serviceName, LocalDateTime createdAtTime) {
+        byte[] zipContent = zipper.zip(
+                new PdfDoc(
+                        FileNameHelper.generatePdfName(letter.getType(), serviceName, id),
+                        getPdfContent(letter)
+                )
+        );
+
+        if (isEncryptionEnabled) {
+            zipContent = encryptZipContents(letter, serviceName, id, zipContent, createdAtTime);
+        }
+        return zipContent;
+    }
+
     private byte[] encryptZipContents(
         ILetterRequest letter,
         String serviceName,
@@ -147,7 +157,7 @@ public class LetterService {
         LocalDateTime createdAt
     ) {
         Asserts.notNull(pgpPublicKey, "pgpPublicKey");
-
+        log.info("Clear file size {} ", zipContent.length);
         String zipFileName = FinalPackageFileNameHelper.generateName(
             letter.getType(),
             serviceName,
