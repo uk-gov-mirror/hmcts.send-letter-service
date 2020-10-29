@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.entity;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -23,6 +25,16 @@ public class PendingLetterSearchTest {
     @Autowired
     private LetterRepository repository;
 
+    @BeforeEach
+    void setUp() {
+        repository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
+        repository.deleteAll();
+    }
+
     @Test
     public void should_return_letters_in_created_status() {
         // given
@@ -36,7 +48,7 @@ public class PendingLetterSearchTest {
 
         // then
         assertThat(letters)
-            .extracting(l -> l.getType())
+            .extracting(BasicLetterInfo::getType)
             .containsExactly("type-3", "type-4");
     }
 
@@ -58,7 +70,8 @@ public class PendingLetterSearchTest {
     @Test
     public void should_set_properties_correctly() {
         // given
-        Letter letter = SampleData.letterEntity("service", LocalDateTime.now(), "type", "fingerprint", 1);
+        Letter letter = SampleData.letterEntity("service", LocalDateTime.now(), "type", "fingerprint", 1,
+                SampleData.checkSumSupplier);
         letter.setStatus(Created);
         Letter savedLetter = repository.save(letter);
 
@@ -84,6 +97,8 @@ public class PendingLetterSearchTest {
                 savedLetter.getType()
             ));
     }
+
+
 
     private void storeLetter(LetterStatus status, String type) {
         Letter letter = SampleData.letterEntity("service1", LocalDateTime.now(), type);

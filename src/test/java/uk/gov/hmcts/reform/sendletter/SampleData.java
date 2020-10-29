@@ -20,6 +20,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -31,6 +32,7 @@ import static java.util.stream.Collectors.toList;
 public final class SampleData {
     private static final String ENCODED_PDF_FILE = "encodedPdfFile.txt";
     private static final String ENCODED_PDF_FILE2 = "encodedPdfFile2.txt";
+    public static final Supplier<String> checkSumSupplier = () -> UUID.randomUUID().toString();
 
     public static LetterRequest letterRequest() {
         try {
@@ -80,8 +82,12 @@ public final class SampleData {
         return letterEntity(service, now());
     }
 
+    public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(String service, Supplier<String> checkSum) {
+        return letterEntity(service, now(), "letterType1",null, 1, checkSum);
+    }
+
     public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(String service, LocalDateTime createdAt) {
-        return letterEntity(service, createdAt, "letterType1", null, 1);
+        return letterEntity(service, createdAt, "letterType1", null, 1, checkSumSupplier);
     }
 
     public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(
@@ -89,7 +95,7 @@ public final class SampleData {
         LocalDateTime createdAt,
         String type
     ) {
-        return letterEntity(service, createdAt, type, null, 1);
+        return letterEntity(service, createdAt, type, null, 1, checkSumSupplier);
     }
 
     public static uk.gov.hmcts.reform.sendletter.entity.Letter letterEntity(
@@ -97,12 +103,13 @@ public final class SampleData {
         LocalDateTime createdAt,
         String type,
         String fingerprint,
-        int copies
+        int copies,
+        Supplier<String> checkSum
     ) {
         try {
             return new uk.gov.hmcts.reform.sendletter.entity.Letter(
                 UUID.randomUUID(),
-                "messageId",
+                checkSum.get(),
                 service,
                 new ObjectMapper().readTree("{}"),
                 type,

@@ -115,9 +115,11 @@ public class SendLetterController {
     })
     public ResponseEntity<LetterStatus> getLetterStatus(
         @PathVariable String id,
-        @RequestParam(name = "include-additional-info", defaultValue = "false") String isAdditionalInfoRequired
+        @RequestParam(name = "include-additional-info", defaultValue = "false") String isAdditionalInfoRequired,
+        @RequestParam(name = "check-duplicate", defaultValue = "false") String isDuplicate
     ) {
-        LetterStatus letterStatus = letterService.getStatus(getLetterIdFromString(id), isAdditionalInfoRequired);
+        LetterStatus letterStatus = letterService.getStatus(getLetterIdFromString(id),
+                isAdditionalInfoRequired, isDuplicate);
         return ok(letterStatus);
     }
 

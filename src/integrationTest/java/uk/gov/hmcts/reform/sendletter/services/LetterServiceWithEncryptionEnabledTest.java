@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -56,7 +57,9 @@ class LetterServiceWithEncryptionEnabledTest {
         LetterRequest letterRequest = SampleData.letterRequest();
 
         PdfCreator pdfCreator = new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert);
-        AsyncService asyncService = new AsyncService();
+        ExecusionService execusionService = new ExecusionService();
+        DuplicateLetterService duplicateLetterService = mock(DuplicateLetterService.class);
+
         LetterService service = new LetterService(
             pdfCreator,
             letterRepository,
@@ -65,7 +68,8 @@ class LetterServiceWithEncryptionEnabledTest {
             true,
             encryptionPublicKey,
             serviceFolderMapping,
-            asyncService
+            execusionService,
+            duplicateLetterService
         );
 
         UUID id = service.save(letterRequest, SERVICE_NAME, async);

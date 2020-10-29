@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.controllers;
 
 import com.microsoft.applicationinsights.web.internal.WebRequestTrackingFilter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,12 @@ class InfoTest {
         WebRequestTrackingFilter filter = new WebRequestTrackingFilter();
         filter.init(new MockFilterConfig());
         mvc = webAppContextSetup(wac).addFilters(filter).build();
+        letterRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
+        letterRepository.deleteAll();
     }
 
     @Test

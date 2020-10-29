@@ -4,6 +4,7 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import net.schmizz.sshj.sftp.SFTPClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.Optional;
@@ -36,23 +38,26 @@ public class UploadLettersTask {
     private final FtpClient ftp;
     private final IFtpAvailabilityChecker availabilityChecker;
     private final ServiceFolderMapping serviceFolderMapping;
+    private final int dbPollDelay;
 
     public UploadLettersTask(
         LetterRepository repo,
         FtpClient ftp,
         IFtpAvailabilityChecker availabilityChecker,
-        ServiceFolderMapping serviceFolderMapping
+        ServiceFolderMapping serviceFolderMapping,
+        @Value("${tasks.upload-letters.db-poll-delay}") int dbPollDelay
     ) {
         this.repo = repo;
         this.ftp = ftp;
         this.availabilityChecker = availabilityChecker;
         this.serviceFolderMapping = serviceFolderMapping;
+        this.dbPollDelay = dbPollDelay;
     }
 
     @SchedulerLock(name = TASK_NAME)
     @Scheduled(fixedDelayString = "${tasks.upload-letters.interval-ms}")
     public void run() {
-        logger.info("Started '{}' task", TASK_NAME);
+        logger.info("Started '{}' task with db-poll-delay of {} ", TASK_NAME, dbPollDelay);
 
         if (!availabilityChecker.isFtpAvailable(now(ZoneId.of(EUROPE_LONDON)).toLocalTime())) {
             logger.info("Not processing '{}' task due to FTP downtime window", TASK_NAME);
@@ -71,7 +76,9 @@ public class UploadLettersTask {
             int uploadCount = 0;
 
             for (int i = 0; i < BATCH_SIZE; i++) {
-                Optional<Letter> letter = repo.findFirstByStatusOrderByCreatedAtAsc(LetterStatus.Created);
+                Optional<Letter> letter
+                        = repo.findFirstLetterCreated(LocalDateTime.now().minusMinutes(dbPollDelay));
+
                 if (letter.isPresent()) {
                     boolean uploaded = processLetter(letter.get(), client);
                     if (uploaded) {

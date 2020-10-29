@@ -116,6 +116,7 @@ scheduling:
 tasks:
   upload-letters:
     interval-ms: ${UPLOAD_LETTERS_INTERVAL:30000}
+    db-poll-delay: ${DB_POLL_DELAY:2}
   mark-letters-posted:
     cron:  ${FTP_REPORTS_CRON:0 30 * * * *}
   stale-letters-report:

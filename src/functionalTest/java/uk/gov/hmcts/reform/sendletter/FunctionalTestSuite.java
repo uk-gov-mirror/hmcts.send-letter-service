@@ -14,6 +14,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.TestPropertySource;
 
@@ -26,8 +28,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -37,11 +44,14 @@ import static org.apache.commons.lang.time.DateUtils.addSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.util.DateUtil.now;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @TestPropertySource("classpath:application.properties")
 abstract class FunctionalTestSuite {
+    private static Logger logger = LoggerFactory.getLogger(ProcessSaveV3Asyn.class);
+
     @Value("${s2s-url}")
     private String s2sUrl;
 
@@ -80,7 +90,8 @@ abstract class FunctionalTestSuite {
 
     static final int LETTER_STATUS_RETRY_COUNT = 40;
     static final int LETTER_STATUS_RETRY_INTERVAL = 500;
-    
+    static final int LETTER_UPLOAD_DELAY = 30000;
+
     /**
      * Sign in to s2s.
      *
@@ -141,7 +152,7 @@ abstract class FunctionalTestSuite {
                 .relaxedHTTPSValidation()
                 .baseUri(sendLetterServiceUrl)
                 .when()
-                .get("/letters/{id}", letterId)
+                .get("/letters/{id}?check-duplicate=true", letterId)
                 .then()
                 .statusCode(200)
                 .extract()
@@ -279,6 +290,20 @@ abstract class FunctionalTestSuite {
         } else {
             return matchingFiles.stream().findFirst();
         }
+    }
+
+    void executeMultiRequest(Supplier<String> letterRequest) {
+        List<CompletableFuture<String>> letters = IntStream.rangeClosed(0, 1)
+                .mapToObj(i -> invokeAsyncSendLetter(letterRequest)).collect(Collectors.toList());
+        CompletionException completionException =
+                assertThrows(CompletionException.class, () -> letters.stream()
+                        .map(CompletableFuture::join).forEach(logger::info));
+        logger.info("completionException is {} ", completionException.getMessage());
+        assertThat(completionException.getMessage()).contains("Expected status code <200> but was <409>");
+    }
+
+    private CompletableFuture<String> invokeAsyncSendLetter(Supplier<String> letterRequest) {
+        return CompletableFuture.supplyAsync(letterRequest);
     }
 
     void validatePdfFile(

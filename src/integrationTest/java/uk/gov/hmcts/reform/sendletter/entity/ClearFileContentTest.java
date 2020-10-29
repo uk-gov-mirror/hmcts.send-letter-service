@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.entity;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -19,6 +21,16 @@ class ClearFileContentTest {
 
     @Autowired
     LetterRepository repo;
+
+    @BeforeEach
+    void setUp() {
+        repo.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
+        repo.deleteAll();
+    }
 
     @Test
     void should_clear_file_content_in_letters_created_before_specified_date_and_in_given_status() {

@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -77,7 +79,7 @@ class UploadLettersTaskTest {
 
         given(repo.countByStatus(eq(Created))).willReturn(2);
 
-        given(repo.findFirstByStatusOrderByCreatedAtAsc(eq(Created)))
+        given(repo.findFirstLetterCreated(isA(LocalDateTime.class)))
             .willReturn(Optional.of(letterOfType(SMOKE_TEST_LETTER_TYPE,1)))
             .willReturn(Optional.of(letterOfType("not_" + SMOKE_TEST_LETTER_TYPE, 1)))
             .willReturn(Optional.empty());
@@ -128,7 +130,7 @@ class UploadLettersTaskTest {
 
         given(repo.countByStatus(eq(Created))).willReturn(3);
 
-        given(repo.findFirstByStatusOrderByCreatedAtAsc(eq(Created)))
+        given(repo.findFirstLetterCreated(isA(LocalDateTime.class)))
             .willReturn(Optional.of(letterA))
             .willReturn(Optional.of(letterB))
             .willReturn(Optional.of(letterC))
@@ -192,7 +194,8 @@ class UploadLettersTaskTest {
             repo,
             ftpClient,
             availabilityChecker,
-            serviceFolderMapping
+            serviceFolderMapping,
+                0
         );
     }
 }

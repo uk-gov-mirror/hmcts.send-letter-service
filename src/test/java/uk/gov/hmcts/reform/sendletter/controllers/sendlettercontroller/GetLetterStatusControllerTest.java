@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -49,9 +50,9 @@ class GetLetterStatusControllerTest {
     @Test
     void should_return_letter_status_when_it_is_found_in_database() throws Exception {
 
-        given(service.getStatus(letterStatus.id, "true")).willReturn(letterStatus);
+        given(service.getStatus(letterStatus.id, "true", "false")).willReturn(letterStatus);
 
-        getLetter(letterStatus.id, "true")
+        getLetter(letterStatus.id, "true", "false")
             .andExpect(status().isOk())
             .andExpect(content().json(
                 "{"
@@ -68,24 +69,32 @@ class GetLetterStatusControllerTest {
 
     @Test
     void should_return_404_client_error_when_letter_is_not_found_in_database() throws Exception {
-        willThrow(LetterNotFoundException.class).given(service).getStatus(letterStatus.id, "false");
+        willThrow(LetterNotFoundException.class).given(service).getStatus(letterStatus.id, "false", "false");
 
-        getLetter(letterStatus.id, "false").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+        getLetter(letterStatus.id, "false", "false").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+    }
+
+    @Test
+    void should_return_409_client_error_when_duplicate_request() throws Exception {
+        willThrow(DataIntegrityViolationException.class).given(service).getStatus(letterStatus.id, "false", "true");
+
+        getLetter(letterStatus.id, "false", "true").andExpect(status().is(HttpStatus.CONFLICT.value()));
     }
 
     @Test
     void should_return_404_client_error_when_invalid_uuid_is_provided() throws Exception {
-        getLetter("0987654321", "false").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
-        getLetter("X558ff55-37R0-4p6e-80fo-5Lb05b650c44", "false").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+        getLetter("0987654321", "false", "false").andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+        getLetter("X558ff55-37R0-4p6e-80fo-5Lb05b650c44", "false", "false")
+                .andExpect(status().is(HttpStatus.NOT_FOUND.value()));
 
-        verify(service, never()).getStatus(any(UUID.class), eq("false"));
+        verify(service, never()).getStatus(any(UUID.class), eq("false"), eq("false"));
     }
 
     @Test
     void shouldInvokeGetStatusServiceWithDefaultValueWhenIncludeAdditionalInfoIsNull() throws Exception {
-        given(service.getStatus(letterStatus.id, "false")).willReturn(letterStatus);
+        given(service.getStatus(letterStatus.id, "false", "false")).willReturn(letterStatus);
 
-        getLetter(letterStatus.id, null)
+        getLetter(letterStatus.id, null, null)
                 .andExpect(status().isOk())
                 .andExpect(content().json(
                         "{"
@@ -102,7 +111,7 @@ class GetLetterStatusControllerTest {
 
     @Test
     void shouldInvokeGetStatusServiceWithNoAdditionalInfoInRequestParam() throws Exception {
-        given(service.getStatus(letterStatus.id, "false")).willReturn(letterStatus);
+        given(service.getStatus(letterStatus.id, "false","false")).willReturn(letterStatus);
 
         mockMvc.perform(
                 get("/letters/" + letterStatus.id)
@@ -120,15 +129,17 @@ class GetLetterStatusControllerTest {
                     + "}"));
     }
 
-    private ResultActions getLetter(String letterId, String isAdditionInfoRequired) throws Exception {
+    private ResultActions getLetter(String letterId, String isAdditionInfoRequired,
+                                    String isDuplicate) throws Exception {
         return mockMvc.perform(
             get("/letters/" + letterId)
                 .param("include-additional-info", isAdditionInfoRequired)
+                .param("check-duplicate", isDuplicate)
                 .header("ServiceAuthorization", "auth-header-value")
         );
     }
 
-    private ResultActions getLetter(UUID letterId, String isAdditionInfoRequired) throws Exception {
-        return getLetter(letterId.toString(), isAdditionInfoRequired);
+    private ResultActions getLetter(UUID letterId, String isAdditionInfoRequired, String isDuplicate) throws Exception {
+        return getLetter(letterId.toString(), isAdditionInfoRequired, isDuplicate);
     }
 }
