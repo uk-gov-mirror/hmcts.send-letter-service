@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.helper.FtpHelper;
 import uk.gov.hmcts.reform.sendletter.services.DuplicateLetterService;
+import uk.gov.hmcts.reform.sendletter.services.ExceptionLetterService;
 import uk.gov.hmcts.reform.sendletter.services.ExecusionService;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
@@ -61,6 +62,7 @@ class UploadLettersTaskTest {
         when(serviceFolderMapping.getFolderFor(any())).thenReturn(Optional.of(LocalSftpServer.SERVICE_FOLDER));
         ExecusionService execusionService = new ExecusionService();
         DuplicateLetterService duplicateLetterService = mock(DuplicateLetterService.class);
+        ExceptionLetterService exceptionLetterService = mock(ExceptionLetterService.class);
 
         repository.deleteAll();
         this.letterService = new LetterService(
@@ -72,8 +74,8 @@ class UploadLettersTaskTest {
             null,
             serviceFolderMapping,
             execusionService,
-            duplicateLetterService
-        );
+            duplicateLetterService,
+            exceptionLetterService);
     }
 
     @ParameterizedTest

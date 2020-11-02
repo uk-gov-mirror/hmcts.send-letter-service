@@ -8,20 +8,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.function.Consumer;
+
 @Service
 public class ExecusionService {
     private static final Logger logger = LoggerFactory.getLogger(ExecusionService.class);
 
     @Async(value = "AsyncExecutor")
-    public void run(final Runnable runnable, final Runnable infoLogger, final Execute execute)  {
+    public void run(final Runnable runnable, final Runnable infoLogger,
+                    final Execute duplicate, final Consumer<String> exception)  {
         try {
             infoLogger.run();
             runnable.run();
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
             logger.error("Async duplicate record ", dataIntegrityViolationException);
-            execute.invoke();
+            duplicate.invoke();
         } catch (RuntimeException e) {
             logger.error("Async task error", e);
+            exception.accept(e.getMessage());
         }
     }
 

@@ -13,9 +13,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.DuplicateLetter;
+import uk.gov.hmcts.reform.sendletter.entity.ExceptionLetter;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
+import uk.gov.hmcts.reform.sendletter.exception.LetterSaveException;
 import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.sendletter.exception.UnsupportedLetterRequestTypeException;
 import uk.gov.hmcts.reform.sendletter.model.PdfDoc;
@@ -59,6 +61,7 @@ public class LetterService {
     private final ServiceFolderMapping serviceFolderMapping;
     private final ExecusionService asynService;
     private final DuplicateLetterService duplicateLetterService;
+    private final ExceptionLetterService exceptionLetterService;
 
     public LetterService(
             PdfCreator pdfCreator,
@@ -69,7 +72,7 @@ public class LetterService {
             @Value("${encryption.publicKey}") String encryptionPublicKey,
             ServiceFolderMapping serviceFolderMapping,
             ExecusionService asynService,
-            DuplicateLetterService duplicateLetterService) {
+            DuplicateLetterService duplicateLetterService, ExceptionLetterService exceptionLetterService) {
         this.pdfCreator = pdfCreator;
         this.letterRepository = letterRepository;
         this.zipper = zipper;
@@ -79,6 +82,7 @@ public class LetterService {
         this.serviceFolderMapping = serviceFolderMapping;
         this.asynService = asynService;
         this.duplicateLetterService = duplicateLetterService;
+        this.exceptionLetterService = exceptionLetterService;
     }
 
     @Transactional
@@ -102,21 +106,31 @@ public class LetterService {
 
     private UUID saveNewLetter(ILetterRequest letter, String messageId, String serviceName, String isAsync) {
         UUID id = UUID.randomUUID();
-        LocalDateTime createdAtTime = now();
-        byte[] zipContent = getFileContent(id, letter, serviceName, createdAtTime);
+
+        byte[] zipContent = zipper.zip(
+                new PdfDoc(
+                        FileNameHelper.generatePdfName(letter.getType(), serviceName, id),
+                        getPdfContent(letter)
+                )
+        );
+
+        Function<LocalDateTime, byte[]> fileContent = localDateTime -> getFileContent(id, letter,
+                serviceName, localDateTime, zipContent);
 
         if (Boolean.parseBoolean(isAsync)) {
             Runnable logger = () -> log.info("Saving letter id {} in async mode as flag value is {}", id, isAsync);
-            asynService.run(() -> saveLetter(letter, messageId, serviceName, id, zipContent, createdAtTime), logger,
-                () -> saveDuplicate(letter, id, messageId, serviceName, zipContent, isAsync));
+            asynService.run(() -> saveLetter(letter, messageId, serviceName, id, fileContent), logger,
+                () -> saveDuplicate(letter, id, messageId, serviceName, fileContent, isAsync),
+                message -> saveExcepton(letter, id, serviceName, message, isAsync));
         } else {
             try {
                 log.info("Saving letter id {} in sync mode as flag value is {}", id, isAsync);
-                asynService.execute(() -> saveLetter(letter, messageId, serviceName, id, zipContent, createdAtTime));
+                asynService.execute(() -> saveLetter(letter, messageId, serviceName, id, fileContent));
             } catch (DataIntegrityViolationException dataIntegrityViolationException) {
                 Runnable logger = () -> log.error("Duplicate record ", dataIntegrityViolationException);
-                asynService.run(() -> saveDuplicate(letter, id, messageId, serviceName, zipContent, isAsync), logger,
-                    () -> {});
+                asynService.run(() -> saveDuplicate(letter, id, messageId, serviceName, fileContent, isAsync), logger,
+                    () -> {}, message -> saveExcepton(letter, id, serviceName,
+                                zipContent.length + ":" + message, isAsync));
                 throw dataIntegrityViolationException;
             }
         }
@@ -127,15 +141,15 @@ public class LetterService {
 
     @Transactional
     public void saveLetter(ILetterRequest letter, String messageId, String serviceName, UUID id,
-                           byte[] zipContent, LocalDateTime createdAtTime) {
-
+                           Function<LocalDateTime, byte[]> zipContent) {
+        LocalDateTime createdAtTime = now();
         Letter dbLetter = new Letter(
             id,
             messageId,
             serviceName,
             mapper.valueToTree(letter.getAdditionalData()),
             letter.getType(),
-            zipContent,
+            zipContent.apply(createdAtTime),
             isEncryptionEnabled,
             getEncryptionKeyFingerprint(),
             createdAtTime,
@@ -147,16 +161,25 @@ public class LetterService {
     }
 
     @Transactional
-    public void saveDuplicate(ILetterRequest letter, UUID id, String checksum, String serviceName, byte[] zipContent,
-                              String isAsync) {
+    public void saveDuplicate(ILetterRequest letter, UUID id, String checksum, String serviceName,
+                              Function<LocalDateTime, byte[]> zipContent, String isAsync) {
         DuplicateLetter duplicateLetter = getDuplicateLetter(letter, id, checksum, serviceName, zipContent,
                 isAsync);
         duplicateLetterService.save(duplicateLetter);
         log.info("Created new duplicate record with id {} for service {}", id, serviceName);
     }
 
+    @Transactional
+    public void saveExcepton(ILetterRequest letter, UUID id, String serviceName, String message, String isAsync) {
+        ExceptionLetter exceptionLetter = new ExceptionLetter(id, serviceName, LocalDateTime.now(), 
+                letter.getType(), message, isAsync);
+        exceptionLetterService.save(exceptionLetter);
+        log.info("Created new exception record with id {} for service {}", id, serviceName);
+    }
+    
     private DuplicateLetter getDuplicateLetter(ILetterRequest letter, UUID id,
-                                               String checksum, String serviceName, byte[] zipContent, String isAsync) {
+                                               String checksum, String serviceName,
+                                               Function<LocalDateTime, byte[]> zipContent, String isAsync) {
         LocalDateTime createdAtTime = now();
         return new DuplicateLetter(
                 id,
@@ -164,8 +187,7 @@ public class LetterService {
                 serviceName,
                 mapper.valueToTree(letter.getAdditionalData()),
                 letter.getType(),
-                isEncryptionEnabled ? encryptZipContents(letter, serviceName, id, zipContent, createdAtTime) :
-                        zipContent,
+                zipContent.apply(createdAtTime),
                 isEncryptionEnabled,
                 getEncryptionKeyFingerprint(),
                 createdAtTime,
@@ -174,14 +196,8 @@ public class LetterService {
         );
     }
 
-    private byte[] getFileContent(UUID id, ILetterRequest letter, String serviceName, LocalDateTime createdAtTime) {
-        byte[] zipContent = zipper.zip(
-                new PdfDoc(
-                        FileNameHelper.generatePdfName(letter.getType(), serviceName, id),
-                        getPdfContent(letter)
-                )
-        );
-
+    private byte[] getFileContent(UUID id, ILetterRequest letter, String serviceName,
+                                  LocalDateTime createdAtTime, byte[] zipContent) {
         if (isEncryptionEnabled) {
             zipContent = encryptZipContents(letter, serviceName, id, zipContent, createdAtTime);
         }
@@ -196,7 +212,6 @@ public class LetterService {
         LocalDateTime createdAt
     ) {
         Asserts.notNull(pgpPublicKey, "pgpPublicKey");
-        log.info("Clear file size {} ", zipContent.length);
         String zipFileName = FinalPackageFileNameHelper.generateName(
             letter.getType(),
             serviceName,
@@ -258,7 +273,7 @@ public class LetterService {
 
     public LetterStatus getStatus(UUID id, String isAdditonalDataRequired, String isDuplicate) {
         log.info("Getting letter status for id {} ", id);
-
+        exceptionCheck(id);
         duplicateCheck(id, isDuplicate);
 
         Function<JsonNode, Map<String, Object>> additionDataFunction = additionalData -> {
@@ -287,9 +302,15 @@ public class LetterService {
         return letterStatus;
     }
 
+    private void exceptionCheck(UUID id) {
+        if (exceptionLetterService.isException(id).isPresent()) {
+            throw new LetterSaveException();
+        }
+    }
+
     private void duplicateCheck(UUID id, String isDuplicate) {
         if (Boolean.parseBoolean(isDuplicate)) {
-            Optional<DuplicateLetter> optDuplicateLetter = duplicateLetterService.isPresent(id);
+            Optional<DuplicateLetter> optDuplicateLetter = duplicateLetterService.isDuplicate(id);
             if (optDuplicateLetter.isPresent()) {
                 DuplicateLetter duplicateLetter = optDuplicateLetter.get();
                 String duplicateMessage = String.join(",",

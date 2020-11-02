@@ -13,9 +13,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.DuplicateLetter;
+import uk.gov.hmcts.reform.sendletter.entity.ExceptionLetter;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
+import uk.gov.hmcts.reform.sendletter.exception.LetterSaveException;
 import uk.gov.hmcts.reform.sendletter.exception.ServiceNotConfiguredException;
 import uk.gov.hmcts.reform.sendletter.exception.UnsupportedLetterRequestTypeException;
 import uk.gov.hmcts.reform.sendletter.model.PdfDoc;
@@ -25,6 +27,7 @@ import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsAndNumberOfCopiesRe
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.encryption.UnableToLoadPgpPublicKeyException;
+import uk.gov.hmcts.reform.sendletter.services.encryption.UnableToPgpEncryptZipFileException;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
@@ -47,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -63,6 +67,7 @@ class LetterServiceTest {
     @Spy
     ExecusionService execusionService;
     @Mock DuplicateLetterService duplicateLetterService;
+    @Mock ExceptionLetterService exceptionLetterService;
 
     private LetterService service;
 
@@ -84,7 +89,7 @@ class LetterServiceTest {
         // then
         verify(pdfCreator).createFromTemplates(letter.documents);
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService).run(any(), any(), any());
+            verify(execusionService).run(any(), any(), any(), any());
         }
     }
 
@@ -112,9 +117,73 @@ class LetterServiceTest {
         // then
         verify(pdfCreator).createFromTemplates(letter.documents);
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService).run(any(), any(), any());
+            verify(execusionService).run(any(), any(), any(), any());
         }
         verify(duplicateLetterService).save(isA(DuplicateLetter.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"false"})
+    void should_handle_DataIntegrityViolationException_and_exceptionletter_exception(String async) {
+        // given
+        thereAreNoDuplicates();
+
+        given(letterRepository.save(any())).willThrow(new DataIntegrityViolationException("Duplicate records"));
+
+        willThrow(new UnableToPgpEncryptZipFileException(new RuntimeException("Exception records")))
+                .given(duplicateLetterService).save(isA(DuplicateLetter.class));
+
+        given(zipper.zip(any())).willReturn("Test bytes".getBytes());
+
+        // and
+        given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
+        createLetterService(false, null);
+
+        LetterRequest letter = SampleData.letterRequest();
+
+        // when
+        assertThrows(DataIntegrityViolationException.class, () -> service.save(letter, "some_service", async));
+
+        // then
+        verify(pdfCreator).createFromTemplates(letter.documents);
+        verify(duplicateLetterService).save(isA(DuplicateLetter.class));
+        verify(exceptionLetterService).save(isA(ExceptionLetter.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"false","true"})
+    void should_handle_ExceptionLetter(String async) {
+        // given
+        thereAreNoDuplicates();
+
+        given(letterRepository.save(any()))
+                .willThrow(new UnableToPgpEncryptZipFileException(new RuntimeException("Exception records")));
+
+        // and
+        given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder"));
+        createLetterService(false, null);
+
+        LetterRequest letter = SampleData.letterRequest();
+
+        // when
+        if (Boolean.parseBoolean(async)) {
+            service.save(letter, "some_service", async);
+        } else {
+            assertThrows(UnableToPgpEncryptZipFileException.class, () -> service.save(letter, "some_service", async));
+        }
+
+        // then
+        verify(pdfCreator).createFromTemplates(letter.documents);
+        if (Boolean.parseBoolean(async)) {
+            verify(execusionService).run(any(), any(), any(), any());
+        }
+        verify(duplicateLetterService, never()).save(isA(DuplicateLetter.class));
+        if (Boolean.parseBoolean(async)) {
+            verify(exceptionLetterService).save(isA(ExceptionLetter.class));
+        } else {
+            verify(exceptionLetterService, never()).save(isA(ExceptionLetter.class));
+        }
+
     }
 
 
@@ -137,7 +206,7 @@ class LetterServiceTest {
         verify(pdfCreator).createFromBase64Pdfs(letter.documents);
 
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService).run(any(), any(), any());
+            verify(execusionService).run(any(), any(), any(), any());
         }
     }
 
@@ -171,7 +240,7 @@ class LetterServiceTest {
         assertThat(letterArgumentCaptor.getValue().getCopies()).isEqualTo(15);
 
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService).run(any(), any(), any());
+            verify(execusionService).run(any(), any(), any(), any());
         }
     }
 
@@ -200,7 +269,7 @@ class LetterServiceTest {
         verify(zipper).zip(any(PdfDoc.class));
 
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService).run(any(), any(), any());
+            verify(execusionService).run(any(), any(), any(), any());
         }
 
         ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
@@ -234,7 +303,7 @@ class LetterServiceTest {
         verify(zipper).zip(any(PdfDoc.class));
 
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService).run(any(), any(), any());
+            verify(execusionService).run(any(), any(), any(), any());
         }
 
         ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
@@ -265,7 +334,7 @@ class LetterServiceTest {
         verify(zipper).zip(any(PdfDoc.class));
 
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService).run(any(), any(), any());
+            verify(execusionService).run(any(), any(), any(), any());
         }
 
         ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
@@ -306,7 +375,7 @@ class LetterServiceTest {
             .isInstanceOf(ServiceNotConfiguredException.class)
             .hasMessageContaining(serviceWithoutFolderConfigured);
 
-        verify(execusionService, never()).run(any(), any(), any());
+        verify(execusionService, never()).run(any(), any(), any(), any());
     }
 
     @ParameterizedTest
@@ -327,20 +396,33 @@ class LetterServiceTest {
             .isInstanceOf(UnsupportedLetterRequestTypeException.class)
             .hasMessage("Unsupported letter request type");
 
-        verify(execusionService, never()).run(any(), any(), any());
+        verify(execusionService, never()).run(any(), any(), any(), any());
     }
 
     @Test
     void should_throw_dataIntegrityViolationException() {
         DuplicateLetter duplicateLetter = mock(DuplicateLetter.class);
-        given(duplicateLetterService.isPresent(isA(UUID.class))).willReturn(Optional.of(duplicateLetter));
+        given(duplicateLetterService.isDuplicate(isA(UUID.class))).willReturn(Optional.of(duplicateLetter));
         createLetterService(false, null);
         UUID uuid = UUID.randomUUID();
         assertThrows(DataIntegrityViolationException.class, () -> {
             service.getStatus(uuid, "false",
                     "true");
         });
-        verify(duplicateLetterService).isPresent(isA(UUID.class));
+        verify(duplicateLetterService).isDuplicate(isA(UUID.class));
+    }
+
+    @Test
+    void should_throw_Exception() {
+        ExceptionLetter exceptionLetter = mock(ExceptionLetter.class);
+        given(exceptionLetterService.isException(isA(UUID.class))).willReturn(Optional.of(exceptionLetter));
+        createLetterService(false, null);
+        UUID uuid = UUID.randomUUID();
+        assertThrows(LetterSaveException.class, () -> {
+            service.getStatus(uuid, "false",
+                    "true");
+        });
+        verify(exceptionLetterService).isException(isA(UUID.class));
     }
 
     @Test
@@ -350,7 +432,7 @@ class LetterServiceTest {
         assertThrows(LetterNotFoundException.class, () -> {
             service.getStatus(id, "false", "false");
         });
-        verify(duplicateLetterService, never()).isPresent(isA(UUID.class));
+        verify(duplicateLetterService, never()).isDuplicate(isA(UUID.class));
     }
 
     @Test
@@ -362,7 +444,7 @@ class LetterServiceTest {
         LetterStatus status = service.getStatus(UUID.randomUUID(), "false", "true");
         assertNotNull(status);
         verify(letterRepository).findById(isA(UUID.class));
-        verify(duplicateLetterService).isPresent(isA(UUID.class));
+        verify(duplicateLetterService).isDuplicate(isA(UUID.class));
     }
 
 
@@ -387,9 +469,9 @@ class LetterServiceTest {
             isEncryptionEnabled,
             encryptionKey,
             serviceFolderMapping,
-                execusionService,
-            duplicateLetterService
-        );
+            execusionService,
+            duplicateLetterService,
+            exceptionLetterService);
     }
 
     private byte[] loadPublicKey() throws IOException {

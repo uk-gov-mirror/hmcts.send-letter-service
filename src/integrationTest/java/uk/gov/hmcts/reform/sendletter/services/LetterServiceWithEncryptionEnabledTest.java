@@ -59,6 +59,7 @@ class LetterServiceWithEncryptionEnabledTest {
         PdfCreator pdfCreator = new PdfCreator(new DuplexPreparator(), new HTMLToPDFConverter()::convert);
         ExecusionService execusionService = new ExecusionService();
         DuplicateLetterService duplicateLetterService = mock(DuplicateLetterService.class);
+        ExceptionLetterService exceptionLetterService = mock(ExceptionLetterService.class);
 
         LetterService service = new LetterService(
             pdfCreator,
@@ -69,8 +70,8 @@ class LetterServiceWithEncryptionEnabledTest {
             encryptionPublicKey,
             serviceFolderMapping,
             execusionService,
-            duplicateLetterService
-        );
+            duplicateLetterService,
+            exceptionLetterService);
 
         UUID id = service.save(letterRequest, SERVICE_NAME, async);
 

@@ -19,7 +19,7 @@ public class DuplicateLetterService {
         duplicateRepository.save(letter);
     }
 
-    public Optional<DuplicateLetter> isPresent(UUID id) {
+    public Optional<DuplicateLetter> isDuplicate(UUID id) {
         return duplicateRepository.findById(id);
     }
 }

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.pdf.generator.HTMLToPDFConverter;
 import uk.gov.hmcts.reform.sendletter.PdfHelper;
 import uk.gov.hmcts.reform.sendletter.SampleData;
 import uk.gov.hmcts.reform.sendletter.entity.DuplicateLetter;
+import uk.gov.hmcts.reform.sendletter.entity.ExceptionLetter;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
@@ -50,6 +51,7 @@ class LetterServiceTest {
     private ObjectMapper objectMapper;
     private ExecusionService execusionService;
     private DuplicateLetterService duplicateLetterService;
+    private ExceptionLetterService exceptionLetterService;
 
     @Autowired
     private LetterRepository letterRepository;
@@ -59,6 +61,7 @@ class LetterServiceTest {
         execusionService = spy(ExecusionService.class);
         ServiceFolderMapping serviceFolderMapping = mock(ServiceFolderMapping.class);
         duplicateLetterService = mock(DuplicateLetterService.class);
+        exceptionLetterService = mock(ExceptionLetterService.class);
         BDDMockito.given(serviceFolderMapping.getFolderFor(any())).willReturn(Optional.of("some_folder_name"));
         objectMapper = new ObjectMapper();
         service = new LetterService(
@@ -70,8 +73,8 @@ class LetterServiceTest {
             null,
             serviceFolderMapping,
             execusionService,
-            duplicateLetterService
-        );
+            duplicateLetterService,
+            exceptionLetterService);
     }
 
     @AfterEach
@@ -90,9 +93,10 @@ class LetterServiceTest {
         assertThat(result.getEncryptionKeyFingerprint()).isNull();
         PdfHelper.validateZippedPdf(result.getFileContent());
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService).run(any(), any(), any());
+            verify(execusionService).run(any(), any(), any(), any());
         }
         verify(duplicateLetterService, never()).save(isA(DuplicateLetter.class));
+        verify(exceptionLetterService, never()).save(isA(ExceptionLetter.class));
     }
 
     @ParameterizedTest
@@ -108,6 +112,8 @@ class LetterServiceTest {
         assertThat(result.getEncryptionKeyFingerprint()).isNull();
         PdfHelper.validateZippedPdf(result.getFileContent());
         verify(duplicateLetterService, never()).save(isA(DuplicateLetter.class));
+        verify(exceptionLetterService, never()).save(isA(ExceptionLetter.class));
+
     }
 
     @ParameterizedTest
@@ -126,9 +132,11 @@ class LetterServiceTest {
         assertThat(result.getAdditionalData()).isEqualTo(expectedAdditionalData);
 
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService).run(any(), any(), any());
+            verify(execusionService).run(any(), any(), any(), any());
         }
         verify(duplicateLetterService, never()).save(isA(DuplicateLetter.class));
+        verify(exceptionLetterService, never()).save(isA(ExceptionLetter.class));
+
     }
 
     @ParameterizedTest
@@ -144,9 +152,11 @@ class LetterServiceTest {
         PdfHelper.validateZippedPdf(result.getFileContent());
 
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService).run(any(), any(), any());
+            verify(execusionService).run(any(), any(), any(), any());
         }
         verify(duplicateLetterService, never()).save(isA(DuplicateLetter.class));
+        verify(exceptionLetterService, never()).save(isA(ExceptionLetter.class));
+
     }
 
     @ParameterizedTest
@@ -167,9 +177,11 @@ class LetterServiceTest {
         assertThat(id1).isEqualByComparingTo(id2);
 
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService).run(any(), any(), any());
+            verify(execusionService).run(any(), any(), any(), any());
         }
         verify(duplicateLetterService, never()).save(isA(DuplicateLetter.class));
+        verify(exceptionLetterService, never()).save(isA(ExceptionLetter.class));
+
     }
 
     @ParameterizedTest
@@ -192,9 +204,11 @@ class LetterServiceTest {
         assertThat(id1).isNotEqualByComparingTo(id2);
 
         if (Boolean.parseBoolean(async)) {
-            verify(execusionService, times(2)).run(any(), any(), any());
+            verify(execusionService, times(2)).run(any(), any(), any(), any());
         }
         verify(duplicateLetterService, never()).save(isA(DuplicateLetter.class));
+        verify(exceptionLetterService, never()).save(isA(ExceptionLetter.class));
+
     }
 
     @ParameterizedTest
