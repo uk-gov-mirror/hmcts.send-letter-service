@@ -1,1 +1,0 @@
-CREATE INDEX ON letters (checksum);
