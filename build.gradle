@@ -285,7 +285,6 @@ dependencies {
   integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.15.0-rc2', {​​​​​​​​
     exclude group: 'junit', module: 'junit'
   }​​​​​​​​
-  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.15.0-rc2'
   integrationTestImplementation group: 'org.awaitility', name: 'awaitility', version: '4.0.3', withoutJunit4
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
