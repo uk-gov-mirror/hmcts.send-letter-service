@@ -192,16 +192,6 @@ def versions = [
 
 ext["rest-assured.version"] = '4.3.0'
 
-ext.libraries = [
-    junit5: [
-            "org.junit.jupiter:junit-jupiter-api:${versions.junit}",
-            "org.junit.jupiter:junit-jupiter-engine:${versions.junit}",
-            "org.junit.jupiter:junit-jupiter-params:${versions.junit}",
-            "org.junit.platform:junit-platform-commons:${versions.junitPlatform}",
-            "org.junit.platform:junit-platform-engine:${versions.junitPlatform}"
-    ]
-]
-
 dependencyManagement {
   dependencies {
     // CVE-2018-10237 - Unbounded memory allocation
