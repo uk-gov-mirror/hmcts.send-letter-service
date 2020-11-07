@@ -23,10 +23,8 @@ flyway {
 group = 'uk.gov.hmcts.reform'
 version = '0.1.0' // 0.1.0 marks migration to java 11
 
-allprojects {
-  sourceCompatibility = '11'
-  targetCompatibility = '11'
-}
+sourceCompatibility = 11
+targetCompatibility = 11
 
 sourceSets {
   functionalTest {
@@ -110,7 +108,7 @@ checkstyle {
 }
 
 pmd {
-  toolVersion = "6.18.0"
+  toolVersion = "6.17.0"
   ignoreFailures = true
   incrementalAnalysis = true
   sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
@@ -284,8 +282,7 @@ dependencies {
   integrationTestImplementation sourceSets.test.runtimeClasspath
   integrationTestImplementation group: 'org.apache.sshd', name: 'sshd-scp', version: '2.5.1'
   integrationTestImplementation group: 'org.apache.sshd', name: 'sshd-sftp', version: '2.5.1'
-  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.15.0-rc2'
-  integrationTestImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.15.0-rc2'
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.15.0' // brings in junit4. testcontainers depend on it
   integrationTestImplementation group: 'org.awaitility', name: 'awaitility', version: '4.0.3', withoutJunit4
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
