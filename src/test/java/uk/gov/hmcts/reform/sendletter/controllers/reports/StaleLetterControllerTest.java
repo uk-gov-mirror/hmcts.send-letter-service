@@ -9,7 +9,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.StaleLetterService;
+import uk.gov.hmcts.reform.sendletter.util.CsvWriter;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -19,8 +21,10 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Resources.getResource;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(StaleLetterController.class)
@@ -67,6 +71,40 @@ public class StaleLetterControllerTest {
                 )
             );
     }
+
+    @Test
+    void should_return_letters_from_stale_as_csv_file() throws Exception {
+        String expected = String.join("\r\n", "Id,Status,Service,CreatedAt,SentToPrintAt",
+                "767cf17e-0ec0-452b-a457-bc173d51ff40,Uploaded,service1,2019-05-03T12:34:56.123,2019-05-03T13:00",
+                "462a58fe-e9b7-494f-a719-5083f31c69cf,Created,service2,2019-05-02T10:11:22.321,","");
+
+        List<BasicLetterInfo> letters = Arrays.asList(
+                letter(
+                        UUID.fromString("767cf17e-0ec0-452b-a457-bc173d51ff40"),
+                        "service1",
+                        LetterStatus.Uploaded,
+                        LocalDateTime.parse("2019-05-03T12:34:56.123"),
+                        LocalDateTime.parse("2019-05-03T13:00:00.000")
+                ),
+                letter(
+                        UUID.fromString("462a58fe-e9b7-494f-a719-5083f31c69cf"),
+                        "service2",
+                        LetterStatus.Created,
+                        LocalDateTime.parse("2019-05-02T10:11:22.321"),
+                        null
+                )
+        );
+        File file = CsvWriter.writeStaleLettersToCsv(letters);
+        given(staleLetterService.getDownloadFile()).willReturn(file);
+
+        mockMvc
+                .perform(get("/stale-letters/download"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_OCTET_STREAM_VALUE))
+                .andExpect(header().string("Content-Disposition","attachment; filename=stale-letters.csv"))
+                .andExpect(content().string(expected));
+    }
+
 
     @Test
     public void should_return_server_error_when_stale_letter_service_throws_exception() throws Exception {

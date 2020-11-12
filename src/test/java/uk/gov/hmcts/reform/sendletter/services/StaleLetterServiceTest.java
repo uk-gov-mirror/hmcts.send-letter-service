@@ -7,8 +7,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
+import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.date.DateCalculator;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,7 +19,9 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -131,6 +136,48 @@ public class StaleLetterServiceTest {
 
         // then
         assertThat(staleLetters).hasSameElementsAs(repositoryLetters);
+    }
+
+    @Test
+    void getStaleLetters_should_file_with_all_letters_returned_by_repository() throws IOException {
+        reset(letterRepository);
+
+        UUID[] uuids = {UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()};
+        LocalDateTime[] localDateTimes = {LocalDateTime.now(), LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(2)};
+        //given
+        List<BasicLetterInfo> repositoryLetters = Arrays.asList(
+                new BasicLetterInfo(uuids[0], null, "Test", LetterStatus.Uploaded,
+                        null, null, localDateTimes[0], localDateTimes[0], null),
+                new BasicLetterInfo(uuids[1], null, "Test", LetterStatus.Uploaded,
+                        null, null, localDateTimes[1], localDateTimes[1], null),
+                new BasicLetterInfo(uuids[2], null, "Test", LetterStatus.Uploaded,
+                        null, null, localDateTimes[2], localDateTimes[2], null)
+        );
+
+        given(letterRepository.findStaleLetters(any())).willReturn(repositoryLetters);
+
+        // when
+        StaleLetterService staleLetterService = staleLetterService("16:00", 2);
+        File downloadFile = staleLetterService.getDownloadFile();
+
+        // then
+        assertThat(downloadFile).isNotEmpty();
+    }
+
+    @Test
+    void should_get_stale_letter_file_when_record_present() throws IOException {
+        reset(letterRepository);
+
+        given(letterRepository.findStaleLetters(any())).willReturn(Collections.emptyList());
+
+        // when
+        StaleLetterService staleLetterService = staleLetterService("16:00", 2);
+        File downloadFile = staleLetterService.getDownloadFile();
+
+        // then
+        assertThat(downloadFile).isNotEmpty();
+
     }
 
     private StaleLetterService staleLetterService(String ftpDowntimeStart, int minStaleLetterAgeInBusinessDays) {
