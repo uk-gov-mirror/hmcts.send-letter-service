@@ -91,7 +91,9 @@ public class LetterService {
         Asserts.notEmpty(serviceName, "serviceName");
 
         if (serviceFolderMapping.getFolderFor(serviceName).isEmpty()) {
-            throw new ServiceNotConfiguredException("No configuration for service " + serviceName + " found");
+            String message = "No configuration for service " + serviceName + " found";
+            log.error(message);
+            throw new ServiceNotConfiguredException(message);
         }
 
         return letterRepository
