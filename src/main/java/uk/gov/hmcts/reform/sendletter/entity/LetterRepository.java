@@ -39,6 +39,8 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
         + " order by l.createdAt asc")
     List<BasicLetterInfo> findPendingLetters();
 
+    List<BasicLetterInfo> findByCreatedAtBeforeAndStatusAndTypeNot(LocalDateTime createdBefore, LetterStatus status, String type);
+
     @Query("select new uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo(l.id, l.checksum, l.service, l.status, l.type, l.encryptionKeyFingerprint, l.createdAt, l.sentToPrintAt, l.printedAt)"
         + " from Letter l "
         + " where date(l.createdAt) = :createdAt "

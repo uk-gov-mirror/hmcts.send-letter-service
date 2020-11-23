@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.sendletter.tasks.alerts;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -21,10 +22,13 @@ public class PendingLettersTask {
     private static final String TASK_NAME = "PendingLetters";
     private final PendingLettersService pendingLettersService;
     private final AppInsights insights;
+    private final int lettersBeforeMins;
 
-    public PendingLettersTask(PendingLettersService pendingLettersService, AppInsights insights) {
+    public PendingLettersTask(PendingLettersService pendingLettersService, AppInsights insights,
+                              @Value("${tasks.pending-letters-report.before-mins}") int lettersBeforeMins) {
         this.pendingLettersService = pendingLettersService;
         this.insights = insights;
+        this.lettersBeforeMins = lettersBeforeMins;
     }
 
     @SchedulerLock(name = TASK_NAME)
@@ -32,7 +36,7 @@ public class PendingLettersTask {
     public void run() {
         logger.info("Started '{}' task", TASK_NAME);
 
-        List<BasicLetterInfo> letters = pendingLettersService.getPendingLetters();
+        List<BasicLetterInfo> letters = pendingLettersService.getPendingLettersCreatedBeforeTime(lettersBeforeMins);
         letters.forEach(insights::trackPendingLetter);
         int count = letters.size();
 

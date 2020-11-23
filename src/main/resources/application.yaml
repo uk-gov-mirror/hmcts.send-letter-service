@@ -123,6 +123,7 @@ tasks:
     cron: ${STALE_LETTERS_REPORT_CRON:0 30 11 * * *}
   pending-letters-report:
     cron: ${PENDING_LETTERS_REPORT_CRON:0 0 9 * * *}
+    before-mins: ${PENDING_LETTERS_BEFORE:15}
 
 file-cleanup:
   enabled: ${FILE_CLEANUP_ENABLED:false}

@@ -37,15 +37,17 @@ class PendingLettersTaskTest {
     ArgumentCaptor<BasicLetterInfo> basicLetterCaptor;
 
     private PendingLettersTask task;
+    private int lettersBeforeMinutes = 5;
 
     @BeforeEach
     void setUp() {
-        task = new PendingLettersTask(pendingLettersService, appInsights);
+        task = new PendingLettersTask(pendingLettersService, appInsights, lettersBeforeMinutes);
     }
 
     @Test
     void should_not_invoke_appInsight() {
-        when(pendingLettersService.getPendingLetters()).thenReturn(Collections.emptyList());
+        when(pendingLettersService.getPendingLettersCreatedBeforeTime(lettersBeforeMinutes))
+                .thenReturn(Collections.emptyList());
 
         task.run();
 
@@ -56,7 +58,8 @@ class PendingLettersTaskTest {
     void should_invoke_appInsight() {
 
         List<BasicLetterInfo> basicLetterInfos = Arrays.asList(createBasicLetterInfo(), createBasicLetterInfo());
-        when(pendingLettersService.getPendingLetters()).thenReturn(basicLetterInfos);
+        when(pendingLettersService.getPendingLettersCreatedBeforeTime(lettersBeforeMinutes))
+                .thenReturn(basicLetterInfos);
 
         task.run();
 
