@@ -39,8 +39,6 @@ public class AppInsights {
 
     static final String LETTER_PRINT_REPORT = "LetterPrintReportReceived";
 
-    static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
-
     static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
     private final TelemetryClient telemetryClient;
@@ -163,7 +161,7 @@ public class AppInsights {
         properties.put("service", staleLetter.getService());
         properties.put("type", staleLetter.getType());
         properties.put("sentToPrintDayOfWeek", staleLetter.getSentToPrintAt().getDayOfWeek().name());
-        properties.put("sentToPrintAt", staleLetter.getSentToPrintAt().format(TIME_FORMAT));
+        properties.put("sentToPrintAt", staleLetter.getSentToPrintAt().format(DATE_TIME_FORMAT));
 
         telemetryClient.trackEvent(LETTER_NOT_PRINTED, properties, null);
     }

@@ -72,7 +72,7 @@ public class PendingLetterSearchTest {
         // then
         assertThat(letters)
             .extracting(BasicLetterInfo::getType)
-            .containsExactly("type-3", "type-4");
+            .containsOnly("type-3", "type-4");
     }
 
     @Test

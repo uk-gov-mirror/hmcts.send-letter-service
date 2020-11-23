@@ -84,7 +84,7 @@ class AppInsightsTest {
         expectedProperties.put("service", SERVICE_NAME);
         expectedProperties.put("type", TYPE);
         expectedProperties.put("sentToPrintDayOfWeek", sentToPrint.getDayOfWeek().name());
-        expectedProperties.put("sentToPrintAt", sentToPrint.format(AppInsights.TIME_FORMAT));
+        expectedProperties.put("sentToPrintAt", sentToPrint.format(DATE_TIME_FORMAT));
 
         verify(telemetry).trackEvent(
             eq(AppInsights.LETTER_NOT_PRINTED),
