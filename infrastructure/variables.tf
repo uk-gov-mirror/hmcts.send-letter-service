@@ -136,3 +136,7 @@ variable managed_identity_object_id {
 variable enable_ase {
   default = false
 }
+
+variable num_staging_dbs {
+  default = 0
+}
