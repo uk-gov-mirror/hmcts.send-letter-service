@@ -33,7 +33,7 @@ union
 | where is_operational == false
 EOF
 
-  frequency_in_minutes       = 10
+  frequency_in_minutes = 10
   // window no longer matters as it is defined in the query. but it is a requirement for module
   time_window_in_minutes     = 30
   severity_level             = "2"

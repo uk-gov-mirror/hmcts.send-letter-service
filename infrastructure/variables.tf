@@ -35,7 +35,7 @@ variable capacity {
 
 variable vault_section {
   description = "Name of the environment-specific section in Vault key path, i.e. secret/{vault_section}/..."
-  default = "test"
+  default     = "test"
 }
 
 variable ilbIp {}
@@ -61,7 +61,7 @@ variable scheduling_enabled {
 }
 
 variable file_cleanup_enabled {
-  default = "false"
+  default     = "false"
   description = "Determines whether old files should be deleted from the FTP server. Should only be enabled on AAT."
 }
 
@@ -71,7 +71,7 @@ variable file_cleanup_cron {
 }
 
 variable scheduling_lock_at_most_for {
-  default = "PT10M"
+  default     = "PT10M"
   description = "For how long to keep the lock of the specific task"
 }
 

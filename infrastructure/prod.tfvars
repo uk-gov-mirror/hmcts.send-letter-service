@@ -1,4 +1,4 @@
-vault_section = "prod"
+vault_section        = "prod"
 file_cleanup_enabled = "false"
 
 capacity = "2"
