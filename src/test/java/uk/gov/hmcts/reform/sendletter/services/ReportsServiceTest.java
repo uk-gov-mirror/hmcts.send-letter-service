@@ -176,5 +176,4 @@ class ReportsServiceTest {
         //then
         assertThat(result).isEmpty();
     }
-
 }

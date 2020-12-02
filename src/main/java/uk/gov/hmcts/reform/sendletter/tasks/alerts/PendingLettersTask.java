@@ -11,7 +11,8 @@ import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.PendingLettersService;
 
-import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
 
@@ -35,12 +36,16 @@ public class PendingLettersTask {
     @Scheduled(cron = "${tasks.pending-letters-report.cron}", zone = EUROPE_LONDON)
     public void run() {
         logger.info("Started '{}' task", TASK_NAME);
+        AtomicInteger counter = new AtomicInteger(0);
 
-        List<BasicLetterInfo> letters = pendingLettersService.getPendingLettersCreatedBeforeTime(lettersBeforeMins);
-        letters.forEach(insights::trackPendingLetter);
-        int count = letters.size();
+        try (Stream<BasicLetterInfo> letters = pendingLettersService
+                .getPendingLettersCreatedBeforeTime(lettersBeforeMins)) {
+            letters.forEach(letter -> {
+                insights.trackPendingLetter(letter);
+                counter.incrementAndGet();
+            });
+        }
 
-        logger.info("Completed '{}' task. Letters found: {}", TASK_NAME, count);
+        logger.info("Completed '{}' task. Letters found: {}", TASK_NAME, counter.get());
     }
-
 }

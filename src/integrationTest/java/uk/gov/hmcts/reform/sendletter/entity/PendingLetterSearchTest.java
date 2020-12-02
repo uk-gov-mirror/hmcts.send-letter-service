@@ -11,12 +11,13 @@ import uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Uploaded;
-import static uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask.SMOKE_TEST_LETTER_TYPE;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -40,8 +41,7 @@ public class PendingLetterSearchTest {
     @Test
     public void should_return_letters_in_created_status() {
         // given
-        storeLetter(Uploaded, "type-1", LocalDateTime.now());
-        storeLetter(Uploaded, "type-2", LocalDateTime.now());
+
         storeLetter(Created, "type-3", LocalDateTime.now());
         storeLetter(Created, "type-4", LocalDateTime.now());
 
@@ -65,14 +65,14 @@ public class PendingLetterSearchTest {
         storeLetter(Created, "type-5", currentTime.minusMinutes(2));
 
         // when
-        List<BasicLetterInfo> letters = repository
+        try (Stream<BasicLetterInfo> letters = repository
                 .findByCreatedAtBeforeAndStatusAndTypeNot(currentTime.minusMinutes(5), Created,
-                        UploadLettersTask.SMOKE_TEST_LETTER_TYPE);
-
-        // then
-        assertThat(letters)
-            .extracting(BasicLetterInfo::getType)
-            .containsOnly("type-3", "type-4");
+                        UploadLettersTask.SMOKE_TEST_LETTER_TYPE)) {
+            // then
+            assertThat(letters)
+                    .extracting(BasicLetterInfo::getType)
+                    .containsOnly("type-3", "type-4");
+        }
     }
 
     @Test
@@ -97,15 +97,16 @@ public class PendingLetterSearchTest {
         storeLetter(Created, SMOKE_TEST_LETTER_TYPE, currentTime.minusMinutes(30));
         storeLetter(Created, "not-smoke-test-type-1", currentTime.minusMinutes(30));
         storeLetter(Created, "not-smoke-test-type-2", currentTime.minusMinutes(30));
-
+        List<BasicLetterInfo> collect;
         // when
-        List<BasicLetterInfo> letters = repository
+        try (Stream<BasicLetterInfo> letters = repository
                 .findByCreatedAtBeforeAndStatusAndTypeNot(currentTime.minusMinutes(5), Created,
-                        UploadLettersTask.SMOKE_TEST_LETTER_TYPE);
-
-        // then
-        assertThat(letters.size()).isEqualTo(2);
-        assertThat(letters).noneMatch(l -> l.getStatus().equals(SMOKE_TEST_LETTER_TYPE));
+                        UploadLettersTask.SMOKE_TEST_LETTER_TYPE)) {
+            collect = letters.collect(toList());
+        }
+        assertThat(collect.size()).isEqualTo(2);
+        assertThat(collect).extracting("type")
+                .containsExactlyInAnyOrder("not-smoke-test-type-1","not-smoke-test-type-2");
     }
 
     @Test
@@ -138,7 +139,6 @@ public class PendingLetterSearchTest {
                 savedLetter.getType()
             ));
     }
-
 
 
     private void storeLetter(LetterStatus status, String type, LocalDateTime createdAt) {

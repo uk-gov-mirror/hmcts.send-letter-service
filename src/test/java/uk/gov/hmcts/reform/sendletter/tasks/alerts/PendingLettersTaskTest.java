@@ -12,9 +12,9 @@ import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.PendingLettersService;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,7 +47,7 @@ class PendingLettersTaskTest {
     @Test
     void should_not_invoke_appInsight() {
         when(pendingLettersService.getPendingLettersCreatedBeforeTime(lettersBeforeMinutes))
-                .thenReturn(Collections.emptyList());
+                .thenReturn(Stream.empty());
 
         task.run();
 
@@ -56,10 +56,9 @@ class PendingLettersTaskTest {
 
     @Test
     void should_invoke_appInsight() {
-
         List<BasicLetterInfo> basicLetterInfos = Arrays.asList(createBasicLetterInfo(), createBasicLetterInfo());
         when(pendingLettersService.getPendingLettersCreatedBeforeTime(lettersBeforeMinutes))
-                .thenReturn(basicLetterInfos);
+                .thenReturn(basicLetterInfos.stream());
 
         task.run();
 

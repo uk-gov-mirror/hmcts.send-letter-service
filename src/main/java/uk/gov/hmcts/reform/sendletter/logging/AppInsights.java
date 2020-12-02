@@ -39,7 +39,7 @@ public class AppInsights {
 
     static final String LETTER_PRINT_REPORT = "LetterPrintReportReceived";
 
-    static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+    static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final TelemetryClient telemetryClient;
 

@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Arrays.asList;
@@ -57,21 +58,22 @@ class PendingLettersServiceTest {
     @Test
     void should_return_list_of_letters_from_repo_before_certian_time() {
         // given
-        List<BasicLetterInfo> letters =
-            asList(
+        Stream<BasicLetterInfo> letters =
+            Stream.of(
                 new BasicLetterInfo(randomUUID(), "c1", "s1", Created, "t1", "f1", now(), now().minusSeconds(1), null),
                 new BasicLetterInfo(randomUUID(), "c2", "s2", Created, "t1", "f2", now().minusSeconds(1), now(), null)
             );
+
 
         given(repo.findByCreatedAtBeforeAndStatusAndTypeNot(isA(LocalDateTime.class), eq(Created),
                 eq(UploadLettersTask.SMOKE_TEST_LETTER_TYPE))).willReturn(letters);
 
         // when
-        List<BasicLetterInfo> lettersFromDb = service.getPendingLettersCreatedBeforeTime(5);
-
-        // then
-        assertThat(lettersFromDb)
-                .usingRecursiveFieldByFieldElementComparator()
-                .isEqualTo(letters);
+        try (Stream<BasicLetterInfo> lettersFromDb = service.getPendingLettersCreatedBeforeTime(5)) {
+            // then
+            assertThat(lettersFromDb)
+                    .usingRecursiveFieldByFieldElementComparator()
+                    .isEqualTo(letters);
+        }
     }
 }

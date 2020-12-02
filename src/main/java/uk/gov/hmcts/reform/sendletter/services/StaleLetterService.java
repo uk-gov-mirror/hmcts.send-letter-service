@@ -5,8 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
+import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
+import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.date.DateCalculator;
+import uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask;
 import uk.gov.hmcts.reform.sendletter.util.CsvWriter;
 
 import java.io.File;
@@ -17,6 +20,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static uk.gov.hmcts.reform.sendletter.util.TimeZones.EUROPE_LONDON;
@@ -33,6 +37,10 @@ public class StaleLetterService {
     private final int minStaleLetterAgeInBusinessDays;
     private final LocalTime ftpDowntimeStart;
     private final Clock clock;
+
+    public static final  List<LetterStatus> LETTER_STATUS_TO_IGNORE =
+            List.of(LetterStatus.Posted, LetterStatus.Aborted);
+
 
     public StaleLetterService(
         DateCalculator dateCalculator,
@@ -55,6 +63,21 @@ public class StaleLetterService {
         log.info("Stale letters before {} ", localDateTime);
         return letterRepository.findStaleLetters(localDateTime);
     }
+
+    public File getWeeklyStaleLetters() throws IOException {
+        LocalDateTime localDateTime = calculateCutOffCreationDate()
+                .withZoneSameInstant(DB_TIME_ZONE_ID)
+                .toLocalDateTime();
+        log.info("Stale letters before {} ", localDateTime);
+        try (Stream<Letter> weeklyStaleLetters =
+                letterRepository.findByStatusNotInAndTypeNotAndCreatedAtBetweenOrderByCreatedAtAsc(
+                        LETTER_STATUS_TO_IGNORE, UploadLettersTask.SMOKE_TEST_LETTER_TYPE,
+                        localDateTime.minusDays(6), localDateTime)) {
+            return CsvWriter.writeStaleLettersReport(weeklyStaleLetters);
+        }
+    }
+
+
 
     /**
      * Calculates the cut-off creation date for stale letters.
