@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.services.PendingLettersService;
@@ -32,6 +33,7 @@ public class PendingLettersTask {
         this.lettersBeforeMins = lettersBeforeMins;
     }
 
+    @Transactional
     @SchedulerLock(name = TASK_NAME)
     @Scheduled(cron = "${tasks.pending-letters-report.cron}", zone = EUROPE_LONDON)
     public void run() {

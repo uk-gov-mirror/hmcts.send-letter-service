@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
@@ -64,6 +65,7 @@ public class StaleLetterService {
         return letterRepository.findStaleLetters(localDateTime);
     }
 
+    @Transactional
     public File getWeeklyStaleLetters() throws IOException {
         LocalDateTime localDateTime = calculateCutOffCreationDate()
                 .withZoneSameInstant(DB_TIME_ZONE_ID)
