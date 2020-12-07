@@ -10,6 +10,7 @@ plugins {
   id 'com.github.ben-manes.versions' version '0.36.0'
   id 'org.sonarqube' version '3.0'
   id 'info.solidsoft.pitest' version '1.5.2'
+  id 'au.com.dius.pact' version '4.1.0'
 }
 
 flyway {
@@ -53,6 +54,15 @@ sourceSets {
     }
     resources.srcDir file('src/smokeTest/resources')
   }
+
+  contractTest {
+    java {
+      compileClasspath += main.output
+      runtimeClasspath += main.output
+      srcDir file('src/contractTest/java')
+    }
+    resources.srcDir file('src/contractTest/resources')
+  }
 }
 
 tasks.withType(JavaCompile) {
@@ -90,6 +100,14 @@ task smoke(type: Test) {
   group = 'Verification'
   testClassesDirs = sourceSets.smokeTest.output.classesDirs
   classpath = sourceSets.smokeTest.runtimeClasspath
+}
+
+task contractTest(type: Test) {
+  logger.lifecycle("Runnning contract Tests")
+  useJUnitPlatform()
+  testClassesDirs = sourceSets.contractTest.output.classesDirs
+  classpath = sourceSets.contractTest.runtimeClasspath
+
 }
 
 tasks.withType(Test) {
@@ -185,7 +203,8 @@ def versions = [
   junitPlatform: '1.6.2',
   mockitoJupiter: '3.3.3',
   reformLogging: '5.1.5',
-  springfoxSwagger: '2.9.2'
+  springfoxSwagger: '2.9.2',
+  pact_version: '4.1.7'
 ]
 
 ext["rest-assured.version"] = '4.3.0'
@@ -292,6 +311,28 @@ dependencies {
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
   functionalTestImplementation group: 'io.rest-assured', name: 'rest-assured'
+
+  contractTestCompile group: 'au.com.dius.pact.provider', name: 'junit5', version: versions.pact_version
+  contractTestCompile group: 'au.com.dius.pact.provider', name: 'spring', version: versions.pact_version
+  contractTestCompile group: 'au.com.dius.pact.provider', name: 'junit5spring', version: versions.pact_version
+  contractTestCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+  contractTestCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
+  contractTestCompile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+  contractTestImplementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
+  contractTestImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+
+  contractTestImplementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: versions.bouncycastle
+  contractTestImplementation group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: versions.bouncycastle
+  contractTestImplementation group: 'org.bouncycastle', name: 'bcpg-jdk15on', version: versions.bouncycastle
+
+  contractTestImplementation group: 'uk.gov.hmcts.reform', name: 'pdf-generator', version: '1.0.2'
+  contractTestImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.21'
+
+  contractTestCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
+  contractTestCompile("org.junit.jupiter:junit-jupiter-api:5.3.2")
+  contractTestRuntime("org.junit.jupiter:junit-jupiter-engine:5.3.2")
+  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.3.2')
+
 }
 
 processFunctionalTestResources {
@@ -322,3 +363,13 @@ task migratePostgresDatabase(type: FlywayMigrateTask) {
     url = "jdbc:postgresql://${dburl}"
   }
 }
+
+task runProviderPactVerification(type: Test) {
+  logger.lifecycle("Runs pact Tests")
+  testClassesDirs = sourceSets.contractTest.output.classesDirs
+  classpath = sourceSets.contractTest.runtimeClasspath
+}
+
+runProviderPactVerification.dependsOn contractTest
+
+runProviderPactVerification.finalizedBy pactVerify
