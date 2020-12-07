@@ -231,8 +231,8 @@ dependencyManagement {
       entry 'tomcat-embed-core'
       entry 'tomcat-embed-websocket'
     }
-    //CVE-2019-14900
-    dependencySet(group: 'org.hibernate', version: '5.4.23.Final') {
+    //CVE-2019-14900 CVE-2020-25638
+    dependencySet(group: 'org.hibernate', version: '5.4.24.Final') {
       entry 'hibernate-core'
     }
   }
