@@ -76,7 +76,7 @@ reports:
     - service: fpl_case_service
       display-name: FPLA
   delayed-stale-report:
-    cron: ${DELAYED_STALE_REPORT_CRON:0 0 9 * * 4}
+    cron: ${DELAYED_STALE_REPORT_CRON:0 0 9 * * 5}
     enabled: ${DELAYED_STALE_REPORT_ENABLED:false}
     recipients: ${DELAYED_STALE_REPORT_RECIPIENTS:}
 
