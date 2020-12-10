@@ -65,4 +65,6 @@ withPipeline(type , product, component) {
   onMaster() {
     enablePactAs([AppPipelineDsl.PactRoles.PROVIDER])
   }
+  def branchesToSync = ['demo', 'perftest']
+  syncBranchesWithMaster(branchesToSync)
 }
