@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsAndNumberOfCopiesRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.model.out.v2.LetterStatusV2;
 import uk.gov.hmcts.reform.sendletter.services.encryption.UnableToLoadPgpPublicKeyException;
 import uk.gov.hmcts.reform.sendletter.services.encryption.UnableToPgpEncryptZipFileException;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
@@ -40,6 +43,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static com.google.common.io.Resources.getResource;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +66,7 @@ class LetterServiceTest {
     @Mock PdfCreator pdfCreator;
     @Mock LetterRepository letterRepository;
     @Mock Zipper zipper;
-    @Mock ObjectMapper objectMapper;
+    ObjectMapper objectMapper = new ObjectMapper();
     @Mock ServiceFolderMapping serviceFolderMapping;
     @Spy
     ExecusionService execusionService;
@@ -70,6 +74,11 @@ class LetterServiceTest {
     @Mock ExceptionLetterService exceptionLetterService;
 
     private LetterService service;
+
+
+    Function<JsonNode, Map<String, Integer>> getCopies = jsonNode ->
+            objectMapper.convertValue(jsonNode,
+                    new TypeReference<Map<String, Integer>>() {});
 
     @ParameterizedTest
     @ValueSource(strings = {"false", "true"})
@@ -237,7 +246,8 @@ class LetterServiceTest {
         ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
         verify(letterRepository).save(letterArgumentCaptor.capture());
 
-        assertThat(letterArgumentCaptor.getValue().getCopies()).isEqualTo(15);
+        assertThat(getCopies.apply(letterArgumentCaptor.getValue().getCopies()))
+                .containsAllEntriesOf(Map.of("Document_1", 5, "Document_2", 10));
 
         if (Boolean.parseBoolean(async)) {
             verify(execusionService).run(any(), any(), any(), any());
@@ -275,7 +285,9 @@ class LetterServiceTest {
         ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
         verify(letterRepository).save(letterArgumentCaptor.capture());
 
-        assertThat(letterArgumentCaptor.getValue().getCopies()).isEqualTo(1);
+        assertThat(getCopies.apply(letterArgumentCaptor.getValue().getCopies()))
+                .containsAllEntriesOf(Map.of("Document_1", 1));
+
     }
 
     @ParameterizedTest
@@ -309,7 +321,9 @@ class LetterServiceTest {
         ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
         verify(letterRepository).save(letterArgumentCaptor.capture());
 
-        assertThat(letterArgumentCaptor.getValue().getCopies()).isEqualTo(1);
+        assertThat(getCopies.apply(letterArgumentCaptor.getValue().getCopies()))
+                .containsAllEntriesOf(Map.of("Document_1", 1));
+
     }
 
     @ParameterizedTest
@@ -340,8 +354,8 @@ class LetterServiceTest {
         ArgumentCaptor<Letter> letterArgumentCaptor = ArgumentCaptor.forClass(Letter.class);
         verify(letterRepository).save(letterArgumentCaptor.capture());
 
-        assertThat(letterArgumentCaptor.getValue().getCopies()).isEqualTo(11);
-
+        assertThat(getCopies.apply(letterArgumentCaptor.getValue().getCopies()))
+                .containsAllEntriesOf(Map.of("Document_1", 3, "Document_2", 8));
     }
 
     @Test
@@ -436,6 +450,15 @@ class LetterServiceTest {
     }
 
     @Test
+    void should_throw_LetterNotFoundException_for_json_copies() {
+        createLetterService(false, null);
+        UUID id = UUID.randomUUID();
+        assertThrows(LetterNotFoundException.class, () -> {
+            service.getLatestStatus(id);
+        });
+    }
+
+    @Test
     void should_return_letter() {
         createLetterService(false, null);
         ZonedDateTime now = ZonedDateTime.of(2000, 2, 12, 1, 2, 3, 123_000_000, ZoneId.systemDefault());
@@ -445,6 +468,23 @@ class LetterServiceTest {
         assertNotNull(status);
         verify(letterRepository).findById(isA(UUID.class));
         verify(duplicateLetterService).isDuplicate(isA(UUID.class));
+    }
+
+    @Test
+    void should_return_letter_json_copies() {
+        createLetterService(false, null);
+        ZonedDateTime now = ZonedDateTime.of(2000, 2, 12, 1, 2, 3, 123_000_000, ZoneId.systemDefault());
+        Letter letter = createLetter();
+        JsonNode copies = objectMapper.valueToTree(Map.of("Document_1", 20, "Document_2", 40));
+
+        given(letter.getCopies()).willReturn(copies);
+        given(letterRepository.findById(isA(UUID.class))).willReturn(Optional.of(letter));
+
+        LetterStatusV2 status
+                = service.getLatestStatus(UUID.randomUUID());
+
+        assertNotNull(status);
+        verify(letterRepository).findById(isA(UUID.class));
     }
 
 

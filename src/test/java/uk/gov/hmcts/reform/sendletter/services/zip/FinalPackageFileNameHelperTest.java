@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.sendletter.services.zip;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
@@ -12,6 +14,7 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FinalPackageFileNameHelperTest {
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void should_generate_expected_file_name() {
@@ -26,7 +29,7 @@ class FinalPackageFileNameHelperTest {
             false,
             null,
             now(),
-            1
+            objectMapper.valueToTree(Map.of("Document_1", 1))
         );
 
         // when
@@ -71,7 +74,7 @@ class FinalPackageFileNameHelperTest {
             false,
             null,
             now(),
-            1
+            objectMapper.valueToTree(Map.of("Document_1", 1))
         );
 
         // when
@@ -94,7 +97,7 @@ class FinalPackageFileNameHelperTest {
             false,
             null,
             now(),
-            1
+            objectMapper.valueToTree(Map.of("Document_1", 1))
         );
 
         // when
@@ -116,7 +119,7 @@ class FinalPackageFileNameHelperTest {
             false,
             null,
             now(),
-            1
+            objectMapper.valueToTree(Map.of("Document_1", 1))
         );
 
         Letter encryptedLetter = new Letter(
@@ -129,7 +132,7 @@ class FinalPackageFileNameHelperTest {
             true,
             "752c14ea195c369bac3c3b7896975ee9fd15eeb7",
             now(),
-            1
+            objectMapper.valueToTree(Map.of("Document_1", 1))
         );
 
         assertThat(FinalPackageFileNameHelper.generateName(zippedLetter)).endsWith(".zip");

@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.sendletter.tasks.UploadLettersTask;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -112,7 +113,8 @@ public class PendingLetterSearchTest {
     @Test
     public void should_set_properties_correctly() {
         // given
-        Letter letter = SampleData.letterEntity("service", LocalDateTime.now(), "type", "fingerprint", 1,
+        Letter letter = SampleData.letterEntity("service", LocalDateTime.now(), "type", "fingerprint",
+                Map.of("Document_1", 1),
                 SampleData.checkSumSupplier);
         letter.setStatus(Created);
         Letter savedLetter = repository.save(letter);

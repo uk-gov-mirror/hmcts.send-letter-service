@@ -12,11 +12,13 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.sendletter.controllers.SendLetterController;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.model.out.v2.LetterStatusV2;
 import uk.gov.hmcts.reform.sendletter.services.AuthService;
 import uk.gov.hmcts.reform.sendletter.services.LetterService;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +46,7 @@ class GetLetterStatusControllerTest {
     void setUp() {
         ZonedDateTime now = ZonedDateTime.of(2000, 2, 12, 1, 2, 3, 123_000_000, ZoneId.systemDefault());
         letterStatus = new LetterStatus(UUID.randomUUID(), "Created",
-                "some-message-id", now, now, now, null, 10);
+                "some-message-id", now, now, now, null, null);
     }
 
     @Test
@@ -62,9 +64,35 @@ class GetLetterStatusControllerTest {
                     + "\"created_at\":\"2000-02-12T01:02:03.123Z\","
                     + "\"sent_to_print_at\":\"2000-02-12T01:02:03.123Z\","
                     + "\"printed_at\":\"2000-02-12T01:02:03.123Z\","
-                    + "\"copies\":10"
+                    + "\"copies\":null"
                     + "}"
             ));
+    }
+
+    @Test
+    void should_return_letter_status_when_it_is_found_in_database_with_v2_copies() throws Exception {
+        Map<String, Object> detailCopies = Map.of("Document_1", 1);
+        ZonedDateTime now = ZonedDateTime.of(2000, 2, 12, 1, 2, 3, 123_000_000, ZoneId.systemDefault());
+
+        LetterStatusV2 letterStatus =
+                new LetterStatusV2(UUID.randomUUID(), "Created",
+                "some-message-id", now, now, now, null, detailCopies);
+        given(service.getLatestStatus(letterStatus.id)).willReturn(letterStatus);
+
+        mockMvc.perform(
+                get("/letters/v2/" + letterStatus.id))
+                .andExpect(status().isOk())
+                .andExpect(content().json(
+                        "{"
+                                + "\"id\":\"" + letterStatus.id.toString() + "\","
+                                + "\"message_id\":\"" + letterStatus.messageId + "\","
+                                + "\"checksum\":\"" + letterStatus.checksum + "\","
+                                + "\"created_at\":\"2000-02-12T01:02:03.123Z\","
+                                + "\"sent_to_print_at\":\"2000-02-12T01:02:03.123Z\","
+                                + "\"printed_at\":\"2000-02-12T01:02:03.123Z\","
+                                + "\"copies\":{\"Document_1\":1}"
+                                + "}"
+                ));
     }
 
     @Test
@@ -104,7 +132,7 @@ class GetLetterStatusControllerTest {
                                 + "\"created_at\":\"2000-02-12T01:02:03.123Z\","
                                 + "\"sent_to_print_at\":\"2000-02-12T01:02:03.123Z\","
                                 + "\"printed_at\":\"2000-02-12T01:02:03.123Z\","
-                                + "\"copies\":10"
+                                + "\"copies\":null"
                                 + "}"
                 ));
     }
@@ -125,7 +153,7 @@ class GetLetterStatusControllerTest {
                     + "\"created_at\":\"2000-02-12T01:02:03.123Z\","
                     + "\"sent_to_print_at\":\"2000-02-12T01:02:03.123Z\","
                     + "\"printed_at\":\"2000-02-12T01:02:03.123Z\","
-                    + "\"copies\":10"
+                    + "\"copies\":null"
                     + "}"));
     }
 

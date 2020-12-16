@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.tasks;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.schmizz.sshj.sftp.SFTPClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -61,6 +63,8 @@ class UploadLettersTaskTest {
     @Captor
     private ArgumentCaptor<Function<SFTPClient, Integer>> captureRunWith;
 
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
     @BeforeEach
     void setUp() {
         given(availabilityChecker.isFtpAvailable(any(LocalTime.class))).willReturn(true);
@@ -80,8 +84,8 @@ class UploadLettersTaskTest {
         given(repo.countByStatus(eq(Created))).willReturn(2);
 
         given(repo.findFirstLetterCreated(isA(LocalDateTime.class)))
-            .willReturn(Optional.of(letterOfType(SMOKE_TEST_LETTER_TYPE,1)))
-            .willReturn(Optional.of(letterOfType("not_" + SMOKE_TEST_LETTER_TYPE, 1)))
+            .willReturn(Optional.of(letterOfType(SMOKE_TEST_LETTER_TYPE, Map.of("Document_1", 1))))
+            .willReturn(Optional.of(letterOfType("not_" + SMOKE_TEST_LETTER_TYPE, Map.of("Document_1", 1))))
             .willReturn(Optional.empty());
 
         // when
@@ -124,9 +128,9 @@ class UploadLettersTaskTest {
     @Test
     void should_skip_letter_if_folder_for_its_service_is_not_configured() {
         // given
-        Letter letterA = letterForService("service_A", 1);
-        Letter letterB = letterForService("service_B", 1);
-        Letter letterC = letterForService("service_C", 1);
+        Letter letterA = letterForService("service_A", Map.of("Document_1", 1));
+        Letter letterB = letterForService("service_B", Map.of("Document_1", 1));
+        Letter letterC = letterForService("service_C", Map.of("Document_1", 1));
 
         given(repo.countByStatus(eq(Created))).willReturn(3);
 
@@ -166,15 +170,15 @@ class UploadLettersTaskTest {
         verifyNoMoreInteractions(ftpClient);
     }
 
-    private Letter letterOfType(String type, int copies) {
+    private Letter letterOfType(String type,  Map<String, Integer> copies) {
         return letter("cmc", type, copies);
     }
 
-    private Letter letterForService(String serviceName, int copies) {
+    private Letter letterForService(String serviceName,  Map<String, Integer> copies) {
         return letter(serviceName, "type", copies);
     }
 
-    private Letter letter(String service, String type, int copies) {
+    private Letter letter(String service, String type, Map<String, Integer> copies) {
         return new Letter(
             UUID.randomUUID(),
             "msgId",
@@ -185,7 +189,7 @@ class UploadLettersTaskTest {
             true,
             "9c61b7da4e6c94416be51136122ed01acea9884f",
             now(),
-            copies
+            objectMapper.valueToTree(copies)
         );
     }
 

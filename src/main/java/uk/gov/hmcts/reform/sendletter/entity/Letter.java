@@ -41,7 +41,9 @@ public class Letter {
     private byte[] fileContent;
     private Boolean isEncrypted;
     private String encryptionKeyFingerprint;
-    private Integer copies;
+    @Type(type = "json")
+    @Column(columnDefinition = "json")
+    private JsonNode copies;
 
     // For use by hibernate.
     private Letter() {
@@ -57,7 +59,7 @@ public class Letter {
         Boolean isEncrypted,
         String encryptionKeyFingerprint,
         LocalDateTime createdAt,
-        Integer copies
+        JsonNode copies
     ) {
         this.id = id;
         this.checksum = checksum;
@@ -144,11 +146,11 @@ public class Letter {
         this.encryptionKeyFingerprint = encryptionKeyFingerprint;
     }
 
-    public Integer getCopies() {
+    public JsonNode getCopies() {
         return copies;
     }
 
-    public void setCopies(Integer copies) {
+    public void setCopies(JsonNode copies) {
         this.copies = copies;
     }
 }

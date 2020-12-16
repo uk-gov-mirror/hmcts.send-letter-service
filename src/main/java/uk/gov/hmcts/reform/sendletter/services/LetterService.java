@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.sendletter.model.in.LetterRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsAndNumberOfCopiesRequest;
 import uk.gov.hmcts.reform.sendletter.model.in.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.model.out.LetterStatus;
+import uk.gov.hmcts.reform.sendletter.model.out.v2.LetterStatusV2;
 import uk.gov.hmcts.reform.sendletter.services.encryption.PgpEncryptionUtil;
 import uk.gov.hmcts.reform.sendletter.services.ftp.ServiceFolderMapping;
 import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
@@ -37,11 +38,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.ToIntFunction;
+import java.util.stream.IntStream;
 
 import static java.time.LocalDateTime.now;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Created;
@@ -62,6 +64,7 @@ public class LetterService {
     private final ExecusionService asynService;
     private final DuplicateLetterService duplicateLetterService;
     private final ExceptionLetterService exceptionLetterService;
+    private static final Map<String, Integer> DEFAULT_COPY = Map.of(getCopiesKey(1), 1);
 
     public LetterService(
             PdfCreator pdfCreator,
@@ -155,7 +158,7 @@ public class LetterService {
             isEncryptionEnabled,
             getEncryptionKeyFingerprint(),
             createdAtTime,
-            getCopies(letter)
+            mapper.valueToTree(getCopies(letter))
         );
 
         letterRepository.save(dbLetter);
@@ -193,7 +196,7 @@ public class LetterService {
                 isEncryptionEnabled,
                 getEncryptionKeyFingerprint(),
                 createdAtTime,
-                getCopies(letter),
+                mapper.valueToTree(getCopies(letter)),
                 isAsync
         );
     }
@@ -258,22 +261,25 @@ public class LetterService {
         }
     }
 
-    private int getCopies(ILetterRequest letter) {
-        int letterCount = -1;
-        if (letter instanceof LetterRequest) {
-            letterCount = ((LetterRequest) letter).documents.size();
-        } else if (letter instanceof LetterWithPdfsRequest) {
-            letterCount = ((LetterWithPdfsRequest) letter).documents.size();
-        } else if (letter instanceof LetterWithPdfsAndNumberOfCopiesRequest) {
-            letterCount = copies.applyAsInt((LetterWithPdfsAndNumberOfCopiesRequest) letter);
-        }
-        return letterCount;
+    private Map<String, Integer> getCopies(LetterWithPdfsAndNumberOfCopiesRequest letter) {
+        return IntStream.range(0, letter.documents.size())
+                .collect(HashMap::new, (map, count) -> map.put(getCopiesKey(count + 1),
+                        letter.documents.get(count).copies), Map::putAll);
     }
 
-    private ToIntFunction<LetterWithPdfsAndNumberOfCopiesRequest> copies =
-        request -> request.documents.stream().mapToInt(doc -> doc.copies).sum();
+    private Map<String, Integer> getCopies(ILetterRequest letter) {
+        if (letter instanceof LetterWithPdfsAndNumberOfCopiesRequest) {
+            return getCopies((LetterWithPdfsAndNumberOfCopiesRequest) letter);
+        }
+        return DEFAULT_COPY;
+    }
 
-    public LetterStatus getStatus(UUID id, String isAdditonalDataRequired, String isDuplicate) {
+    private static String getCopiesKey(int count) {
+        return String.join("_","Document", String.valueOf(count));
+    }
+
+    public uk.gov.hmcts.reform.sendletter.model.out.LetterStatus
+        getStatus(UUID id, String isAdditonalDataRequired, String isDuplicate) {
         log.info("Getting letter status for id {} ", id);
         exceptionCheck(id);
         duplicateCheck(id, isDuplicate);
@@ -297,10 +303,31 @@ public class LetterService {
                         toDateTime(letter.getSentToPrintAt()),
                         toDateTime(letter.getPrintedAt()),
                         additionDataFunction.apply(letter.getAdditionalData()),
-                        letter.getCopies()
+                        null
                 ))
                 .orElseThrow(() -> new LetterNotFoundException(id));
         log.info("Returning  letter status for letter {} ", letterStatus);
+        return letterStatus;
+    }
+
+    public LetterStatusV2
+        getLatestStatus(UUID id) {
+        log.info("Getting v2 letter status for id {} ", id);
+
+        LetterStatusV2 letterStatus = letterRepository
+                .findById(id)
+                .map(letter -> new LetterStatusV2(
+                        id,
+                        letter.getStatus().name(),
+                        letter.getChecksum(),
+                        toDateTime(letter.getCreatedAt()),
+                        toDateTime(letter.getSentToPrintAt()),
+                        toDateTime(letter.getPrintedAt()),
+                        mapper.convertValue(letter.getAdditionalData(), new TypeReference<>(){}),
+                        mapper.convertValue(letter.getCopies(), new TypeReference<>(){})
+                ))
+                .orElseThrow(() -> new LetterNotFoundException(id));
+        log.info("Returning v2 letter status for letter {} ", letterStatus);
         return letterStatus;
     }
 

@@ -31,7 +31,9 @@ public class DuplicateLetter {
     private byte[] fileContent;
     private Boolean isEncrypted;
     private String encryptionKeyFingerprint;
-    private Integer copies;
+    @Type(type = "json")
+    @Column(columnDefinition = "json")
+    private JsonNode copies;
     private String isAsync;
 
     // For use by hibernate.
@@ -48,7 +50,7 @@ public class DuplicateLetter {
         Boolean isEncrypted,
         String encryptionKeyFingerprint,
         LocalDateTime createdAt,
-        Integer copies,
+        JsonNode copies,
         String isAsync
     ) {
         this.id = id;
@@ -130,11 +132,11 @@ public class DuplicateLetter {
         this.encryptionKeyFingerprint = encryptionKeyFingerprint;
     }
 
-    public Integer getCopies() {
+    public JsonNode getCopies() {
         return copies;
     }
 
-    public void setCopies(Integer copies) {
+    public void setCopies(JsonNode copies) {
         this.copies = copies;
     }
 

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.sendletter.model.out;
+package uk.gov.hmcts.reform.sendletter.model.out.v2;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,45 +18,51 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @JsonTest
-class LetterStatusTest {
+class LetterStatusV2Test {
     @Autowired
-    private JacksonTester<LetterStatus> json;
+    private JacksonTester<LetterStatusV2> json;
 
     @Test
     void testAdditionalDataPresent() throws IOException {
         UUID uuid = UUID.randomUUID();
         Map<String, Object> additionalData = Map.of("reference", "ABD-123-WAZ", "count", 10, "additionInfo", "present");
-        LetterStatus letterStatus = new LetterStatus(uuid, "TEST", "abc",
+        Map<String, Object> detailCopies = Map.of("Document_1", 1, "Document_2", 2);
+        LetterStatusV2 letterStatus = new LetterStatusV2(uuid, "TEST", "abc",
                 ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
-                ZonedDateTime.now().plusHours(2), additionalData, null);
-        JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
+                ZonedDateTime.now().plusHours(2), additionalData, detailCopies);
+        JsonContent<LetterStatusV2> jsonContent = this.json.write(letterStatus);
+
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
-                       .hasJsonPathMapValue("$.additional_data")
-                       .hasJsonPath("$.copies");
+                .hasJsonPathMapValue("$.additional_data")
+                .extractingJsonPathMapValue("$.copies")
+                .containsExactlyEntriesOf(detailCopies);
     }
 
     @Test
     void testWithEmptyAdditionalData() throws IOException {
         UUID uuid = UUID.randomUUID();
-        LetterStatus letterStatus = new LetterStatus(uuid, "TEST", "abc",
+        Map<String, Object> detailCopies = Map.of("Document_1", 1);
+        LetterStatusV2 letterStatus = new LetterStatusV2(uuid, "TEST", "abc",
                 ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
-                ZonedDateTime.now().plusHours(2), Collections.emptyMap(), null);
-        JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
+                ZonedDateTime.now().plusHours(2), Collections.emptyMap(), detailCopies);
+        JsonContent<LetterStatusV2> jsonContent = this.json.write(letterStatus);
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
                 .hasJsonPath("$.additional_data")
-                .hasJsonPath("$.copies");
-
+                .extractingJsonPathMapValue("$.copies")
+                .containsExactlyEntriesOf(detailCopies);
     }
 
     @Test
     void testWithNullAdditionalDataPresent() throws IOException {
         UUID uuid = UUID.randomUUID();
 
-        LetterStatus letterStatus = new LetterStatus(uuid, "TEST", "abc",
+        LetterStatusV2 letterStatus = new LetterStatusV2(uuid, "TEST", "abc",
                 ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
                 ZonedDateTime.now().plusHours(2), null,  null);
-        JsonContent<LetterStatus> jsonContent = this.json.write(letterStatus);
+        JsonContent<LetterStatusV2> jsonContent = this.json.write(letterStatus);
+        System.out.println(jsonContent);
         assertThat(jsonContent).hasJsonPathStringValue("$.id")
-                .doesNotHaveJsonPath("$.additional_data");
+                .doesNotHaveJsonPath("$.additional_data")
+                .doesNotHaveJsonPath("$.copies");
     }
 }

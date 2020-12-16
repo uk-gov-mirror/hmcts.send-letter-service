@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -25,12 +26,12 @@ import uk.gov.hmcts.reform.sendletter.services.pdf.PdfCreator;
 import uk.gov.hmcts.reform.sendletter.services.zip.Zipper;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
@@ -106,8 +107,10 @@ class LetterServiceTest {
 
         Letter result = letterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Letter not found " + id.toString()));
-
-        assertEquals(14, result.getCopies().intValue());
+        JsonNode copiesNode = result.getCopies();
+        Map<String, Integer> copies = objectMapper.convertValue(copiesNode, new TypeReference<Map<String, Integer>>() {
+        });
+        assertThat(copies).containsAllEntriesOf(Map.of("Document_1", 4, "Document_2", 10));
         assertThat(result.isEncrypted()).isFalse();
         assertThat(result.getEncryptionKeyFingerprint()).isNull();
         PdfHelper.validateZippedPdf(result.getFileContent());
