@@ -125,7 +125,7 @@ public class LetterService {
         if (Boolean.parseBoolean(isAsync)) {
             Runnable logger = () -> log.info("Saving letter id {} in async mode as flag value is {}", id, isAsync);
             asynService.run(() -> saveLetter(letter, messageId, serviceName, id, fileContent), logger,
-                () -> saveDuplicate(letter, id, messageId, serviceName, fileContent, isAsync),
+                () -> saveDuplicate(letter, id, messageId, serviceName, isAsync),
                 message -> saveExcepton(letter, id, serviceName, message, isAsync));
         } else {
             try {
@@ -133,7 +133,7 @@ public class LetterService {
                 asynService.execute(() -> saveLetter(letter, messageId, serviceName, id, fileContent));
             } catch (DataIntegrityViolationException dataIntegrityViolationException) {
                 Runnable logger = () -> log.error("Duplicate record ", dataIntegrityViolationException);
-                asynService.run(() -> saveDuplicate(letter, id, messageId, serviceName, fileContent, isAsync), logger,
+                asynService.run(() -> saveDuplicate(letter, id, messageId, serviceName, isAsync), logger,
                     () -> {}, message -> saveExcepton(letter, id, serviceName,
                                 zipContent.length + ":" + message, isAsync));
                 throw dataIntegrityViolationException;
@@ -167,8 +167,8 @@ public class LetterService {
 
     @Transactional
     public void saveDuplicate(ILetterRequest letter, UUID id, String checksum, String serviceName,
-                              Function<LocalDateTime, byte[]> zipContent, String isAsync) {
-        DuplicateLetter duplicateLetter = getDuplicateLetter(letter, id, checksum, serviceName, zipContent,
+                              String isAsync) {
+        DuplicateLetter duplicateLetter = getDuplicateLetter(letter, id, checksum, serviceName,
                 isAsync);
         duplicateLetterService.save(duplicateLetter);
         log.info("Created new duplicate record with id {} for service {}", id, serviceName);
@@ -184,7 +184,7 @@ public class LetterService {
     
     private DuplicateLetter getDuplicateLetter(ILetterRequest letter, UUID id,
                                                String checksum, String serviceName,
-                                               Function<LocalDateTime, byte[]> zipContent, String isAsync) {
+                                               String isAsync) {
         LocalDateTime createdAtTime = now();
         return new DuplicateLetter(
                 id,
@@ -192,9 +192,6 @@ public class LetterService {
                 serviceName,
                 mapper.valueToTree(letter.getAdditionalData()),
                 letter.getType(),
-                zipContent.apply(createdAtTime),
-                isEncryptionEnabled,
-                getEncryptionKeyFingerprint(),
                 createdAtTime,
                 mapper.valueToTree(getCopies(letter)),
                 isAsync

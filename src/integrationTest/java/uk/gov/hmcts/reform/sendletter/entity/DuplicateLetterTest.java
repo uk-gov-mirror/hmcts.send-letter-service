@@ -45,9 +45,6 @@ public class DuplicateLetterTest {
                 "a.service",
                 objectMapper.readTree("{}"),
                 "test",
-               "true".getBytes(),
-                true,
-                "EncryptionKeyFingerprint",
                 LocalDateTime.now(),
                 objectMapper.valueToTree(document),
                 "true"
@@ -60,9 +57,7 @@ public class DuplicateLetterTest {
         assertThat(savedDuplicateLetter.getChecksum()).isEqualTo("checksum");
         assertThat(savedDuplicateLetter.getService()).isEqualTo("a.service");
         assertThat(savedDuplicateLetter.getAdditionalData()).isInstanceOf(JsonNode.class);
-        assertThat(savedDuplicateLetter.getFileContent()).isEqualTo("true".getBytes());
         assertThat(savedDuplicateLetter.getType()).isEqualTo("test");
-        assertThat(savedDuplicateLetter.getEncryptionKeyFingerprint()).isEqualTo("EncryptionKeyFingerprint");
         assertThat(savedDuplicateLetter.getCreatedAt()).isInstanceOf(LocalDateTime.class);
         assertThat(objectMapper.convertValue(savedDuplicateLetter.getCopies(),
                 new TypeReference<Map<String, Integer>>() {})).containsAllEntriesOf(document);
@@ -79,9 +74,6 @@ public class DuplicateLetterTest {
         duplicateLetter.setService("a.service");
         duplicateLetter.setAdditionalData(new ObjectMapper().readTree("{}"));
         duplicateLetter.setType("test");
-        duplicateLetter.setFileContent("true".getBytes());
-        duplicateLetter.setEncrypted(true);
-        duplicateLetter.setEncryptionKeyFingerprint("EncryptionKeyFingerprint");
         duplicateLetter.setCreatedAt(LocalDateTime.now());
         duplicateLetter.setIsAsync("true");
         duplicateLetter.setCopies(objectMapper.valueToTree(document));
@@ -94,9 +86,7 @@ public class DuplicateLetterTest {
         assertThat(savedDuplicateLetter.getChecksum()).isEqualTo("checksum");
         assertThat(savedDuplicateLetter.getService()).isEqualTo("a.service");
         assertThat(savedDuplicateLetter.getAdditionalData()).isInstanceOf(JsonNode.class);
-        assertThat(savedDuplicateLetter.getFileContent()).isEqualTo("true".getBytes());
         assertThat(savedDuplicateLetter.getType()).isEqualTo("test");
-        assertThat(savedDuplicateLetter.getEncryptionKeyFingerprint()).isEqualTo("EncryptionKeyFingerprint");
         assertThat(savedDuplicateLetter.getCreatedAt()).isInstanceOf(LocalDateTime.class);
         assertThat(objectMapper.convertValue(savedDuplicateLetter.getCopies(),
                 new TypeReference<Map<String, Integer>>() {})).containsAllEntriesOf(document);

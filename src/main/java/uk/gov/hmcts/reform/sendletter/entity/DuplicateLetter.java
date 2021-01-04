@@ -28,9 +28,6 @@ public class DuplicateLetter {
     private JsonNode additionalData;
     private LocalDateTime createdAt;
     private String type;
-    private byte[] fileContent;
-    private Boolean isEncrypted;
-    private String encryptionKeyFingerprint;
     @Type(type = "json")
     @Column(columnDefinition = "json")
     private JsonNode copies;
@@ -46,9 +43,6 @@ public class DuplicateLetter {
         String service,
         JsonNode additionalData,
         String type,
-        byte[] fileContent,
-        Boolean isEncrypted,
-        String encryptionKeyFingerprint,
         LocalDateTime createdAt,
         JsonNode copies,
         String isAsync
@@ -59,9 +53,6 @@ public class DuplicateLetter {
         this.additionalData = additionalData;
         this.createdAt = createdAt;
         this.type = type;
-        this.fileContent = fileContent;
-        this.isEncrypted = isEncrypted;
-        this.encryptionKeyFingerprint = encryptionKeyFingerprint;
         this.copies = copies;
         this.isAsync = isAsync;
     }
@@ -106,30 +97,6 @@ public class DuplicateLetter {
 
     public void setAdditionalData(JsonNode additionalData) {
         this.additionalData = additionalData;
-    }
-
-    public byte[] getFileContent() {
-        return fileContent;
-    }
-
-    public void setFileContent(byte[] fileContent) {
-        this.fileContent = fileContent;
-    }
-
-    public Boolean getEncrypted() {
-        return isEncrypted;
-    }
-
-    public void setEncrypted(Boolean encrypted) {
-        isEncrypted = encrypted;
-    }
-
-    public String getEncryptionKeyFingerprint() {
-        return encryptionKeyFingerprint;
-    }
-
-    public void setEncryptionKeyFingerprint(String encryptionKeyFingerprint) {
-        this.encryptionKeyFingerprint = encryptionKeyFingerprint;
     }
 
     public JsonNode getCopies() {
