@@ -330,7 +330,7 @@ dependencies {
 
   contractTestCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
   contractTestCompile("org.junit.jupiter:junit-jupiter-api:5.7.0")
-  contractTestRuntime("org.junit.jupiter:junit-jupiter-engine:5.3.2")
+  contractTestRuntime("org.junit.jupiter:junit-jupiter-engine:5.7.0")
   contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.3.2')
 
 }
