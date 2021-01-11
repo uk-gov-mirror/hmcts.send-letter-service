@@ -3,7 +3,9 @@
 [![Build Status](https://travis-ci.org/hmcts/send-letter-service.svg?branch=master)](https://travis-ci.org/hmcts/send-letter-service)
 [![codecov](https://codecov.io/gh/hmcts/send-letter-service/branch/master/graph/badge.svg)](https://codecov.io/gh/hmcts/send-letter-service)
 
-![Diagram](/doc/arch/diagram.png)
+![Diagram](./doc/arch/diagram.png)
+> You can edit this diagram by importing `./doc/arch/diagram.drawio` into [draw.io](https://www.draw.io/).
+
 
 [Swagger API Specs](https://hmcts.github.io/reform-api-docs/swagger.html?url=https://hmcts.github.io/reform-api-docs/specs/send-letter-service.json)
 

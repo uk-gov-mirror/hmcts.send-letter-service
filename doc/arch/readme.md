@@ -1,3 +1,3 @@
-The diagram was created using https://www.draw.io/
+# Architecture Decision Records
 
-You can edit it by importing the `diagram.drawio` file and the exporting to a new png image.
+* [1. Increase pod memory limit for OOM error](adr/0001-increase-pod-memory-for-oom-error.md)
