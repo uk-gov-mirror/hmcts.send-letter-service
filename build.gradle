@@ -271,7 +271,7 @@ dependencies {
   implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
 
   implementation group: 'com.hierynomus', name: 'sshj', version: '0.30.0'
-  implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.21'
+  implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.22'
   implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
@@ -293,7 +293,7 @@ dependencies {
   testImplementation group: 'com.icegreen', name: 'greenmail', version: '1.5.13', withoutJunit4
   testImplementation group: 'org.apache.commons', name: 'commons-email', version: '1.5'
   testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
-  testImplementation group: 'org.apache.pdfbox', name: 'preflight', version: '2.0.21', withoutJunit4
+  testImplementation group: 'org.apache.pdfbox', name: 'preflight', version: '2.0.22', withoutJunit4
   testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockitoJupiter
   testImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.27.0', withoutJunit4
 
@@ -326,7 +326,7 @@ dependencies {
   contractTestImplementation group: 'org.bouncycastle', name: 'bcpg-jdk15on', version: versions.bouncycastle
 
   contractTestImplementation group: 'uk.gov.hmcts.reform', name: 'pdf-generator', version: '1.0.2'
-  contractTestImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.21'
+  contractTestImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.22'
 
   contractTestCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
   contractTestCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
