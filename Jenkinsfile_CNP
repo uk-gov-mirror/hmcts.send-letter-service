@@ -18,7 +18,8 @@ secrets = [
   'rpe-send-letter-${env}': [
     secret('ftp-user', 'TEST_FTP_USER'),
     secret('ftp-private-key', 'TEST_FTP_PRIVATE_KEY'),
-    secret('ftp-public-key', 'TEST_FTP_PUBLIC_KEY')
+    secret('ftp-public-key', 'TEST_FTP_PUBLIC_KEY'),
+    secret('xerox-ftp-hostname', 'TEST_FTP_HOSTNAME')
   ]
 ]
 
@@ -44,7 +45,6 @@ withPipeline(type , product, component) {
     // vars needed for AKS testing
     env.TEST_S2S_NAME = 'send_letter_tests'
     env.TEST_S2S_URL = 'http://rpe-service-auth-provider-aat.service.core-compute-aat.internal'
-    env.TEST_FTP_HOSTNAME = 'cmseft.services.xerox.com'
     env.TEST_FTP_PORT = 22
     env.TEST_FTP_FINGERPRINT = 'SHA256:3tX3DIkqd1Loz2alHfnt+qjHocfxk0YUOZHlnf9Zgdk'
     env.FTP_TARGET_FOLDER = 'TO_XEROX'

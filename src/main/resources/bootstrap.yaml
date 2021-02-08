@@ -24,3 +24,4 @@ spring:
         reports-email-username: SMTP_USERNAME
         reports-email-password: SMTP_PASSWORD
         delayed-stale-report-recipients: DELAYED_STALE_REPORT_RECIPIENTS
+        xerox-ftp-hostname: FTP_HOSTNAME
