@@ -8,10 +8,6 @@ output "test_s2s_name" {
   value = "send_letter_tests"
 }
 
-output "test_ftp_hostname" {
-  value = var.ftp_hostname
-}
-
 output "test_ftp_port" {
   value = var.ftp_port
 }
