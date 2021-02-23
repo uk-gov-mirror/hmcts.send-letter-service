@@ -14,61 +14,61 @@ class FtpAvailabilityCheckerTest {
 
     @Test
     void ftp_is_available_before_downtime() {
-        assertThatFtpCheck("16:00", "17:00", "15:00").isTrue();
+        assertThatFtpCheck("16:00", "17:00", "15:00", false).isTrue();
     }
 
     @Test
     void ftp_is_available_after_downtime() {
-        assertThatFtpCheck("08:00", "09:00", "10:00").isTrue();
+        assertThatFtpCheck("08:00", "09:00", "10:00", false).isTrue();
     }
 
     @Test
     void ftp_is_unavailable_during_downtime() {
-        assertThatFtpCheck("06:00", "08:00", "07:00").isFalse();
+        assertThatFtpCheck("06:00", "08:00", "07:00", false).isFalse();
     }
 
     @Test
     void ftp_is_unavailable_exactly_at_downtime_start() {
-        assertThatFtpCheck("17:30", "20:00", "17:30").isFalse();
+        assertThatFtpCheck("17:30", "20:00", "17:30", false).isFalse();
     }
 
     @Test
     void ftp_is_unavailable_exactly_at_downtime_end() {
-        assertThatFtpCheck("17:30", "20:00", "20:00").isFalse();
+        assertThatFtpCheck("17:30", "20:00", "20:00", false).isFalse();
     }
 
     @Test
     void ftp_is_available_outside_of_overnight_downtime() {
-        assertThatFtpCheck("23:30", "02:00", "08:14").isTrue();
+        assertThatFtpCheck("23:30", "02:00", "08:14", false).isTrue();
     }
 
     @Test
     void ftp_is_unavailable_during_overnight_downtime_before_midnight() {
-        assertThatFtpCheck("23:00", "01:00", "23:59").isFalse();
+        assertThatFtpCheck("23:00", "01:00", "23:59", false).isFalse();
     }
 
     @Test
     void ftp_is_unavailable_during_overnight_downtime_after_midnight() {
-        assertThatFtpCheck("23:00", "01:00", "00:01").isFalse();
+        assertThatFtpCheck("23:00", "01:00", "00:01", false).isFalse();
     }
 
     @Test
     void ftp_is_unavailable_for_a_minute() {
-        assertThatFtpCheck("01:00", "01:00", "01:00:29").isFalse();
+        assertThatFtpCheck("01:00", "01:00", "01:00:29", false).isFalse();
     }
 
     @Test
     void throws_exception_if_from_hour_is_invalid() {
-        assertThrows(DateTimeParseException.class, () -> new FtpAvailabilityChecker("1:00", "02:00"));
+        assertThrows(DateTimeParseException.class, () -> new FtpAvailabilityChecker("1:00","02:00", false));
     }
 
     @Test
     void throws_exception_if_to_hour_is_invalid() {
-        assertThrows(DateTimeParseException.class, () -> new FtpAvailabilityChecker("01:00", "2:00"));
+        assertThrows(DateTimeParseException.class, () -> new FtpAvailabilityChecker("1:00","2:00", false));
     }
 
-    private static AbstractBooleanAssert<?> assertThatFtpCheck(String fromHour, String toHour, String now) {
-        FtpAvailabilityChecker checker = new FtpAvailabilityChecker(fromHour, toHour);
+    private static AbstractBooleanAssert<?> assertThatFtpCheck(String fromHour, String toHour, String now, Boolean disableDowntime) {
+        FtpAvailabilityChecker checker = new FtpAvailabilityChecker(fromHour, toHour, disableDowntime);
         return assertThat(checker.isFtpAvailable(LocalTime.parse(now)));
     }
 }

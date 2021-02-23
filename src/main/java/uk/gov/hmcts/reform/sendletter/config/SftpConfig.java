@@ -20,8 +20,9 @@ public class SftpConfig {
     @Bean
     public IFtpAvailabilityChecker ftpAvailabilityChecker(
         @Value("${ftp.downtime.from}") String downtimeFromHour,
-        @Value("${ftp.downtime.to}") String downtimeToHour
+        @Value("${ftp.downtime.to}") String downtimeToHour,
+        @Value("${ftp.disableDowntime}") boolean disableDowntime
     ) {
-        return new FtpAvailabilityChecker(downtimeFromHour, downtimeToHour);
+        return new FtpAvailabilityChecker(downtimeFromHour, downtimeToHour,disableDowntime);
     }
 }
