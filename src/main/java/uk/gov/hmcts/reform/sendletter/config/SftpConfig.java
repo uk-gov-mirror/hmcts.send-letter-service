@@ -21,7 +21,7 @@ public class SftpConfig {
     public IFtpAvailabilityChecker ftpAvailabilityChecker(
         @Value("${ftp.downtime.from}") String downtimeFromHour,
         @Value("${ftp.downtime.to}") String downtimeToHour,
-        @Value("${ftp.disableDowntime}") boolean disableDowntime
+        @Value("${ftp.downtime.disableDowntime}") boolean disableDowntime
     ) {
         return new FtpAvailabilityChecker(downtimeFromHour, downtimeToHour,disableDowntime);
     }
