@@ -37,7 +37,6 @@ import static org.mockito.BDDMockito.doNothing;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -150,7 +149,7 @@ class FtpClientTest {
         assertThat(exception)
             .isInstanceOf(FtpException.class)
             .hasMessageStartingWith("Unable to upload file");
-        verify(sftpClient, times(2)).rm("null/cmc/massive.zip"); // we mocked mapping hence null
+        verify(sftpClient).rm("null/cmc/massive.zip"); // we mocked mapping hence null
     }
 
     @Test
@@ -197,29 +196,5 @@ class FtpClientTest {
             .isInstanceOf(FtpException.class)
             .hasMessage("Unable to authenticate.")
             .hasCauseInstanceOf(UserAuthException.class);
-    }
-
-    @Test
-    void should_delete_corrupt_file_and_retry_in_case_upload_timed_out() throws IOException {
-
-        retry = new RetryOnExceptionStrategy(5, 2000);
-        client = new FtpClient(() -> sshClient, ftpProps, retry);
-
-        // given
-        given(sftpClient.getFileTransfer()).willReturn(sftpFileTransfer);
-        willThrow(new IOException(new TimeoutException("oh no")))
-                .given(sftpFileTransfer)
-                .upload(any(LocalSourceFile.class), anyString());
-
-        // when
-        Throwable exception = catchThrowable(() ->
-                client.upload(new FileToSend("massive.zip", "insane size".getBytes(), false), "cmc", sftpClient)
-        );
-
-        // then
-        assertThat(exception)
-                .isInstanceOf(FtpException.class)
-                .hasMessageStartingWith("Unable to upload file");
-        verify(sftpClient, times(5)).rm("null/cmc/massive.zip"); // we mocked mapping hence null
     }
 }
