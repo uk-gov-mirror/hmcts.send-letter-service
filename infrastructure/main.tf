@@ -1,4 +1,5 @@
 provider "azurerm" {
+  version = "=2.49.0"
   features {}
 }
 
@@ -48,7 +49,7 @@ module "staging-db" {
 
 # region save DB details to Azure Key Vault
 module "send-letter-key-vault" {
-  source              = "git@github.com:hmcts/cnp-module-key-vault"
+  source              = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
   name                = "${var.product}-send-letter-${var.env}"
   product             = var.product
   env                 = var.env
