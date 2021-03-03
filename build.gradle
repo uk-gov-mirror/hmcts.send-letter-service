@@ -239,6 +239,8 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-batch'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '7.5.4'
   implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.19'

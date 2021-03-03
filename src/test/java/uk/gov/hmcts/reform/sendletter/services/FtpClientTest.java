@@ -12,14 +12,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
+import uk.gov.hmcts.reform.sendletter.config.RetryConfig;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
 import uk.gov.hmcts.reform.sendletter.model.Report;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FileToSend;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
-import uk.gov.hmcts.reform.sendletter.services.ftp.RetryOnExceptionStrategy;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,6 +36,7 @@ import static org.mockito.BDDMockito.doNothing;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,13 +48,12 @@ class FtpClientTest {
     @Mock private SFTPClient sftpClient;
     @Mock private SFTPFileTransfer sftpFileTransfer;
     @Mock private FtpConfigProperties ftpProps;
-    @Spy private RetryOnExceptionStrategy retry;
-
 
     @BeforeEach
     void setUp() {
-        retry = new RetryOnExceptionStrategy(2, 2000);
-        client = new FtpClient(() -> sshClient, ftpProps, retry);
+        RetryConfig retryConfig = new RetryConfig();
+        client = new FtpClient(() -> sshClient, ftpProps,
+            retryConfig.retryTemplate(2, 2000));
     }
 
     @Test
@@ -149,7 +148,7 @@ class FtpClientTest {
         assertThat(exception)
             .isInstanceOf(FtpException.class)
             .hasMessageStartingWith("Unable to upload file");
-        verify(sftpClient).rm("null/cmc/massive.zip"); // we mocked mapping hence null
+        verify(sftpClient, times(2)).rm("null/cmc/massive.zip"); // we mocked mapping hence null
     }
 
     @Test

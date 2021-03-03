@@ -5,9 +5,9 @@ import com.google.common.io.Resources;
 import net.schmizz.sshj.SSHClient;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties.ServiceFolderMapping;
+import uk.gov.hmcts.reform.sendletter.config.RetryConfig;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
-import uk.gov.hmcts.reform.sendletter.services.ftp.RetryOnExceptionStrategy;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -30,7 +30,8 @@ public final class FtpHelper {
             client.addHostKeyVerifier((a, b, c) -> verified);
             return client;
         };
-        return new FtpClient(s, getFtpConfig(port), new RetryOnExceptionStrategy());
+        RetryConfig config = new RetryConfig();
+        return new FtpClient(s, getFtpConfig(port), config.retryTemplate(2, 2000));
     }
 
     public static FtpClient getFailingClient(int port) throws IOException {

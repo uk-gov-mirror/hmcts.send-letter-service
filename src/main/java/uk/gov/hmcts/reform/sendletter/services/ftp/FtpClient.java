@@ -8,6 +8,7 @@ import net.schmizz.sshj.userauth.UserAuthException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.sendletter.config.FtpConfigProperties;
 import uk.gov.hmcts.reform.sendletter.exception.FtpException;
@@ -41,24 +42,22 @@ public class FtpClient {
     private static final Logger logger = LoggerFactory.getLogger(FtpClient.class);
     private final FtpConfigProperties configProperties;
     private final Supplier<SSHClient> sshClientSupplier;
-    private RetryOnExceptionStrategy retry;
+    private final RetryTemplate retryTemplate;
 
     // region constructor
     public FtpClient(
         Supplier<SSHClient> sshClientSupplier,
         FtpConfigProperties configProperties,
-        RetryOnExceptionStrategy retry
+        RetryTemplate retryTemplate
     ) {
         this.sshClientSupplier = sshClientSupplier;
         this.configProperties = configProperties;
-        this.retry = retry;
+        this.retryTemplate = retryTemplate;
     }
     // endregion
 
     @Dependency(name = FTP_CLIENT, command = FTP_FILE_UPLOADED, type = FTP)
     public void upload(FileToSend file, String serviceFolder, SFTPClient sftpClient) {
-        logger.info("Uploading file {} to SFTP server", file.filename);
-
         String folder = file.isSmokeTest
             ? configProperties.getSmokeTestTargetFolder()
             : String.join("/", configProperties.getTargetFolder(), serviceFolder);
@@ -66,28 +65,33 @@ public class FtpClient {
         String path = String.join("/", folder, file.getName());
         Instant start = Instant.now();
 
-        try {
-            sftpClient.getFileTransfer().upload(file, path);
+        retryTemplate.execute(arg -> {
+            try {
+                logger.info("Uploading file {} to SFTP server", file.filename);
+                sftpClient.getFileTransfer().upload(file, path);
 
-            logger.info(
-                "File {} uploaded. Time: {}, Size: {}, Folder: {}",
-                file.filename,
-                ChronoUnit.MILLIS.between(start, Instant.now()) + "ms",
-                file.content.length / 1024 + "KB",
-                serviceFolder
-            );
-        } catch (IOException exc) {
-            if (exc.getCause() instanceof TimeoutException) {
-                logger.error("Timeout error while uploading file. Deleting corrupt file. Path: {}", path, exc);
-                // deleting as file is corrupt and will break printing provider
-                deleteFile(path, sftpClient);
-                // this ^ can also cause FtpException. In case not - we will have the following FtpException
-            } else {
-                logger.error("Error uploading file. Path: {}", path, exc);
+                logger.info(
+                    "File {} uploaded. Time: {}, Size: {}, Folder: {}",
+                    file.filename,
+                    ChronoUnit.MILLIS.between(start, Instant.now()) + "ms",
+                    file.content.length / 1024 + "KB",
+                    serviceFolder
+                );
+
+            } catch (IOException exc) {
+                if (exc.getCause() instanceof TimeoutException) {
+                    logger.error("Timeout error while uploading file. Deleting corrupt file. Path: {}", path, exc);
+                    // deleting as file is corrupt and will break printing provider
+                    deleteFile(path, sftpClient);
+                    // this ^ can also cause FtpException. In case not - we will have the following FtpException
+                } else {
+                    logger.error("Error uploading file. Path: {}", path, exc);
+                }
+                logger.info("Retrying to upload file {} ", file.filename);
+                throw new FtpException(String.format("Unable to upload file %s.", file.filename), exc);
             }
-
-            throw new FtpException(String.format("Unable to upload file %s.", file.filename), exc);
-        }
+            return true;
+        });
     }
 
     /**
