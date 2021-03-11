@@ -40,9 +40,10 @@ class DelayPostSearchTest {
         storeLetter(Posted, "type-2",  currentDateTime.minusDays(3), currentDateTime.minusDays(1));
         storeLetter(Posted, "type-2",  currentDateTime.minusDays(3), currentDateTime.minusDays(1).plusHours(1));
 
-        try (Stream<Letter> deplayedPostedLetter = letterRepository.findDeplayedPostedLetter(
-                currentDateTime.minusDays(6), currentDateTime, 48)) {
-            assertThat(deplayedPostedLetter.count()).isEqualTo(3);
+        try (Stream<BasicLetterInfo> deplayedPostedLetter =
+                 letterRepository.findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(
+                LetterStatus.Posted,currentDateTime.minusDays(6), currentDateTime)) {
+            assertThat(deplayedPostedLetter.count()).isEqualTo(5);
         }
     }
 

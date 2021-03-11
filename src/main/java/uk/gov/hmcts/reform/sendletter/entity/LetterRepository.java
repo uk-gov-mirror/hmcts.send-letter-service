@@ -35,7 +35,7 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
     );
 
 
-    Stream<Letter> findByStatusNotInAndTypeNotAndCreatedAtBetweenOrderByCreatedAtAsc(Collection<LetterStatus> letterStatuses,
+    Stream<BasicLetterInfo> findByStatusNotInAndTypeNotAndCreatedAtBetweenOrderByCreatedAtAsc(Collection<LetterStatus> letterStatuses,
                                                                String type, LocalDateTime from, LocalDateTime to);
 
     @Query("select new uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo(l.id, l.checksum, l.service, l.status, l.type, l.encryptionKeyFingerprint, l.createdAt, l.sentToPrintAt, l.printedAt)"
@@ -78,15 +78,6 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
 
     int countByStatus(LetterStatus status);
 
-    @Query(nativeQuery = true,
-            value = "SELECT *"
-        + " FROM Letters l"
-        + " WHERE l.created_at BETWEEN :fromDate AND :toDate"
-        + " AND EXTRACT(EPOCH FROM  printed_at - sent_to_print_at ) /3600 > :limit"
-        + " AND l.status = 'Posted'"
-        + " ORDER BY l.created_at"
-    )
-    Stream<Letter> findDeplayedPostedLetter(@Param("fromDate") LocalDateTime fromCreatedDate,
-                                            @Param("toDate") LocalDateTime toCreatedDate,
-                                            @Param("limit") int minProcessingHours);
+
+    Stream<BasicLetterInfo> findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(LetterStatus status, LocalDateTime from, LocalDateTime to);
 }

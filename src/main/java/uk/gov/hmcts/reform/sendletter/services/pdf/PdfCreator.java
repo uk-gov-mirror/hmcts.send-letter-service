@@ -53,10 +53,10 @@ public class PdfCreator {
 
         List<byte[]> pdfs = docs
             .stream()
+            .peek(doc -> logger.info("Number of copies request {}", doc.copies))
             .map(doc -> new Doc(duplexPreparator.prepare(doc.content), doc.copies))
             .map(d -> Collections.nCopies(d.copies, d.content))
             .flatMap(Collection::stream)
-            .peek(data -> logger.info("Final file size {} KB", data.length / 1024))
             .collect(toList());
 
         return PdfMerger.mergeDocuments(pdfs);

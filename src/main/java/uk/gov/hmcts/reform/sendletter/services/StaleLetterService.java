@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.services.date.DateCalculator;
@@ -71,7 +70,7 @@ public class StaleLetterService {
                 .withZoneSameInstant(DB_TIME_ZONE_ID)
                 .toLocalDateTime();
         log.info("Stale letters before {} ", localDateTime);
-        try (Stream<Letter> weeklyStaleLetters =
+        try (Stream<BasicLetterInfo> weeklyStaleLetters =
                 letterRepository.findByStatusNotInAndTypeNotAndCreatedAtBetweenOrderByCreatedAtAsc(
                         LETTER_STATUS_TO_IGNORE, UploadLettersTask.SMOKE_TEST_LETTER_TYPE,
                         localDateTime.minusDays(6), localDateTime)) {

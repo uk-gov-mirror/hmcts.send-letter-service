@@ -5,7 +5,6 @@ import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.model.out.LettersCountSummary;
 import uk.gov.hmcts.reform.sendletter.services.util.FinalPackageFileNameHelper;
 
@@ -73,7 +72,7 @@ public final class CsvWriter {
         return csvFile;
     }
 
-    public static File writeDelayedPostedLettersToCsv(Stream<Letter> letters) throws IOException {
+    public static File writeDelayedPostedLettersToCsv(Stream<BasicLetterInfo> letters) throws IOException {
         File csvFIle = File.createTempFile("Deplayed-letters-", ".csv");
         CSVFormat csvFileHeader = CSVFormat.DEFAULT.withHeader(DELAYED_LETTERS_EMAIL_CSV_HEADERS);
         FileWriter fileWriter = new FileWriter(csvFIle);
@@ -87,7 +86,7 @@ public final class CsvWriter {
         return csvFIle;
     }
 
-    public static File writeStaleLettersReport(Stream<Letter> letters) throws IOException {
+    public static File writeStaleLettersReport(Stream<BasicLetterInfo> letters) throws IOException {
         File csvFIle = File.createTempFile("Stale-letters-", ".csv");
         CSVFormat csvFileHeader = CSVFormat.DEFAULT.withHeader(STALE_LETTERS_EMAIL_CSV_HEADERS);
         FileWriter fileWriter = new FileWriter(csvFIle);
@@ -101,9 +100,10 @@ public final class CsvWriter {
         return csvFIle;
     }
 
-    private static void printStaleRecords(Letter letter, CSVPrinter printer, AtomicInteger count) {
+    private static void printStaleRecords(BasicLetterInfo letter, CSVPrinter printer, AtomicInteger count) {
         try {
-            printer.printRecord(FinalPackageFileNameHelper.generateName(letter),
+            printer.printRecord(FinalPackageFileNameHelper.generateName(letter.getType(),
+                letter.getService(), letter.getCreatedAt(), letter.getId(), true),
                     letter.getService(), letter.getCreatedAt(),
                     letter.getSentToPrintAt());
             count.incrementAndGet();
@@ -112,9 +112,10 @@ public final class CsvWriter {
         }
     }
 
-    private static void printDelayRecords(Letter letter, CSVPrinter printer, AtomicInteger count) {
+    private static void printDelayRecords(BasicLetterInfo letter, CSVPrinter printer, AtomicInteger count) {
         try {
-            printer.printRecord(FinalPackageFileNameHelper.generateName(letter),
+            printer.printRecord(FinalPackageFileNameHelper.generateName(letter.getType(),
+                letter.getService(), letter.getCreatedAt(), letter.getId(), true),
                     letter.getService(), letter.getCreatedAt(),
                     letter.getSentToPrintAt(), letter.getPrintedAt());
             count.incrementAndGet();

@@ -1,14 +1,18 @@
 package uk.gov.hmcts.reform.sendletter.services;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.sendletter.entity.Letter;
+import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
+import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -17,12 +21,10 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DelayedPrintServiceTest {
@@ -38,32 +40,35 @@ class DelayedPrintServiceTest {
 
     @Test
     void should_return_delayed_print_file() throws IOException {
-        List<Letter> letters = Arrays.asList(createLetter(), createLetter(), createLetter());
-        Stream<Letter> stream = letters.stream();
-        //given
-        given(letterRepository.findDeplayedPostedLetter(isA(LocalDateTime.class),
-                isA(LocalDateTime.class), anyInt())).willReturn(stream);
-
-
         LocalDateTime current = LocalDateTime.now();
+        List<BasicLetterInfo> letters = Arrays.asList(createLetter(current.plusDays(3)),
+            createLetter(current.plusDays(3)), createLetter(current.plusDays(3)),
+            createLetter(current.plusDays(1)));
+        Stream<BasicLetterInfo> stream = letters.stream();
+        //given
+        given(letterRepository.findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(eq(LetterStatus.Posted),
+            isA(LocalDateTime.class), isA(LocalDateTime.class))).willReturn(stream);
+
+
+
         File deplayLettersAttachment = delayedPrintService.getDeplayLettersAttachment(
                 current.minusDays(6), current, 48);
-        assertThat(deplayLettersAttachment).isNotEmpty();
-        verify(letterRepository).findDeplayedPostedLetter(isA(LocalDateTime.class),
-                isA(LocalDateTime.class), anyInt());
+        List<CSVRecord> csvRecords = readCsv(deplayLettersAttachment);
+        assertThat(csvRecords.size()).isEqualTo(4); // Includes header
+        verify(letterRepository).findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(eq(LetterStatus.Posted),
+            isA(LocalDateTime.class), isA(LocalDateTime.class));
     }
 
-    private Letter createLetter() {
+    private BasicLetterInfo createLetter(LocalDateTime printeAt) {
         LocalDateTime current = LocalDateTime.now();
-        Letter result = mock(Letter.class);
-        when(result.getType()).thenReturn("type-1");
-        when(result.getService()).thenReturn("testService");
-        when(result.getCreatedAt()).thenReturn(current);
-        when(result.getId()).thenReturn(UUID.randomUUID());
-        when(result.isEncrypted()).thenReturn(true);
-        when(result.getSentToPrintAt()).thenReturn(current.plusMinutes(10));
-        when(result.getPrintedAt()).thenReturn(current.plusDays(3));
-        return result;
+        return new BasicLetterInfo(UUID.randomUUID(), "checksum", "testService",
+            LetterStatus.Posted, "type-1", "encryptionKeyFingerprint",
+            current, current.plusMinutes(10), printeAt);
     }
+
+    private List<CSVRecord> readCsv(File file) throws IOException {
+        return CSVFormat.DEFAULT.parse(new FileReader(file)).getRecords();
+    }
+
 
 }

@@ -48,13 +48,13 @@ public class StaleLetterSearchTest {
         LocalDateTime cutOffDate = LocalDateTime.now().minusDays(2);
 
         storeLetter(cutOffDate.minusDays(7), LetterStatus.Uploaded);
-        List<Letter> letters;
+        List<BasicLetterInfo> letters;
 
         Letter uploadedLetter = storeLetter(cutOffDate.minusDays(5), LetterStatus.Uploaded);
         Letter createdLetter = storeLetter(cutOffDate.minusSeconds(1), LetterStatus.Created);
 
         // when
-        try (Stream<Letter> letterStream = repository
+        try (Stream<BasicLetterInfo> letterStream = repository
                 .findByStatusNotInAndTypeNotAndCreatedAtBetweenOrderByCreatedAtAsc(LETTER_STATUS_TO_IGNORE,
                 UploadLettersTask.SMOKE_TEST_LETTER_TYPE, cutOffDate.minusDays(6), cutOffDate)) {
             letters = letterStream.collect(Collectors.toList());
@@ -111,7 +111,7 @@ public class StaleLetterSearchTest {
         storeLetter(LocalDateTime.now(), LetterStatus.Created);
 
         // when
-        try (Stream<Letter> letters = repository
+        try (Stream<BasicLetterInfo> letters = repository
                 .findByStatusNotInAndTypeNotAndCreatedAtBetweenOrderByCreatedAtAsc(LETTER_STATUS_TO_IGNORE,
                 UploadLettersTask.SMOKE_TEST_LETTER_TYPE, cutOffDate.minusDays(6), cutOffDate)) {
             // then
