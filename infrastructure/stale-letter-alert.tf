@@ -18,6 +18,13 @@ customEvents
           type = dimensions.type,
           sentToPrintDayOfWeek = dimensions.sentToPrintDayOfWeek,
           sentToPrintAt = dimensions.sentToPrintAt
+| summarize by format_datetime(timestamp, 'MM-dd-yyyy'),
+          tostring(letterId),
+          tostring(checksum),
+          tostring(service),
+          tostring(type),
+          tostring(sentToPrintDayOfWeek),
+          tostring(sentToPrintAt)
 EOF
 
   frequency_in_minutes       = 15

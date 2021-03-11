@@ -17,6 +17,12 @@ customEvents
           type = dimensions.type,
           createdAt = dimensions.createdAt,
           createdDayOfWeek = dimensions.createdDayOfWeek
+| summarize by format_datetime(timestamp, 'MM-dd-yyyy'),
+          tostring(letterId),
+          tostring(service),
+          tostring(type),
+          tostring(createdAt),
+          tostring(createdDayOfWeek)
 EOF
 
   frequency_in_minutes       = 15
