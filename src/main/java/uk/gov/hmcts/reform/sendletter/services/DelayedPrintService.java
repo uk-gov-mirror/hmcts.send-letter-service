@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.sendletter.util.CsvWriter;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -34,7 +34,8 @@ public class DelayedPrintService {
                 .findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(LetterStatus.Posted,
                     fromCreatedDate, toCreatedDate)) {
             List<BasicLetterInfo> filteredLetters = deplayedPostedLetter.filter(letter ->
-                Duration.between(letter.getSentToPrintAt(), letter.getPrintedAt()).toHours() > minProcessingDays * 24)
+                Period.between(letter.getSentToPrintAt().toLocalDate(),
+                    letter.getPrintedAt().toLocalDate()).getDays() > minProcessingDays)
                 .collect(toList());
             return CsvWriter.writeDelayedPostedLettersToCsv(filteredLetters.stream());
         }
