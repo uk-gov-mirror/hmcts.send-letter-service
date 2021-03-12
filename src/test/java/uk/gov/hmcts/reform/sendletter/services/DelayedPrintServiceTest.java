@@ -41,29 +41,27 @@ class DelayedPrintServiceTest {
     @Test
     void should_return_delayed_print_file() throws IOException {
         LocalDateTime current = LocalDateTime.now();
-        List<BasicLetterInfo> letters = Arrays.asList(createLetter(current.plusDays(3)),
-            createLetter(current.plusDays(3)), createLetter(current.plusDays(3)),
-            createLetter(current.plusDays(1)));
+        LocalDateTime createdAt = current.minusDays(6);
+        List<BasicLetterInfo> letters = Arrays.asList(createLetter(createdAt, 3),
+            createLetter(createdAt, 2), createLetter(createdAt, 5),
+            createLetter(createdAt, 1));
         Stream<BasicLetterInfo> stream = letters.stream();
         //given
         given(letterRepository.findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(eq(LetterStatus.Posted),
             isA(LocalDateTime.class), isA(LocalDateTime.class))).willReturn(stream);
 
-
-
-        File deplayLettersAttachment = delayedPrintService.getDeplayLettersAttachment(
-                current.minusDays(6), current, 48);
+        File deplayLettersAttachment = delayedPrintService.getDelayLettersAttachment(
+                current.minusDays(6), current, 2);
         List<CSVRecord> csvRecords = readCsv(deplayLettersAttachment);
-        assertThat(csvRecords.size()).isEqualTo(4); // Includes header
+        assertThat(csvRecords.size()).isEqualTo(3); // Includes header
         verify(letterRepository).findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(eq(LetterStatus.Posted),
             isA(LocalDateTime.class), isA(LocalDateTime.class));
     }
 
-    private BasicLetterInfo createLetter(LocalDateTime printeAt) {
-        LocalDateTime current = LocalDateTime.now();
+    private BasicLetterInfo createLetter(LocalDateTime createdAt, int daysToPrint) {
         return new BasicLetterInfo(UUID.randomUUID(), "checksum", "testService",
             LetterStatus.Posted, "type-1", "encryptionKeyFingerprint",
-            current, current.plusMinutes(10), printeAt);
+            createdAt, createdAt.plusMinutes(10), createdAt.plusDays(daysToPrint));
     }
 
     private List<CSVRecord> readCsv(File file) throws IOException {

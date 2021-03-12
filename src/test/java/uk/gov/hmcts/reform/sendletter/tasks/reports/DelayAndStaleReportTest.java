@@ -64,7 +64,7 @@ class DelayAndStaleReportTest {
     @Test
     void should_send_emails() throws IOException {
         File deplayedFile = new File("delayed-file");
-        given(delayedPrintService.getDeplayLettersAttachment(isA(LocalDateTime.class),
+        given(delayedPrintService.getDelayLettersAttachment(isA(LocalDateTime.class),
                 isA(LocalDateTime.class), anyInt())).willReturn(deplayedFile);
 
         File staleFile = new File("stale-file");
@@ -72,7 +72,7 @@ class DelayAndStaleReportTest {
 
         delayAndStaleReport.send();
 
-        verify(delayedPrintService).getDeplayLettersAttachment(isA(LocalDateTime.class),
+        verify(delayedPrintService).getDelayLettersAttachment(isA(LocalDateTime.class),
                 isA(LocalDateTime.class), anyInt());
         verify(staleLetterService).getWeeklyStaleLetters();
 
@@ -94,7 +94,7 @@ class DelayAndStaleReportTest {
 
         delayAndStaleReport.send();
 
-        verify(delayedPrintService, never()).getDeplayLettersAttachment(isA(LocalDateTime.class),
+        verify(delayedPrintService, never()).getDelayLettersAttachment(isA(LocalDateTime.class),
                 isA(LocalDateTime.class), anyInt());
         verify(emailSender, never()).send(eq(EMAIL_SUBJECT), eq(recipients),
                 ArgumentMatchers.<Attachment>any());
@@ -109,7 +109,7 @@ class DelayAndStaleReportTest {
 
     @Test
     void should_invoke_send_emails_for_only_delayed_exception() throws IOException {
-        given(delayedPrintService.getDeplayLettersAttachment(isA(LocalDateTime.class),
+        given(delayedPrintService.getDelayLettersAttachment(isA(LocalDateTime.class),
                 isA(LocalDateTime.class), anyInt())).willThrow(new RuntimeException("Error occured"));
 
         delayAndStaleReport.send();
@@ -136,7 +136,7 @@ class DelayAndStaleReportTest {
 
     @Test
     void should_not_invoke_send_emails_for_stale_exception() throws IOException {
-        given(delayedPrintService.getDeplayLettersAttachment(isA(LocalDateTime.class),
+        given(delayedPrintService.getDelayLettersAttachment(isA(LocalDateTime.class),
                 isA(LocalDateTime.class), anyInt())).willThrow(new RuntimeException("Error occured"));
 
         given(staleLetterService.getWeeklyStaleLetters()).willThrow(new RuntimeException("Error occured"));

@@ -27,14 +27,14 @@ public class DelayedPrintService {
     }
 
     @Transactional
-    public File getDeplayLettersAttachment(LocalDateTime fromCreatedDate,
+    public File getDelayLettersAttachment(LocalDateTime fromCreatedDate,
                                           LocalDateTime toCreatedDate,
                                           int minProcessingDays) throws IOException {
         try (Stream<BasicLetterInfo> deplayedPostedLetter = letterRepository
                 .findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(LetterStatus.Posted,
                     fromCreatedDate, toCreatedDate)) {
             List<BasicLetterInfo> filteredLetters = deplayedPostedLetter.filter(letter ->
-                Duration.between(letter.getSentToPrintAt(), letter.getPrintedAt()).toHours() > minProcessingDays)
+                Duration.between(letter.getSentToPrintAt(), letter.getPrintedAt()).toHours() > minProcessingDays * 24)
                 .collect(toList());
             return CsvWriter.writeDelayedPostedLettersToCsv(filteredLetters.stream());
         }
