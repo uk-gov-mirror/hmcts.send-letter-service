@@ -4,13 +4,13 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-  id 'org.flywaydb.flyway' version '7.5.4'
+  id 'org.flywaydb.flyway' version '7.7.0'
   id 'org.springframework.boot' version '2.4.3'
-  id 'org.owasp.dependencycheck' version '6.1.1'
+  id 'org.owasp.dependencycheck' version '6.1.2'
   id 'com.github.ben-manes.versions' version '0.36.0'
   id 'org.sonarqube' version '3.1.1'
   id 'info.solidsoft.pitest' version '1.5.2'
-  id 'au.com.dius.pact' version '4.2.0'
+  id 'au.com.dius.pact' version '4.2.2'
 }
 
 flyway {
@@ -222,7 +222,7 @@ dependencyManagement {
       entry 'groovy-xml'
     }
     //CVE-2019-14900
-    dependencySet(group: 'org.hibernate', version: '5.4.27.Final') {
+    dependencySet(group: 'org.hibernate', version: '5.4.29.Final') {
       entry 'hibernate-core'
     }
   }
@@ -242,11 +242,11 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-batch'
   implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '7.5.4'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '7.7.0'
   implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.19'
 
-  implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-provider-jdbc-template', version: '4.20.1'
-  implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-spring', version: '4.20.1'
+  implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-provider-jdbc-template', version: '4.21.0'
+  implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-spring', version: '4.21.0'
 
   implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
