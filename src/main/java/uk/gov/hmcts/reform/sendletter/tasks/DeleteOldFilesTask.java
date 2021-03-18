@@ -61,6 +61,9 @@ public class DeleteOldFilesTask {
         System.out.println("checking git access");
         System.out.println("checking git access");
         System.out.println("checking git access");
+        System.out.println("checking git access");
+        System.out.println("checking git access");
+        System.out.println("checking git access");
 
         if (!ftpAvailabilityChecker.isFtpAvailable(LocalTime.now(ZoneId.of(EUROPE_LONDON)))) {
             logger.info("Not processing '{}' task due to FTP downtime window", TASK_NAME);
