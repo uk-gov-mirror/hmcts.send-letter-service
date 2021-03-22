@@ -176,12 +176,12 @@ public class LetterService {
 
     @Transactional
     public void saveExcepton(ILetterRequest letter, UUID id, String serviceName, String message, String isAsync) {
-        ExceptionLetter exceptionLetter = new ExceptionLetter(id, serviceName, LocalDateTime.now(), 
+        ExceptionLetter exceptionLetter = new ExceptionLetter(id, serviceName, LocalDateTime.now(),
                 letter.getType(), message, isAsync);
         exceptionLetterService.save(exceptionLetter);
         log.info("Created new exception record with id {} for service {}", id, serviceName);
     }
-    
+
     private DuplicateLetter getDuplicateLetter(ILetterRequest letter, UUID id,
                                                String checksum, String serviceName,
                                                String isAsync) {
