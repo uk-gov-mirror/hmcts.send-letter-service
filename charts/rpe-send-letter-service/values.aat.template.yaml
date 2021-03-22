@@ -3,5 +3,18 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   devApplicationInsightsInstrumentKey: "71df5a0f-ebbe-445c-b1d1-d10d349f0970"
+  keyVaults:
+    "rpe-send-letter":
+      secrets:
+        - name: send-letter-service-staging-db-password
+          alias: LETTER_TRACKING_DB_PASSWORD
+        - name: send-letter-service-staging-db-user
+          alias: LETTER_TRACKING_DB_USER_NAME
+        - name: send-letter-service-staging-db-name
+          alias: LETTER_TRACKING_DB_NAME
+        - name: send-letter-service-staging-db-host
+          alias: LETTER_TRACKING_DB_HOST
+        - name: send-letter-service-staging-db-port
+          alias: LETTER_TRACKING_DB_PORT
   environment:
     FLYWAY_NOOP_STRATEGY: "false"
