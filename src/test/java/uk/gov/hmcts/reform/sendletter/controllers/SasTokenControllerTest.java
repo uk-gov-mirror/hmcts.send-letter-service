@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(SasTokenController.class)
 class SasTokenControllerTest {
@@ -17,9 +19,9 @@ class SasTokenControllerTest {
     @Test
     void should_return_sasResponse() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/token/send-letter"))
-        .andDo(MockMvcResultHandlers.print())
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.jsonPath("$.sas_token").isNotEmpty())
-        .andExpect(MockMvcResultMatchers.jsonPath("$.request_id").isNotEmpty());
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.sas_token").isNotEmpty())
+            .andExpect(jsonPath("$.request_id").isNotEmpty());
     }
 }
