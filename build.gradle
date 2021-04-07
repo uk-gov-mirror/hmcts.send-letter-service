@@ -4,13 +4,13 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-  id 'org.flywaydb.flyway' version '7.7.0'
+  id 'org.flywaydb.flyway' version '7.7.1'
   id 'org.springframework.boot' version '2.4.4'
-  id 'org.owasp.dependencycheck' version '6.1.2'
+  id 'org.owasp.dependencycheck' version '6.1.5'
   id 'com.github.ben-manes.versions' version '0.36.0'
   id 'org.sonarqube' version '3.1.1'
   id 'info.solidsoft.pitest' version '1.6.0'
-  id 'au.com.dius.pact' version '4.2.2'
+  id 'au.com.dius.pact' version '4.2.3'
 }
 
 flyway {
@@ -211,7 +211,7 @@ ext["rest-assured.version"] = '4.3.0'
 dependencyManagement {
   dependencies {
     // CVE-2018-10237 - Unbounded memory allocation
-    dependencySet(group: 'com.google.guava', version: '30.1-jre') {
+    dependencySet(group: 'com.google.guava', version: '30.1.1-jre') {
       entry 'guava'
     }
     // force junit5 deps to use groovy v3 which fixes reflective call errors for java 11
@@ -222,7 +222,7 @@ dependencyManagement {
       entry 'groovy-xml'
     }
     //CVE-2019-14900
-    dependencySet(group: 'org.hibernate', version: '5.4.29.Final') {
+    dependencySet(group: 'org.hibernate', version: '5.4.30.Final') {
       entry 'hibernate-core'
     }
   }
@@ -242,11 +242,11 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-batch'
   implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '7.7.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '7.7.1'
   implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.19'
 
-  implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-provider-jdbc-template', version: '4.21.0'
-  implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-spring', version: '4.21.0'
+  implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-provider-jdbc-template', version: '4.22.1'
+  implementation group: 'net.javacrumbs.shedlock', name: 'shedlock-spring', version: '4.22.1'
 
   implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
@@ -262,11 +262,11 @@ dependencies {
   implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
 
   implementation group: 'com.hierynomus', name: 'sshj', version: '0.31.0'
-  implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.22'
+  implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.23'
   implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
-  implementation group: 'com.vladmihalcea', name: 'hibernate-types-5', version: '2.10.3'
+  implementation group: 'com.vladmihalcea', name: 'hibernate-types-5', version: '2.10.4'
   implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: versions.bouncycastle
   implementation group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: versions.bouncycastle
   implementation group: 'org.bouncycastle', name: 'bcpg-jdk15on', version: versions.bouncycastle
@@ -284,7 +284,7 @@ dependencies {
   testImplementation group: 'com.icegreen', name: 'greenmail', version: '1.5.13', withoutJunit4
   testImplementation group: 'org.apache.commons', name: 'commons-email', version: '1.5'
   testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
-  testImplementation group: 'org.apache.pdfbox', name: 'preflight', version: '2.0.22', withoutJunit4
+  testImplementation group: 'org.apache.pdfbox', name: 'preflight', version: '2.0.23', withoutJunit4
   testImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.27.0', withoutJunit4
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
