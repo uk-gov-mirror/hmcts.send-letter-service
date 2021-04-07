@@ -51,15 +51,15 @@ class SasTokenControllerTest {
 
     @Test
     void should_return_unauthorized_status_when_authentication_fails() throws Exception {
-        given(authService.authenticate("auth-header-value")).
-            willThrow(
+        given(authService.authenticate("auth-header-value"))
+            .willThrow(
                 new UnauthenticatedException("Missing ServiceAuthorization header")
             );
 
         mockMvc.perform(
-            get("/token")
-                .header("ServiceAuthorization", "auth-header-value")
-        )
+                get("/token")
+                    .header("ServiceAuthorization", "auth-header-value")
+            )
             .andDo(print())
             .andExpect(status().isUnauthorized());
 
@@ -76,9 +76,9 @@ class SasTokenControllerTest {
             );
 
         mockMvc.perform(
-            get("/token")
-                .header("ServiceAuthorization", "auth-header-value")
-        )
+                get("/token")
+                    .header("ServiceAuthorization", "auth-header-value")
+            )
             .andDo(print())
             .andExpect(status().isForbidden());
 
