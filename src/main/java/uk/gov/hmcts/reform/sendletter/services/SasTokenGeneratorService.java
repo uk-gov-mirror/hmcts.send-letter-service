@@ -6,6 +6,6 @@ import org.springframework.stereotype.Service;
 public class SasTokenGeneratorService {
 
     public String generateSasToken(String serviceName) {
-        return "dummy";
+        return serviceName;
     }
 }
