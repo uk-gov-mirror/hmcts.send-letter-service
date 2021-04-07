@@ -36,7 +36,8 @@ class SasTokenControllerTest {
         given(authService.authenticate("auth-header-value")).willReturn("send-letter");
         given(sasTokenGeneratorService.generateSasToken("send-letter")).willReturn("sas_token");
 
-        mockMvc.perform(
+        mockMvc
+            .perform(
                 get("/token")
                     .header("ServiceAuthorization", "auth-header-value")
             )
@@ -56,7 +57,8 @@ class SasTokenControllerTest {
                 new UnauthenticatedException("Missing ServiceAuthorization header")
             );
 
-        mockMvc.perform(
+        mockMvc
+            .perform(
                 get("/token")
                     .header("ServiceAuthorization", "auth-header-value")
             )
@@ -75,7 +77,8 @@ class SasTokenControllerTest {
                 new ServiceNotConfiguredException("Service not configured")
             );
 
-        mockMvc.perform(
+        mockMvc
+            .perform(
                 get("/token")
                     .header("ServiceAuthorization", "auth-header-value")
             )
