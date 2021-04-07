@@ -25,7 +25,10 @@ public class SasTokenController {
     private final SasTokenGeneratorService sasTokenGeneratorService;
     private final AuthService authService;
 
-    public SasTokenController(SasTokenGeneratorService sasTokenGeneratorService, AuthService authService) {
+    public SasTokenController(
+        SasTokenGeneratorService sasTokenGeneratorService,
+        AuthService authService
+    ) {
         this.sasTokenGeneratorService = sasTokenGeneratorService;
         this.authService = authService;
     }
