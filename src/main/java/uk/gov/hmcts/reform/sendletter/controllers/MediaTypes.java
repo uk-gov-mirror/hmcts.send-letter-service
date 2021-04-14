@@ -6,6 +6,8 @@ public final class MediaTypes {
     public static final String LETTER_V2 = "application/vnd.uk.gov.hmcts.letter-service.in.letter.v2+json";
     public static final String LETTER_V3 = "application/vnd.uk.gov.hmcts.letter-service.in.letter.v3+json";
 
+    public static final String PRINT_V1 = "application/vnd.uk.gov.hmcts.letter-service.in.print-job.v1+json";
+
     private MediaTypes() {
     }
 }
