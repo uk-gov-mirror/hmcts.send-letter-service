@@ -18,14 +18,14 @@ locals {
 
   product = "bulk-print"
   tags = merge(
-      var.common_tags,
-      map(
-        "Team Contact", "#bulk-print-build-notices",
-        "Team Name", "Bulk Print",
-        "contactSlackChannel",  "#bulk-print-build-notices",
-        "managedBy",  "Bulk Print"
-      )
+    var.common_tags,
+    map(
+      "Team Contact", "#bulk-print-build-notices",
+      "Team Name", "Bulk Print",
+      "contactSlackChannel", "#bulk-print-build-notices",
+      "managedBy", "Bulk Print"
     )
+  )
 }
 
 module "db-v11" {
