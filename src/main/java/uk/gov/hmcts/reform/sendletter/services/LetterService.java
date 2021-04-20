@@ -123,7 +123,11 @@ public class LetterService {
                 serviceName, localDateTime, zipContent);
 
         if (letter instanceof LetterRequest) {
-            log.info("Team {} is still using the v1 api call and renders pdf templates. Letter id = {}", serviceName, id);
+            log.info(
+                "Team {} is still using the v1 api call and renders pdf templates. Letter id = {}",
+                serviceName,
+                id
+            );
         }
 
         if (Boolean.parseBoolean(isAsync)) {
