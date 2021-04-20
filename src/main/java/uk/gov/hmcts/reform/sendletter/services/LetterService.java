@@ -122,6 +122,10 @@ public class LetterService {
         Function<LocalDateTime, byte[]> fileContent = localDateTime -> getFileContent(id, letter,
                 serviceName, localDateTime, zipContent);
 
+        if (letter instanceof LetterRequest) {
+            log.info("Team {} is still using the v1 api call and renders pdf templates. Letter id = {}", serviceName, id);
+        }
+
         if (Boolean.parseBoolean(isAsync)) {
             Runnable logger = () -> log.info("Saving letter id {} in async mode as flag value is {}", id, isAsync);
             asynService.run(() -> saveLetter(letter, messageId, serviceName, id, fileContent), logger,
