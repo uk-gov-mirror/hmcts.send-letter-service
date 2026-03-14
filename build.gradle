@@ -269,7 +269,7 @@ dependencies {
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
   testImplementation group: 'com.icegreen', name: 'greenmail', version: '2.1.8'
   testImplementation 'org.apache.commons:commons-email2-jakarta:2.0.0-M2-SNAPSHOT'
-  testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.18.0'
+  testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.20.0'
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox-io', version: versions.pdfbox
   testImplementation group: 'org.apache.pdfbox', name: 'preflight', version: versions.pdfbox
   testImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8-standalone', version: '3.0.1'
