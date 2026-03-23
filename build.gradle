@@ -214,6 +214,12 @@ configurations.all {
   exclude group: 'org.springframework.boot', module: 'spring-boot-starter-security'
 }
 
+dependencyManagement {
+  imports {
+    mavenBom "org.testcontainers:testcontainers-bom:1.21.4"
+  }
+}
+
 dependencies {
   implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
   implementation group: 'org.eclipse.jetty', name: 'jetty-util', version: '12.1.0'
@@ -280,7 +286,7 @@ dependencies {
   integrationTestImplementation sourceSets.test.runtimeClasspath
   integrationTestImplementation group: 'org.apache.sshd', name: 'sshd-scp', version: '2.15.0'
   integrationTestImplementation group: 'org.apache.sshd', name: 'sshd-sftp', version: '2.15.0'
-  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.21.3'
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.21.4'
   integrationTestImplementation group: 'org.awaitility', name: 'awaitility', version: '4.3.0'
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
