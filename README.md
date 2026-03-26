@@ -2,8 +2,7 @@
 
 ## Architectural Diagram
 ![Diagram](./doc/arch/diagram.png)
-> You can edit this diagram by importing `./doc/arch/diagram.drawio` into [draw.io](https://www.draw.io/)
-
+> You can edit this diagram by importing `./doc/arch/diagram.drawio` into [draw.io](https://www.draw.io/).
 
 [Swagger API Specs](https://hmcts.github.io/reform-api-docs/swagger.html?url=https://hmcts.github.io/reform-api-docs/specs/send-letter-service.json)
 

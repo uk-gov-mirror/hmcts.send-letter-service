@@ -79,26 +79,40 @@ reports:
   service-config:
     - service: cmc_claim_store
       display-name: CMC
+      report-code: CMC
     - service: civil_service
       display-name: OCMC
+      report-code: CMC
     - service: send_letter_tests
       display-name: Bulk Print
+      report-code: BULKPRINT
     - service: divorce_frontend
       display-name: Divorce
+      report-code: DIV
+    - service: nfdiv_case_api
+      display-name: Divorce
+      report-code: NFDIV
     - service: probate_backend
       display-name: Probate
+      report-code: Probate
     - service: sscs
       display-name: SSCS
+      report-code: SSCS
     - service: finrem_document_generator
       display-name: FINREM
+      report-code: FRM
     - service: finrem_case_orchestration
       display-name: FINREM
+      report-code: FRM
     - service: fpl_case_service
       display-name: FPLA
+      report-code: FPL
     - service: prl_cos_api
       display-name: PRIVATELAW
+      report-code: PRIVLAW
     - service: civil_general_applications
       display-name: general_applications
+      report-code: CMC
   delayed-stale-report:
     cron: ${DELAYED_STALE_REPORT_CRON:0 0 13 * * *}
     enabled: ${DELAYED_STALE_REPORT_ENABLED:false}
@@ -114,7 +128,6 @@ ftp:
   target-folder: ${FTP_TARGET_FOLDER}
   smoke-test-target-folder: ${FTP_SMOKE_TEST_TARGET_FOLDER:SMOKE_TEST}
   reports-folder: ${FTP_REPORTS_FOLDER}
-  reports-cron: ${FTP_REPORTS_CRON:"30 59 15 * * ?"}
   fingerprint: ${FTP_FINGERPRINT}
   username: ${FTP_USER}
   privateKey: ${FTP_PRIVATE_KEY}
@@ -157,8 +170,6 @@ tasks:
   upload-letters:
     interval-ms: ${UPLOAD_LETTERS_INTERVAL:30000}
     db-poll-delay: ${DB_POLL_DELAY:2}
-  mark-letters-posted:
-    cron:  ${FTP_REPORTS_CRON:0 30 * * * *}
   stale-letters-report:
     cron: ${STALE_LETTERS_REPORT_CRON:0 30 11 * * *}
   pending-letters-report:
@@ -180,7 +191,8 @@ encryption:
   publicKey: ${ENCRYPTION_PUBLIC_KEY:}
 
 stale-letters:
-  min-age-in-business-days: 2
+  min-age-in-business-days: ${STALE_BUSINESS_DAYS:2}
+  min-age-in-days-for-no-report-abort: ${NO_REPORT_ABORT_DAYS:7}
 
 async:
   threadpool-size: ${ASYNC_THREADPOOL_SIZE:20}

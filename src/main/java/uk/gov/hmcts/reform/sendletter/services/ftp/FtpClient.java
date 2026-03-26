@@ -130,7 +130,11 @@ public class FtpClient {
                         InMemoryDownloadedFile inMemoryFile = new InMemoryDownloadedFile();
                         try {
                             transfer.download(file.getPath(), inMemoryFile);
-                            Report report = new Report(file.getPath(), inMemoryFile.getBytes());
+                            Report report = new Report(
+                                file.getPath(),
+                                inMemoryFile.getBytes(),
+                                file.getAttributes().getMtime()
+                            );
                             logger.info("Downloaded report file '{}'", report.path);
                             return report;
                         } catch (IOException exc) {

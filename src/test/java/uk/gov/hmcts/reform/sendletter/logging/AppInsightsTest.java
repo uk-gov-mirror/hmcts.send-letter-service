@@ -130,9 +130,24 @@ class AppInsightsTest {
             UUID.randomUUID(),
             ZonedDateTime.now()
         ));
-        ParsedReport fullyParsedReport = new ParsedReport("/path/to/report", statuses, true);
-        ParsedReport partiallyParsedReport = new ParsedReport("/path/to/report", statuses, false);
-        ParsedReport emptyReport = new ParsedReport("/path/to/report", Collections.emptyList(), true);
+
+        ParsedReport fullyParsedReport = new ParsedReport(
+            "/path/to/report",
+            statuses,
+            true,
+            ZonedDateTime.now().toLocalDate());
+
+        ParsedReport partiallyParsedReport = new ParsedReport(
+            "/path/to/report",
+            statuses,
+            false,
+            ZonedDateTime.now().toLocalDate());
+
+        ParsedReport emptyReport = new ParsedReport(
+            "/path/to/report",
+            Collections.emptyList(),
+            true,
+            ZonedDateTime.now().toLocalDate());
 
         insights.trackPrintReportReceived(fullyParsedReport);
         insights.trackPrintReportReceived(partiallyParsedReport);

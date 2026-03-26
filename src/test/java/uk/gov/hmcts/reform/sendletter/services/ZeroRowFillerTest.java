@@ -24,7 +24,7 @@ class ZeroRowFillerTest {
     @Test
     void should_add_missing_zero_row_when_needed() {
         //given
-        given(reportsServiceConfig.getServiceConfig())
+        given(reportsServiceConfig.getServiceDisplayNameMap())
             .willReturn(ImmutableMap.of("aService", "ServiceA", "bService", "ServiceB", "cService", "ServiceC"));
 
         ZeroRowFiller zeroRowFiller = new ZeroRowFiller(reportsServiceConfig);
@@ -51,7 +51,7 @@ class ZeroRowFillerTest {
     @Test
     void should_add_all_services_when_input_collection_is_empty() {
         //given
-        given(reportsServiceConfig.getServiceConfig())
+        given(reportsServiceConfig.getServiceDisplayNameMap())
             .willReturn(ImmutableMap.of("aService", "ServiceA", "bService", "ServiceB", "cService", "ServiceC"));
         ZeroRowFiller zeroRowFiller = new ZeroRowFiller(reportsServiceConfig);
 
@@ -73,7 +73,7 @@ class ZeroRowFillerTest {
     @Test
     void should_add_services_when_input_collection_contains_unconfigured_services() {
         //given
-        given(reportsServiceConfig.getServiceConfig())
+        given(reportsServiceConfig.getServiceDisplayNameMap())
             .willReturn(ImmutableMap.of("aService", "ServiceA", "bService", "ServiceB"));
 
         ZeroRowFiller zeroRowFiller = new ZeroRowFiller(reportsServiceConfig);
@@ -101,7 +101,7 @@ class ZeroRowFillerTest {
     @Test
     void should_not_change_the_collection_when_all_services_exist() {
         //given
-        given(reportsServiceConfig.getServiceConfig())
+        given(reportsServiceConfig.getServiceDisplayNameMap())
             .willReturn(ImmutableMap.of("aService", "ServiceA", "bService", "ServiceB", "cService", "ServiceC"));
         ZeroRowFiller zeroRowFiller = new ZeroRowFiller(reportsServiceConfig);
 

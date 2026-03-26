@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.sendletter.entity.EventType.MANUALLY_MARKED_AS
 import static uk.gov.hmcts.reform.sendletter.entity.EventType.MANUALLY_MARKED_AS_CREATED;
 import static uk.gov.hmcts.reform.sendletter.entity.EventType.MANUALLY_MARKED_AS_POSTED;
 import static uk.gov.hmcts.reform.sendletter.entity.EventType.MANUALLY_MARKED_AS_POSTED_LOCALLY;
+import static uk.gov.hmcts.reform.sendletter.entity.EventType.MARKED_AS_NO_REPORT_ABORTED;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.FailedToUpload;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Posted;
 import static uk.gov.hmcts.reform.sendletter.entity.LetterStatus.Uploaded;
@@ -78,6 +79,29 @@ public class LetterActionService {
             "Letter marked manually as Aborted to stop processing");
 
         return letterRepository.markLetterAsAborted(id);
+    }
+
+    /**
+     * Mark a letter as aborted due to a missing report.
+     * @param id The id of the letter to mark as NoReportAborted
+     * @return The number of letters marked as NoReportAborted
+     */
+    @Transactional
+    public int markLetterAsNoReportAborted(UUID id) {
+        log.info("Marking the letter id {} as NoReportAborted", id);
+
+        Optional<Letter> letterOpt = letterRepository.findById(id);
+
+        if (letterOpt.isEmpty()) {
+            throw new LetterNotFoundException(id);
+        }
+
+        createLetterEvent(
+            letterOpt.get(),
+            MARKED_AS_NO_REPORT_ABORTED,
+            "Letter marked NoReportAborted to stop processing");
+
+        return letterRepository.markLetterAsNoReportAborted(id);
     }
 
     /**

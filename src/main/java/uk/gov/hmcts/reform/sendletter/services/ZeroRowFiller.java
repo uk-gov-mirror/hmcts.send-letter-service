@@ -29,7 +29,7 @@ public class ZeroRowFiller {
      * @param reportsServiceConfig The configuration for reports service
      */
     public ZeroRowFiller(ReportsServiceConfig reportsServiceConfig) {
-        this.reportsServiceConfig = reportsServiceConfig.getServiceConfig();
+        this.reportsServiceConfig = reportsServiceConfig.getServiceDisplayNameMap();
     }
 
     /**

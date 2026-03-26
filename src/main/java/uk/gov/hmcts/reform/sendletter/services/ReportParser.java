@@ -49,7 +49,8 @@ public class ReportParser {
             return new ParsedReport(
                 report.path,
                 statuses.stream().filter(Objects::nonNull).collect(toList()),
-                statuses.stream().allMatch(Objects::nonNull)
+                statuses.stream().allMatch(Objects::nonNull),
+                report.reportDate
             );
 
         } catch (IOException exc) {

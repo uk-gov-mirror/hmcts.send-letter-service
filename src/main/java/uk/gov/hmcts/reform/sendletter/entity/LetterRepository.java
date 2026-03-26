@@ -55,6 +55,26 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
     );
 
     /**
+     * Find by status in and created before, ordered by created at ascending.
+     *
+     * @param statuses the letter statuses
+     * @param createdAtBefore the created before date
+     * @return the {@link List} of found {@link BasicLetterInfo}s
+     */
+    List<BasicLetterInfo> findByStatusInAndCreatedAtBeforeOrderByCreatedAtAsc(Collection<LetterStatus> statuses, LocalDateTime createdAtBefore);
+
+    /**
+     * Find by status in and created before where sentToPrintAt is not null, ordered by created at
+     * ascending.
+     *
+     * @param statuses the letter statuses
+     * @param createdAtBefore the created before date
+     * @return the {@link List} of found {@link BasicLetterInfo}s
+     */
+    List<BasicLetterInfo> findByStatusInAndCreatedAtBeforeAndSentToPrintAtNotNullOrderByCreatedAtAsc(
+        Collection<LetterStatus> statuses, LocalDateTime createdAtBefore);
+
+    /**
      * Find by status not in and type not and created at between order by created at asc.
      * @param letterStatuses the letter statuses
      * @param type the type
@@ -200,6 +220,18 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
     int markLetterAsAborted(@Param("id") UUID id);
 
     /**
+     * Mark letter as no report aborted.
+     * @param id the id
+     * @return int number of updated records
+     */
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Letter l"
+        + " SET l.status = uk.gov.hmcts.reform.sendletter.entity.LetterStatus.NoReportAborted"
+        + " WHERE l.id = :id"
+    )
+    int markLetterAsNoReportAborted(UUID id);
+
+    /**
      * Mark letter as posted locally.
      * @param id the id
      * @return int number of updated records
@@ -210,4 +242,13 @@ public interface LetterRepository extends JpaRepository<Letter, UUID> {
         + " WHERE l.id = :id AND l.status in ('Uploaded', 'Posted')"
     )
     int markLetterAsPostedLocally(@Param("id") UUID id);
+
+    /**
+     * Find the related service for a letter.
+     *
+     * @param id the letter id
+     * @return the service
+     */
+    @Query("SELECT l.service FROM Letter l WHERE l.id = :id")
+    Optional<String> findLetterService(UUID id);
 }

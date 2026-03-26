@@ -15,5 +15,6 @@ public enum LetterStatus {
     Skipped, // service decided to not upload. previously it was considered as uploaded and data is lost
     NotSent,
     FailedToUpload,
-    PostedLocally
+    PostedLocally,
+    NoReportAborted
 }

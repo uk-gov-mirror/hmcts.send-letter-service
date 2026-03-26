@@ -33,6 +33,15 @@ public class LetterDataAccessService {
     }
 
     /**
+     * Finds letter service by id.
+     * @param id letter id
+     * @return letter service
+     */
+    public Optional<String> findLetterService(UUID id) {
+        return repository.findLetterService(id);
+    }
+
+    /**
      * Marks letter as posted.
      * @param id letter id
      * @param printedAt time when letter was printed

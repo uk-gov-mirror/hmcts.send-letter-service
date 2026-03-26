@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.sendletter.exception.DuplexException;
 import uk.gov.hmcts.reform.sendletter.exception.DuplicateDocumentException;
+import uk.gov.hmcts.reform.sendletter.exception.FtpDownloadException;
 import uk.gov.hmcts.reform.sendletter.exception.InvalidApiKeyException;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotStaleException;
@@ -39,6 +40,7 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ResponseEntity.badRequest;
 import static org.springframework.http.ResponseEntity.status;
@@ -292,5 +294,19 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     ) {
         log.warn(exc.getMessage(), exc);
         return status(BAD_REQUEST).body(exc.getMessage());
+    }
+
+    /**
+     * Handles FtpDownloadException.
+     *
+     * @param exc FtpDownloadException
+     * @return ResponseEntity
+     */
+    @ExceptionHandler(FtpDownloadException.class)
+    protected ResponseEntity<String> handleFtpDownloadException(
+        FtpDownloadException exc
+    ) {
+        log.warn(exc.getMessage(), exc);
+        return status(SERVICE_UNAVAILABLE).body(exc.getMessage());
     }
 }

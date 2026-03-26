@@ -25,7 +25,8 @@ class ReportParserTest {
     @Test
     void should_parse_valid_csv_report() {
         String report = formatReport(UUID_1, UUID_2);
-        ParsedReport result = new ReportParser().parse(new Report("a.csv", report.getBytes()));
+        ParsedReport result = new ReportParser().parse(
+            new Report("a.csv", report.getBytes(), ZonedDateTime.now().toEpochSecond()));
 
         assertThat(result.statuses)
             .usingFieldByFieldElementComparator()
@@ -39,7 +40,8 @@ class ReportParserTest {
     @Test
     void should_filter_out_rows_with_invalid_file_name() {
         String report = formatReport("invalidID", UUID_1);
-        ParsedReport result = new ReportParser().parse(new Report("a.csv", report.getBytes()));
+        ParsedReport result = new ReportParser().parse(
+            new Report("a.csv", report.getBytes(), ZonedDateTime.now().toEpochSecond()));
 
         assertThat(result.statuses)
             .usingFieldByFieldElementComparator()
@@ -55,7 +57,8 @@ class ReportParserTest {
                 + "20180101,16:38,CMC001_cmcclaimstore_ff99f8ad-7ab8-43f8-9671-5397cbfa96a6.pdf\n"
                 + String.format("27-03-2018,16:38,CMC001_cmcclaimstore_%s\n", UUID_1);
 
-        ParsedReport result = new ReportParser().parse(new Report("a.csv", report.getBytes()));
+        ParsedReport result = new ReportParser().parse(
+            new Report("a.csv", report.getBytes(),  ZonedDateTime.now().toEpochSecond()));
 
         assertThat(result.statuses)
             .usingFieldByFieldElementComparator()
@@ -68,7 +71,8 @@ class ReportParserTest {
     void should_parse_sample_report() throws Exception {
         byte[] report = loadResource("report.csv");
 
-        ParsedReport result = new ReportParser().parse(new Report("a.csv", report));
+        ParsedReport result = new ReportParser().parse(
+            new Report("a.csv", report, ZonedDateTime.now().toEpochSecond()));
 
         assertThat(result.statuses).hasSize(3);
         assertThat(result.allRowsParsed).isTrue();
@@ -82,7 +86,7 @@ class ReportParserTest {
                 + "27-03-2018;16:38;CMC001_cmcclaimstore_ff88f8ad-8ab8-44f8-9672-5398cbfa96a7.pdf\n";
 
         Throwable exc = catchThrowable(() ->
-            new ReportParser().parse(new Report("a.csv", report.getBytes())));
+            new ReportParser().parse(new Report("a.csv", report.getBytes(), ZonedDateTime.now().toEpochSecond())));
 
         assertThat(exc)
             .isInstanceOf(ReportParsingException.class);

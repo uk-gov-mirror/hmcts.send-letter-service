@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -94,6 +95,30 @@ public class StaleLetterService {
                 .toLocalDateTime();
         log.info("Stale letters before {} ", localDateTime);
         return letterRepository.findStaleLetters(localDateTime);
+    }
+
+    /**
+     * Get stale letters for a specific status and before date.
+     *
+     * @return The stale letters
+     */
+    public List<BasicLetterInfo> getStaleLetters(Collection<LetterStatus> statuses, LocalDateTime beforeDateTime) {
+        log.info("Stale letters before {} where status in: {}", beforeDateTime, statuses);
+        return letterRepository.findByStatusInAndCreatedAtBeforeOrderByCreatedAtAsc(statuses, beforeDateTime);
+    }
+
+    /**
+     * Get stale letters for a specific status and before date that have a non-null sent_to_print_date.
+     *
+     * @return The stale letters
+     */
+    public List<BasicLetterInfo> getStaleLettersWithValidPrintDate(
+        Collection<LetterStatus> statuses,
+        LocalDateTime beforeDateTime) {
+        log.info("Stale letters before {} where status in: {}, and sent_to_print_at is not noll",
+            beforeDateTime, statuses);
+        return letterRepository.findByStatusInAndCreatedAtBeforeAndSentToPrintAtNotNullOrderByCreatedAtAsc(
+            statuses, beforeDateTime);
     }
 
     /**

@@ -184,7 +184,8 @@ public final class SampleData {
                 .stream()
                 .map(id -> new LetterPrintStatus(id, ZonedDateTime.now()))
                 .collect(toList()),
-            allParsed
+            allParsed,
+            ZonedDateTime.now().toLocalDate()
         );
     }
 
