@@ -55,4 +55,10 @@ public class Report {
     LocalDateTime processedAt;
 
     private boolean isInternational;
+
+    @NotNull
+    private ReportStatus status;
+
+    private String errorMessage;
 }
+

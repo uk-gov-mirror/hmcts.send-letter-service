@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.sendletter.entity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,6 +22,14 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
      */
     Optional<Report> findFirstByReportCodeAndReportDateAndIsInternational(
         String reportCode, LocalDate reportDate, boolean isInternational);
+
+    /**
+     * Retrieves all reports processed after a specific timestamp.
+     *
+     * @param timestamp the date and time after which reports were processed
+     * @return a list of {@link Report} entities processed after the given timestamp
+     */
+    List<Report> findByProcessedAtAfter(LocalDateTime timestamp);
 }
 
 
