@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.sendletter.services.MarkLettersPostedService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,8 +56,6 @@ class TaskControllerTest {
 
     @Test
     void processReportsShouldReturn204() {
-        when(markLettersPostedService.processReports()).thenReturn(Collections.emptyList());
-
         ResponseEntity<Void> response =
             controller.processReports(AUTH_HEADER);
 

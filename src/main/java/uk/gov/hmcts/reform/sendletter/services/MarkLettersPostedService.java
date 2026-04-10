@@ -8,12 +8,11 @@ import uk.gov.hmcts.reform.sendletter.config.ReportsServiceConfig;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.entity.Report;
 import uk.gov.hmcts.reform.sendletter.entity.ReportRepository;
-import uk.gov.hmcts.reform.sendletter.exception.FtpDownloadException;
+import uk.gov.hmcts.reform.sendletter.entity.ReportStatus;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.LetterPrintStatus;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
-import uk.gov.hmcts.reform.sendletter.model.out.PostedReportTaskResponse;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 import uk.gov.hmcts.reform.sendletter.services.ftp.IFtpAvailabilityChecker;
 
@@ -24,9 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.format.SignStyle;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -87,14 +83,13 @@ public class MarkLettersPostedService {
     /**
      * Fetches reports from SFTP and sets status as Posted in the database.
      */
-    public List<PostedReportTaskResponse> processReports() {
+    public void processReports() {
         if (!ftpAvailabilityChecker.isFtpAvailable(LocalTime.now(ZoneId.of(EUROPE_LONDON)))) {
             logger.info("Not processing '{}' task due to FTP downtime window", TASK_NAME);
-            return Collections.emptyList();
+            return;
         }
         logger.info("Started '{}' task", TASK_NAME);
-        final AtomicReference<PostedReportTaskResponse> currentResponse = new AtomicReference<>();
-        final List<PostedReportTaskResponse> responseList = new ArrayList<>();
+        final AtomicReference<Report> currentReport = new AtomicReference<>();
         try {
             ftpClient
                 .downloadReports()
@@ -114,81 +109,61 @@ public class MarkLettersPostedService {
                         // to determine a report code from their assigned service.
                         //
                         // When this happens, processing is allowed to move on to the next parsed report,
-                        // but an error response will be added to indicate that a report couldn't be married
+                        // but an error report will be added to indicate that a report couldn't be married
                         // up to a specific service.
-                        currentResponse.set(new PostedReportTaskResponse(
-                            "UNKNOWN",
-                            parsedReport.reportDate,
-                            false)
+                        currentReport.set(Report.builder()
+                            .reportCode("UNKNOWN")
+                            .reportDate(parsedReport.reportDate)
+                            .isInternational(false)
+                            .status(ReportStatus.FAIL)
+                            .errorMessage(String.format("Service not found for report with name '%s'",
+                                parsedReport.path))
+                            .build()
                         );
-                        currentResponse.get().markAsFailed(
-                            String.format("Service not found for report with name '%s'", parsedReport.path));
                     } else {
 
-                        // initialise a response now so that we can ensure a response in the case of an
+                        // initialise a report now so that we can ensure a report in the case of an
                         // exceptional failure during the markAsPosted iteration below.
-                        currentResponse.set(new PostedReportTaskResponse(
-                            reportInfo.reportCode,
-                            reportInfo.reportDate,
-                            reportInfo.isInternational)
+                        currentReport.set(Report.builder()
+                            .reportCode(reportInfo.reportCode)
+                            .reportDate(reportInfo.reportDate)
+                            .isInternational(reportInfo.isInternational)
+                            .build()
                         );
 
                         long count = parsedReport.statuses.stream()
                             .filter(status -> markAsPosted(status, parsedReport.path))
                             .count();
 
-                        currentResponse.get().setMarkedPostedCount(count);
+                        currentReport.get().setPrintedLettersCount(count);
 
                         if (parsedReport.allRowsParsed) {
                             logger.info("Report {} successfully parsed, deleting", parsedReport.path);
                             ftpClient.deleteReport(parsedReport.path);
-                            // now that we've processed the file, we can save a report.
-                            reportRepository.save(Report.builder()
-                                .reportName(parsedReport.path)
-                                .reportCode(reportInfo.reportCode)
-                                .reportDate(reportInfo.reportDate)
-                                .printedLettersCount(count)
-                                .isInternational(reportInfo.isInternational)
-                                .build()
-                            );
+                            currentReport.get().setStatus(ReportStatus.SUCCESS);
                         } else {
                             logger.warn("Report {} contained invalid rows, file not removed.", parsedReport.path);
-                            currentResponse.get().markAsFailed("Report "
+                            currentReport.get().setStatus(ReportStatus.FAIL);
+                            currentReport.get().setErrorMessage("Report "
                                 + parsedReport.path + " contained invalid rows");
                         }
                     }
-                    responseList.add(currentResponse.getAndSet(null));
+                    // save whatever report we made above.
+                    reportRepository.save(currentReport.getAndSet(null));
                 });
 
             logger.info("Completed '{}' task", TASK_NAME);
         } catch (Exception e) {
             logger.error("An error occurred when downloading reports from SFTP server", e);
-            // If we opened a response before the exception was thrown, we need to commit
-            // that response to the list and mark it up as an error.
-            Optional.ofNullable(currentResponse.getAndSet(null)).ifPresentOrElse(ptr -> {
-                ptr.markAsFailed(
-                    "An error occurred when processing downloaded reports from the SFTP server: " + e.getMessage());
-                responseList.add(ptr);
-            }, () -> {
-                // otherwise, make a choice about adding a general error or just throwing a 503
-                if (responseList.isEmpty()) {
-                    // if we have an empty response list at this point, we should
-                    // throw a formal 503
-                    throw new FtpDownloadException("An error occurred when downloading reports from SFTP server", e);
-                } else {
-                    // if the response list already has some errors in it then we need to add
-                    // another one with an UNKNOWN report code that details the error
-                    PostedReportTaskResponse errorReport =
-                        new PostedReportTaskResponse("UNKNOWN", LocalDate.now(), false);
-                    errorReport.setMarkedPostedCount(0);
-                    errorReport.markAsFailed(
-                        "An error occurred when processing reports from SFTP server: " + e.getMessage());
-                    responseList.add(errorReport);
-                }
+            // If we opened a report before the exception was thrown, we need to commit
+            // that report to the list and mark it up as an error.
+            Optional.ofNullable(currentReport.getAndSet(null)).ifPresent(ptr -> {
+                ptr.setStatus(ReportStatus.FAIL);
+                ptr.setErrorMessage("An error occurred when processing downloaded reports from the SFTP server: "
+                    + e.getMessage());
+                reportRepository.save(ptr);
             });
-
         }
-        return responseList;
     }
 
     /**

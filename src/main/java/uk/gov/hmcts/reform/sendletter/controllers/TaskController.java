@@ -75,12 +75,21 @@ public class TaskController {
     public ResponseEntity<List<PostedReportTaskResponse>> retrieveReports(
         @RequestHeader(value = AUTHORIZATION, required = false) String authHeader,
         @RequestParam(name = "after", required = false) LocalDateTime afterDate) {
+
         validateAuthorization(authHeader);
+
         LocalDateTime after = afterDate != null
             ? afterDate
             : LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
-        return ResponseEntity.ok(reportRepository.findByProcessedAtAfter(after).stream()
-                .map(PostedReportTaskResponse::fromReport).toList());
+
+        List<PostedReportTaskResponse> reports = reportRepository.findByProcessedAtAfter(after).stream()
+            .map(PostedReportTaskResponse::fromReport).toList();
+
+        if (reports.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(reports);
     }
 
 

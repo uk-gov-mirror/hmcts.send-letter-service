@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.sendletter.entity.LetterRepository;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.helper.FakeFtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
-import uk.gov.hmcts.reform.sendletter.model.out.PostedReportTaskResponse;
 import uk.gov.hmcts.reform.sendletter.services.LocalSftpServer;
 import uk.gov.hmcts.reform.sendletter.services.MarkLettersPostedService;
 import uk.gov.hmcts.reform.sendletter.services.encryption.PgpDecryptionHelper;
@@ -136,13 +135,7 @@ class BaseTest {
             createCsvReport(server);
 
             // Run the process-report task manually as it is no longer a scheduled task
-            await()
-                .forever()
-                .untilAsserted(() -> {
-                    List<PostedReportTaskResponse> mpResp = markLettersPostedService.processReports();
-                    assertThat(mpResp).isNotNull().isNotEmpty().hasSize(1);
-                    assertThat(mpResp.getFirst()).isNotNull().extracting("processingFailed").isEqualTo(false);
-                });
+            markLettersPostedService.processReports();
 
             // The report should be processed and the letter marked posted.
             await()

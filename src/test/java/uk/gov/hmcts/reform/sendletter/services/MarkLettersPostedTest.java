@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.SampleData;
@@ -12,11 +13,11 @@ import uk.gov.hmcts.reform.sendletter.config.ReportsServiceConfig;
 import uk.gov.hmcts.reform.sendletter.entity.Letter;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.entity.ReportRepository;
+import uk.gov.hmcts.reform.sendletter.entity.ReportStatus;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
 import uk.gov.hmcts.reform.sendletter.logging.AppInsights;
 import uk.gov.hmcts.reform.sendletter.model.ParsedReport;
 import uk.gov.hmcts.reform.sendletter.model.Report;
-import uk.gov.hmcts.reform.sendletter.model.out.PostedReportTaskResponse;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpAvailabilityChecker;
 import uk.gov.hmcts.reform.sendletter.services.ftp.FtpClient;
 
@@ -24,7 +25,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -174,18 +174,20 @@ class MarkLettersPostedTest {
         given(reportsServiceConfig.getReportCodes()).willReturn(Set.of("CODE1", "CODE2"));
 
         // when
-        List<PostedReportTaskResponse> processedReports = task.processReports();
+        task.processReports();
 
         // then
         verify(ftpClient, never()).deleteReport(reportName);
-        assertThat(processedReports).isNotNull().isNotEmpty().hasSize(1);
-        assertThat(processedReports.getFirst()).satisfies(p -> {
-            assertThat(p.isProcessingFailed()).isTrue();
-            assertThat(p.getMarkedPostedCount()).isZero();
-            assertThat(p.getErrorMessage()).isNotEmpty().contains(
-                String.format("Service not found for report with name '%s'",  reportName)
-            );
-        });
+        ArgumentCaptor<uk.gov.hmcts.reform.sendletter.entity.Report> reportCaptor =
+            ArgumentCaptor.forClass(uk.gov.hmcts.reform.sendletter.entity.Report.class);
+        verify(reportRepository, times(1)).save(reportCaptor.capture());
+        uk.gov.hmcts.reform.sendletter.entity.Report report = reportCaptor.getValue();
+        assertThat(report).isNotNull();
+        assertThat(report.getStatus()).isEqualTo(ReportStatus.FAIL);
+        assertThat(report.getPrintedLettersCount()).isZero();
+        assertThat(report.getErrorMessage()).isNotEmpty().contains(
+            String.format("Service not found for report with name '%s'",  reportName)
+        );
     }
 
     @Test
@@ -223,21 +225,22 @@ class MarkLettersPostedTest {
         given(dataAccessService.findLetterStatus(any())).willReturn(Optional.of(LetterStatus.Uploaded));
 
         // when
-        List<PostedReportTaskResponse> processedReports = task.processReports();
+        task.processReports();
 
         // then
         verify(dataAccessService, times(parsedReport.statuses.size()))
             .markLetterAsPosted(any(),any(LocalDateTime.class));
         verify(ftpClient).deleteReport(reportName);
-        verify(reportRepository).save(any());
-        assertThat(processedReports).isNotNull().isNotEmpty().hasSize(1);
-        assertThat(processedReports.getFirst()).satisfies(p -> {
-            assertThat(p.isProcessingFailed()).isFalse();
-            // SampleData parsedReport has 2 letters in it
-            assertThat(p.getMarkedPostedCount()).isEqualTo(parsedReport.statuses.size());
-            assertThat(p.getErrorMessage()).isNull();
-            assertThat(p.getReportCode()).isEqualTo("CODE1");
-        });
+        ArgumentCaptor<uk.gov.hmcts.reform.sendletter.entity.Report> reportCaptor =
+            ArgumentCaptor.forClass(uk.gov.hmcts.reform.sendletter.entity.Report.class);
+        verify(reportRepository).save(reportCaptor.capture());
+        uk.gov.hmcts.reform.sendletter.entity.Report report = reportCaptor.getValue();
+        assertThat(report).isNotNull();
+        assertThat(report.getStatus()).isEqualTo(ReportStatus.SUCCESS);
+        // SampleData parsedReport has 2 letters in it
+        assertThat(report.getPrintedLettersCount()).isEqualTo(parsedReport.statuses.size());
+        assertThat(report.getErrorMessage()).isNull();
+        assertThat(report.getReportCode()).isEqualTo("CODE1");
     }
 
     @Test
@@ -262,19 +265,20 @@ class MarkLettersPostedTest {
             .markLetterAsPosted(any(UUID.class),any(LocalDateTime.class));
 
         // when
-        List<PostedReportTaskResponse> processedReports = task.processReports();
+        task.processReports();
 
         // then
         verify(ftpClient, never()).deleteReport(reportName);
-        verify(reportRepository, never()).save(any());
-        assertThat(processedReports).isNotNull().isNotEmpty().hasSize(1);
-        assertThat(processedReports.getFirst()).satisfies(p -> {
-            assertThat(p.isProcessingFailed()).isTrue();
-            assertThat(p.getMarkedPostedCount()).isZero();
-            assertThat(p.getErrorMessage()).isNotEmpty().contains(
-                "An error occurred when processing downloaded reports from the SFTP server: test exception message"
-            );
-        });
+        ArgumentCaptor<uk.gov.hmcts.reform.sendletter.entity.Report> reportCaptor =
+            ArgumentCaptor.forClass(uk.gov.hmcts.reform.sendletter.entity.Report.class);
+        verify(reportRepository, times(1)).save(reportCaptor.capture());
+        uk.gov.hmcts.reform.sendletter.entity.Report report = reportCaptor.getValue();
+        assertThat(report).isNotNull();
+        assertThat(report.getStatus()).isEqualTo(ReportStatus.FAIL);
+        assertThat(report.getPrintedLettersCount()).isZero();
+        assertThat(report.getErrorMessage()).isNotEmpty().contains(
+            "An error occurred when processing downloaded reports from the SFTP server: test exception message"
+        );
     }
 
     @Test
@@ -316,13 +320,16 @@ class MarkLettersPostedTest {
         given(dataAccessService.findLetterStatus(any())).willReturn(Optional.of(LetterStatus.Uploaded));
 
         // when
-        List<PostedReportTaskResponse> processedReports = task.processReports();
+        task.processReports();
 
         // then
         verify(ftpClient).deleteReport(reportName);
-        verify(reportRepository).save(any());
-        assertThat(processedReports).isNotNull().isNotEmpty().hasSize(1);
-        assertThat(processedReports.getFirst().getReportCode()).isEqualTo("CODE1");
+        ArgumentCaptor<uk.gov.hmcts.reform.sendletter.entity.Report> reportCaptor =
+            ArgumentCaptor.forClass(uk.gov.hmcts.reform.sendletter.entity.Report.class);
+        verify(reportRepository).save(reportCaptor.capture());
+        uk.gov.hmcts.reform.sendletter.entity.Report report = reportCaptor.getValue();
+        assertThat(report).isNotNull();
+        assertThat(report.getReportCode()).isEqualTo("CODE1");
     }
 
 
@@ -342,13 +349,16 @@ class MarkLettersPostedTest {
         given(reportsServiceConfig.getReportCodes()).willReturn(Set.of("CODE1", "CODE2"));
 
         // when
-        List<PostedReportTaskResponse> processedReports = task.processReports();
+        task.processReports();
 
         // then
         verify(ftpClient).deleteReport(reportName);
-        verify(reportRepository).save(any());
-        assertThat(processedReports).isNotNull().isNotEmpty().hasSize(1);
-        assertThat(processedReports.getFirst().getReportDate()).isEqualTo(LocalDate.of(2026,1,13));
+        ArgumentCaptor<uk.gov.hmcts.reform.sendletter.entity.Report> reportCaptor =
+            ArgumentCaptor.forClass(uk.gov.hmcts.reform.sendletter.entity.Report.class);
+        verify(reportRepository).save(reportCaptor.capture());
+        uk.gov.hmcts.reform.sendletter.entity.Report report = reportCaptor.getValue();
+        assertThat(report).isNotNull();
+        assertThat(report.getReportDate()).isEqualTo(LocalDate.of(2026,1,13));
     }
 
     @Test
@@ -367,13 +377,16 @@ class MarkLettersPostedTest {
         given(reportsServiceConfig.getReportCodes()).willReturn(Set.of("CODE1", "CODE2"));
 
         // when
-        List<PostedReportTaskResponse> processedReports = task.processReports();
+        task.processReports();
 
         // then
         verify(ftpClient).deleteReport(reportName);
-        verify(reportRepository).save(any());
-        assertThat(processedReports).isNotNull().isNotEmpty().hasSize(1);
-        assertThat(processedReports.getFirst().getReportDate()).isEqualTo(parsedReport.reportDate);
+        ArgumentCaptor<uk.gov.hmcts.reform.sendletter.entity.Report> reportCaptor =
+            ArgumentCaptor.forClass(uk.gov.hmcts.reform.sendletter.entity.Report.class);
+        verify(reportRepository).save(reportCaptor.capture());
+        uk.gov.hmcts.reform.sendletter.entity.Report report = reportCaptor.getValue();
+        assertThat(report).isNotNull();
+        assertThat(report.getReportDate()).isEqualTo(parsedReport.reportDate);
     }
 
 }

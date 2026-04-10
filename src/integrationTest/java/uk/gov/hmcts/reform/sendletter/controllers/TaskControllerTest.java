@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.sendletter.exception.FtpDownloadException;
+import uk.gov.hmcts.reform.sendletter.entity.Report;
+import uk.gov.hmcts.reform.sendletter.entity.ReportRepository;
 import uk.gov.hmcts.reform.sendletter.model.out.CheckPostedTaskResponse;
 import uk.gov.hmcts.reform.sendletter.model.out.PostedReportTaskResponse;
 import uk.gov.hmcts.reform.sendletter.services.CheckLettersPostedService;
@@ -18,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,19 +44,12 @@ class TaskControllerTest {
     @MockitoBean
     private CheckLettersPostedService checkLettersPostedService;
 
-    @Test
-    void processReportsShouldReturn503WhenFtpDownloadExceptionOccurs() throws Exception {
-        when(markLettersPostedService.processReports())
-            .thenThrow(new FtpDownloadException("Download Failed!"));
-
-        mockMvc.perform(get("/tasks/process-reports")
-                .header("Authorization", AUTH_HEADER))
-            .andExpect(status().isServiceUnavailable());
-    }
+    @MockitoBean
+    private ReportRepository reportRepository;
 
     @Test
     void processReportsShouldReturn204WhenEmpty() throws Exception {
-        when(markLettersPostedService.processReports()).thenReturn(Collections.emptyList());
+        when(reportRepository.findByProcessedAtAfter(any())).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/tasks/process-reports")
                 .header("Authorization", AUTH_HEADER))
@@ -64,9 +59,14 @@ class TaskControllerTest {
     @Test
     void processReportsShouldReturn200WithList() throws Exception {
         final LocalDate reportDate = LocalDate.now();
-        PostedReportTaskResponse item = new PostedReportTaskResponse("CODE1", reportDate, false);
-        item.setMarkedPostedCount(100);
-        when(markLettersPostedService.processReports()).thenReturn(List.of(item));
+        Report report = Report.builder()
+            .reportCode("CODE1")
+            .reportDate(reportDate)
+            .isInternational(false)
+            .printedLettersCount(100)
+            .build();
+
+        when(reportRepository.findByProcessedAtAfter(any())).thenReturn(List.of(report));
 
         String responseBodyStr = mockMvc.perform(get("/tasks/process-reports")
                 .header("Authorization", AUTH_HEADER))
@@ -77,7 +77,7 @@ class TaskControllerTest {
             responseBodyStr, new TypeReference<List<PostedReportTaskResponse>>() {});
 
         assertThat(response).isNotNull().hasSize(1);
-        assertThat(response.getFirst()).isEqualTo(item);
+        assertThat(response.getFirst()).isEqualTo(PostedReportTaskResponse.fromReport(report));
     }
 
     @Test
