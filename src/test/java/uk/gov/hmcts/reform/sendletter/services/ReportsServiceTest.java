@@ -7,8 +7,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.sendletter.config.ReportsServiceConfig;
 import uk.gov.hmcts.reform.sendletter.entity.LettersCountSummaryRepository;
+import uk.gov.hmcts.reform.sendletter.entity.Report;
+import uk.gov.hmcts.reform.sendletter.entity.ReportRepository;
 import uk.gov.hmcts.reform.sendletter.entity.reports.ServiceLettersCount;
 import uk.gov.hmcts.reform.sendletter.model.out.LettersCountSummary;
+import uk.gov.hmcts.reform.sendletter.model.out.MissingReportsResponse;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,11 +19,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 import static uk.gov.hmcts.reform.sendletter.util.TimeZones.localDateTimeWithUtc;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,6 +32,9 @@ class ReportsServiceTest {
 
     @Mock
     LettersCountSummaryRepository repository;
+
+    @Mock
+    ReportRepository reportRepository;
 
     @Mock
     private ZeroRowFiller zeroRowFiller;
@@ -39,9 +46,15 @@ class ReportsServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.service = new ReportsService(this.repository, reportsServiceConfig, zeroRowFiller, "16:00", "17:00");
+        this.service = new ReportsService(
+            this.repository,
+            this.reportRepository,
+            reportsServiceConfig,
+            zeroRowFiller,
+            "16:00",
+            "17:00");
 
-        when(this.zeroRowFiller.fill(any()))
+        lenient().when(this.zeroRowFiller.fill(any()))
             .thenAnswer(invocation -> invocation.getArgument(0)); // return data unchanged
     }
 
@@ -175,5 +188,41 @@ class ReportsServiceTest {
 
         //then
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void should_return_empty_list_when_all_reports_exist() {
+        // given
+        LocalDate date = LocalDate.of(2021, 1, 1);
+        given(reportsServiceConfig.getReportCodes()).willReturn(Set.of("SERVICE_A"));
+        given(reportRepository.findByReportDateBetween(date, date)).willReturn(Arrays.asList(
+            Report.builder().reportCode("SERVICE_A").reportDate(date).isInternational(false).build(),
+            Report.builder().reportCode("SERVICE_A").reportDate(date).isInternational(true).build()
+        ));
+
+        // when
+        List<MissingReportsResponse> result = service.checkReports(date, date);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void should_return_missing_reports_when_some_are_not_in_db() {
+        // given
+        LocalDate date = LocalDate.of(2021, 1, 1);
+        given(reportsServiceConfig.getReportCodes()).willReturn(Set.of("SERVICE_A"));
+        // Only domestic report exists
+        given(reportRepository.findByReportDateBetween(date, date)).willReturn(List.of(
+            Report.builder().reportCode("SERVICE_A").reportDate(date).isInternational(false).build()
+        ));
+
+        // when
+        List<MissingReportsResponse> result = service.checkReports(date, date);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).serviceName).isEqualTo("SERVICE_A");
+        assertThat(result.get(0).type).isEqualTo("international");
     }
 }

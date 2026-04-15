@@ -4,13 +4,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sendletter.config.ReportsServiceConfig;
 import uk.gov.hmcts.reform.sendletter.entity.LettersCountSummaryRepository;
+import uk.gov.hmcts.reform.sendletter.entity.Report;
+import uk.gov.hmcts.reform.sendletter.entity.ReportRepository;
 import uk.gov.hmcts.reform.sendletter.entity.reports.ServiceLettersCountSummary;
 import uk.gov.hmcts.reform.sendletter.model.out.LettersCountSummary;
+import uk.gov.hmcts.reform.sendletter.model.out.MissingReportsResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -26,6 +31,8 @@ public class ReportsService {
 
     private final LettersCountSummaryRepository repo;
 
+    private final ReportRepository reportRepository;
+
     private final ReportsServiceConfig reportsServiceConfig;
 
     private final ZeroRowFiller zeroRowFiller;
@@ -38,6 +45,7 @@ public class ReportsService {
      * Constructor for the ReportsService.
      *
      * @param repo The repository for letters count summary
+     * @param reportRepository The repository for reports
      * @param reportsServiceConfig The configuration for reports service
      * @param zeroRowFiller The utility for filling zero rows
      * @param downtimeFromHour The downtime from hour
@@ -45,12 +53,14 @@ public class ReportsService {
      */
     public ReportsService(
         LettersCountSummaryRepository repo,
+        ReportRepository reportRepository,
         ReportsServiceConfig reportsServiceConfig,
         ZeroRowFiller zeroRowFiller,
         @Value("${ftp.downtime.from}") String downtimeFromHour,
         @Value("${ftp.downtime.to}") String downtimeToHour
     ) {
         this.repo = repo;
+        this.reportRepository = reportRepository;
         this.reportsServiceConfig = reportsServiceConfig;
         this.zeroRowFiller = zeroRowFiller;
         this.timeFromHour = downtimeToHour;
@@ -74,6 +84,33 @@ public class ReportsService {
                 summary -> isNotBlank(summary.serviceName) && !summary.serviceName.equals(TEST_SERVICE)
             ) //excludes nulls, empty values and test service
             .collect(toList());
+    }
+
+    public List<MissingReportsResponse> checkReports(
+        LocalDate startDate,
+        LocalDate endDate
+    ) {
+        Set<String> expectedCodes = reportsServiceConfig.getReportCodes();
+        List<Report> actualReports = reportRepository.findByReportDateBetween(startDate, endDate);
+
+        List<MissingReportsResponse> missing = new ArrayList<>();
+
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            for (String code : expectedCodes) {
+                final LocalDate currentDate = date;
+                // Check Domestic
+                if (actualReports.stream().noneMatch(r ->
+                    r.getReportCode().equals(code) && r.getReportDate().equals(currentDate) && !r.isInternational())) {
+                    missing.add(new MissingReportsResponse(code, "domestic"));
+                }
+                // Check International
+                if (actualReports.stream().noneMatch(r ->
+                    r.getReportCode().equals(code) && r.getReportDate().equals(currentDate) && r.isInternational())) {
+                    missing.add(new MissingReportsResponse(code, "international"));
+                }
+            }
+        }
+        return missing;
     }
 
     /**

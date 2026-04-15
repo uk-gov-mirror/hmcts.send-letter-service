@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.sendletter.exception.CsvReportGenerationException;
 import uk.gov.hmcts.reform.sendletter.model.out.LettersCountSummary;
+import uk.gov.hmcts.reform.sendletter.model.out.MissingReportsResponse;
 import uk.gov.hmcts.reform.sendletter.model.out.SendLetterResponse;
 import uk.gov.hmcts.reform.sendletter.services.ReportsService;
 import uk.gov.hmcts.reform.sendletter.util.CsvWriter;
@@ -68,6 +70,21 @@ public class ReportsController {
                 .body(Files.readAllBytes(csvFile.toPath()));
         } catch (Exception e) {
             throw new CsvReportGenerationException(e);
+        }
+    }
+
+    @GetMapping(path = "/check-reports")
+    @Operation(description = "Checks if all reports for a date range are present")
+    public ResponseEntity<List<MissingReportsResponse>> checkReports(
+        @RequestParam(name = "startDate") @DateTimeFormat(iso = DATE) LocalDate startDate,
+        @RequestParam(name = "endDate") @DateTimeFormat(iso = DATE) LocalDate endDate
+    ) {
+        List<MissingReportsResponse> missingReports = reportsService.checkReports(startDate, endDate);
+
+        if (missingReports.isEmpty()) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(missingReports);
         }
     }
 

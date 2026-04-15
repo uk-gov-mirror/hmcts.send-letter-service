@@ -8,12 +8,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.sendletter.model.out.LettersCountSummary;
+import uk.gov.hmcts.reform.sendletter.model.out.MissingReportsResponse;
 import uk.gov.hmcts.reform.sendletter.services.ReportsService;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 
 import static java.util.Collections.emptyList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -84,5 +86,32 @@ class ReportsControllerTest {
         mockMvc
             .perform(get("/reports/count-summary?date=2019-05-26"))
             .andExpect(status().is5xxServerError());
+    }
+
+    @Test
+    void should_return_200_when_no_reports_are_missing() throws Exception {
+        given(reportsService.checkReports(any(LocalDate.class), any(LocalDate.class)))
+            .willReturn(emptyList());
+
+        mockMvc
+            .perform(get("/reports/check-reports?startDate=2021-01-01&endDate=2021-01-01"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void should_return_404_with_missing_reports_list() throws Exception {
+        given(reportsService.checkReports(any(LocalDate.class), any(LocalDate.class)))
+            .willReturn(Arrays.asList(
+                new MissingReportsResponse("SERVICE_A", "domestic"),
+                new MissingReportsResponse("SERVICE_A", "international")
+            ));
+
+        mockMvc
+            .perform(get("/reports/check-reports?startDate=2021-01-01&endDate=2021-01-01"))
+            .andExpect(status().isNotFound())
+            .andExpect(content().json("["
+                + "{\"serviceName\":\"SERVICE_A\",\"type\":\"domestic\"},"
+                + "{\"serviceName\":\"SERVICE_A\",\"type\":\"international\"}"
+                + "]"));
     }
 }
