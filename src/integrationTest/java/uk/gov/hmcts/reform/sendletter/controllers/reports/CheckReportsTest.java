@@ -43,7 +43,7 @@ class CheckReportsTest {
     @Test
     void should_return_200_when_all_reports_are_present() throws Exception {
         // given
-        LocalDate date = LocalDate.of(2021, 1, 1);
+        LocalDate date = LocalDate.of(2026, 1, 1);
         Set<String> reportCodes = reportsServiceConfig.getReportCodes();
 
         for (String code : reportCodes) {
@@ -72,7 +72,7 @@ class CheckReportsTest {
     @Test
     void should_return_404_when_reports_are_missing() throws Exception {
         // given
-        LocalDate date = LocalDate.of(2021, 1, 1);
+        LocalDate date = LocalDate.of(2026, 1, 1);
         Set<String> reportCodes = reportsServiceConfig.getReportCodes();
         String code = reportCodes.iterator().next(); // Use the first code
 
