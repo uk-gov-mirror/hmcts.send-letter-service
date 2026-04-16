@@ -3,16 +3,10 @@ package uk.gov.hmcts.reform.sendletter.model.out;
 public class MissingReportsResponse {
 
     public final String serviceName;
-    public final String type;
+    public final boolean isInternational;
 
-    /**
-     * Constructor.
-     *
-     * @param serviceName the service name
-     * @param type the type of report
-     */
-    public MissingReportsResponse(String serviceName, String type) {
+    public MissingReportsResponse(String serviceName, boolean isInternational) {
         this.serviceName = serviceName;
-        this.type = type;
+        this.isInternational = isInternational;
     }
 }

@@ -101,12 +101,12 @@ public class ReportsService {
                 // Check Domestic
                 if (actualReports.stream().noneMatch(r ->
                     r.getReportCode().equals(code) && r.getReportDate().equals(currentDate) && !r.isInternational())) {
-                    missing.add(new MissingReportsResponse(code, "domestic"));
+                    missing.add(new MissingReportsResponse(code, false));
                 }
                 // Check International
                 if (actualReports.stream().noneMatch(r ->
                     r.getReportCode().equals(code) && r.getReportDate().equals(currentDate) && r.isInternational())) {
-                    missing.add(new MissingReportsResponse(code, "international"));
+                    missing.add(new MissingReportsResponse(code, true));
                 }
             }
         }

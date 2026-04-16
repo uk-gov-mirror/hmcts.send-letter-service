@@ -34,7 +34,7 @@ class CheckReportsFunctionalTest extends FunctionalTestSuite {
         if (response.getStatusCode() == 404) {
             // If it's 404, verify the response body is a list of missing reports
             assertThat(response.getBody().asString()).contains("serviceName");
-            assertThat(response.getBody().asString()).contains("type");
+            assertThat(response.getBody().asString()).contains("isInternational");
         }
     }
 

@@ -63,8 +63,8 @@ class CheckReportsTest {
 
         // when
         mvc.perform(get("/reports/check-reports")
-                .param("startDate", "2021-01-01")
-                .param("endDate", "2021-01-01"))
+                .param("startDate", "2026-01-01")
+                .param("endDate", "2026-01-07"))
             // then
             .andExpect(status().isOk());
     }
@@ -86,10 +86,10 @@ class CheckReportsTest {
 
         // when
         mvc.perform(get("/reports/check-reports")
-                .param("startDate", "2021-01-01")
-                .param("endDate", "2021-01-01"))
+                .param("startDate", "2026-01-01")
+                .param("endDate", "2026-01-07"))
             // then
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$[?(@.serviceName == '%s' && @.type == 'international')]", code).exists());
+            .andExpect(jsonPath("$[?(@.serviceName == '%s' && @.isInternational == 'true')]", code).exists());
     }
 }

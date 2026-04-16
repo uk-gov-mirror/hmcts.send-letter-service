@@ -223,6 +223,6 @@ class ReportsServiceTest {
         // then
         assertThat(result).hasSize(1);
         assertThat(result.get(0).serviceName).isEqualTo("SERVICE_A");
-        assertThat(result.get(0).type).isEqualTo("international");
+        assertThat(result.get(0).isInternational).isEqualTo(true);
     }
 }

@@ -94,7 +94,7 @@ class ReportsControllerTest {
             .willReturn(emptyList());
 
         mockMvc
-            .perform(get("/reports/check-reports?startDate=2021-01-01&endDate=2021-01-01"))
+            .perform(get("/reports/check-reports?startDate=2026-01-01&endDate=2026-01-07"))
             .andExpect(status().isOk());
     }
 
@@ -102,16 +102,16 @@ class ReportsControllerTest {
     void should_return_404_with_missing_reports_list() throws Exception {
         given(reportsService.checkReports(any(LocalDate.class), any(LocalDate.class)))
             .willReturn(Arrays.asList(
-                new MissingReportsResponse("SERVICE_A", "domestic"),
-                new MissingReportsResponse("SERVICE_A", "international")
+                new MissingReportsResponse("SERVICE_A", false),
+                new MissingReportsResponse("SERVICE_A", true)
             ));
 
         mockMvc
-            .perform(get("/reports/check-reports?startDate=2021-01-01&endDate=2021-01-01"))
+            .perform(get("/reports/check-reports?startDate=2026-01-01&endDate=2026-01-07"))
             .andExpect(status().isNotFound())
             .andExpect(content().json("["
-                + "{\"serviceName\":\"SERVICE_A\",\"type\":\"domestic\"},"
-                + "{\"serviceName\":\"SERVICE_A\",\"type\":\"international\"}"
+                + "{\"serviceName\":\"SERVICE_A\",\"isInternational\":false},"
+                + "{\"serviceName\":\"SERVICE_A\",\"isInternational\":true}"
                 + "]"));
     }
 }
