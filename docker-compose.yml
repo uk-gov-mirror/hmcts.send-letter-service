@@ -40,7 +40,7 @@ services:
       FTP_PUBLIC_KEY: >
         ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDHomWdZ5Q2ZL/ElmDWRwoztvHaj9nr/l0TNiDsx1S3YIHbqcBRpffq4j/lsC8IhVthmGIiaTQU9e668otDow7KBG9vCyonBW4nx9VnLh3aEEzGWxLT9JfxNE4spRveH5SwsleTI+ljFEZtP0T5ha7YhJ3xtrVnPbXwN1BWsoV4omd7Mf4uj7mSA/gjC1gBu7GLwScuAeVp7S6WF2tYB3EbG+T99C0Y0NQAbji78Oe1hX9rjkj/fQt3Kv2OEKfcTXH3fXyp2q6LjDNyMiDylWQAqwxXOBk1swlL57v4K7mWtKSA6054yBJr+ATSQ+vG5FfsqNDQ9YbsT5gvMf8FWuFx alex@MacBook-Pro-7.local
       S2S_URL: http://service-auth-provider-api:8080
-    image: hmctspublic.azurecr.io/rpe/send-letter-service:latest
+    image: hmctsprod.azurecr.io/rpe/send-letter-service:latest
     links:
       - send-letter-database
       - send-letter-sftp
@@ -63,7 +63,7 @@ services:
       - ./docker/sftp/ssh/id_rsa.pub:/home/mosh/ssh/keys/id_rsa.pub:ro
       - ./docker/sftp/ssh/id_ed25519.pub:/home/mosh/ssh/keys/id_ed25519.pub:ro
   service-auth-provider-api:
-    image: hmctspublic.azurecr.io/rpe/service-auth-provider:latest
+    image: hmctsprod.azurecr.io/rpe/service-auth-provider:latest
     healthcheck:
       interval: 10s
       timeout: 10s
