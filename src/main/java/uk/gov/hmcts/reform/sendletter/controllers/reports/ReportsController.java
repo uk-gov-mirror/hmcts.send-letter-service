@@ -73,6 +73,14 @@ public class ReportsController {
         }
     }
 
+
+    /**
+     * Checks if all expected reports for a date range are present.
+     *
+     * @param startDate The start date of the range to check
+     * @param endDate   The end date of the range to check
+     * @return ResponseEntity with HTTP 200 if all reports are present, or HTTP 404 with list of missing reports
+     */
     @GetMapping(path = "/check-reports")
     @Operation(description = "Checks if all reports for a date range are present")
     public ResponseEntity<List<MissingReportsResponse>> checkReports(
