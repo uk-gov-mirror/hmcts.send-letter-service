@@ -43,28 +43,31 @@ class CheckReportsTest {
     @Test
     void should_return_200_when_all_reports_are_present() throws Exception {
         // given
-        LocalDate date = LocalDate.of(2026, 1, 1);
+        LocalDate startDate = LocalDate.of(2026, 1, 1);
+        LocalDate endDate = LocalDate.of(2026, 1, 7);
         Set<String> reportCodes = reportsServiceConfig.getReportCodes();
 
-        for (String code : reportCodes) {
-            reportRepository.save(Report.builder()
-                .reportName("Test " + code + " Domestic")
-                .reportCode(code)
-                .reportDate(date)
-                .isInternational(false)
-                .build());
-            reportRepository.save(Report.builder()
-                .reportName("Test " + code + " International")
-                .reportCode(code)
-                .reportDate(date)
-                .isInternational(true)
-                .build());
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            for (String code : reportCodes) {
+                reportRepository.save(Report.builder()
+                    .reportName("Test " + code + " Domestic")
+                    .reportCode(code)
+                    .reportDate(date)
+                    .isInternational(false)
+                    .build());
+                reportRepository.save(Report.builder()
+                    .reportName("Test " + code + " International")
+                    .reportCode(code)
+                    .reportDate(date)
+                    .isInternational(true)
+                    .build());
+            }
         }
 
         // when
         mvc.perform(get("/reports/check-reports")
-                .param("startDate", "2026-01-01")
-                .param("endDate", "2026-01-07"))
+                .param("startDate", startDate.toString())
+                .param("endDate", endDate.toString()))
             // then
             .andExpect(status().isOk());
     }
@@ -72,7 +75,8 @@ class CheckReportsTest {
     @Test
     void should_return_404_when_reports_are_missing() throws Exception {
         // given
-        LocalDate date = LocalDate.of(2026, 1, 1);
+        LocalDate startDate = LocalDate.of(2026, 1, 1);
+        LocalDate endDate = LocalDate.of(2026, 1, 1);
         Set<String> reportCodes = reportsServiceConfig.getReportCodes();
         String code = reportCodes.iterator().next(); // Use the first code
 
@@ -80,16 +84,16 @@ class CheckReportsTest {
         reportRepository.save(Report.builder()
             .reportName("Test " + code + " Domestic")
             .reportCode(code)
-            .reportDate(date)
+            .reportDate(startDate)
             .isInternational(false)
             .build());
 
         // when
         mvc.perform(get("/reports/check-reports")
-                .param("startDate", "2026-01-01")
-                .param("endDate", "2026-01-07"))
+                .param("startDate", startDate.toString())
+                .param("endDate", endDate.toString()))
             // then
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$[?(@.serviceName == '%s' && @.isInternational == 'true')]", code).exists());
+            .andExpect(jsonPath("$[?(@.serviceName == '%s' && @.isInternational == true)]", code).exists());
     }
 }
