@@ -73,6 +73,33 @@ class CheckReportsTest {
     }
 
     @Test
+    void should_return_200_when_parameters_are_missing_and_reports_exist_for_today() throws Exception {
+        // given
+        LocalDate today = LocalDate.now();
+        Set<String> reportCodes = reportsServiceConfig.getReportCodes();
+
+        for (String code : reportCodes) {
+            reportRepository.save(Report.builder()
+                .reportName("Test " + code + " Domestic")
+                .reportCode(code)
+                .reportDate(today)
+                .isInternational(false)
+                .build());
+            reportRepository.save(Report.builder()
+                .reportName("Test " + code + " International")
+                .reportCode(code)
+                .reportDate(today)
+                .isInternational(true)
+                .build());
+        }
+
+        // when
+        mvc.perform(get("/reports/check-reports"))
+            // then
+            .andExpect(status().isOk());
+    }
+
+    @Test
     void should_return_404_when_reports_are_missing() throws Exception {
         // given
         LocalDate startDate = LocalDate.of(2026, 1, 1);
@@ -94,6 +121,7 @@ class CheckReportsTest {
                 .param("endDate", endDate.toString()))
             // then
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$[?(@.serviceName == '%s' && @.isInternational == true)]", code).exists());
+            .andExpect(jsonPath("$[?(@.service_name == '%s' && @.is_international == true)]", code).exists())
+            .andExpect(jsonPath("$[?(@.report_date == '%s')]", startDate.toString()).exists());
     }
 }

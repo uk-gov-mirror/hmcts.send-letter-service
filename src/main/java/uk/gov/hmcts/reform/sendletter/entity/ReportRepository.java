@@ -31,6 +31,17 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
      * @return a list of {@link Report} entities
      */
     List<Report> findByReportDateBetween(LocalDate startDate, LocalDate endDate);
+
+    /**
+     * Retrieves all reports within a specified date range that match any of the given report codes.
+     *
+     * @param startDate   the start date of the range
+     * @param endDate     the end date of the range
+     * @param reportCodes the list of report codes to filter by
+     * @return a list of {@link Report} entities
+     */
+    List<Report> findAllByReportDateBetweenAndReportCodeIn(
+        LocalDate startDate, LocalDate endDate, List<String> reportCodes);
 }
 
 

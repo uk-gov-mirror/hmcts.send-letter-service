@@ -195,10 +195,15 @@ class ReportsServiceTest {
         // given
         LocalDate date = LocalDate.of(2021, 1, 1);
         given(reportsServiceConfig.getReportCodes()).willReturn(Set.of("SERVICE_A"));
-        given(reportRepository.findByReportDateBetween(date, date)).willReturn(Arrays.asList(
-            Report.builder().reportCode("SERVICE_A").reportDate(date).isInternational(false).build(),
-            Report.builder().reportCode("SERVICE_A").reportDate(date).isInternational(true).build()
-        ));
+        given(
+            reportRepository
+                .findAllByReportDateBetweenAndReportCodeIn(date, date, List.of("SERVICE_A")))
+            .willReturn(
+                Arrays.asList(
+                    Report.builder().reportCode("SERVICE_A").reportDate(date).isInternational(false).build(),
+                    Report.builder().reportCode("SERVICE_A").reportDate(date).isInternational(true).build()
+                )
+            );
 
         // when
         List<MissingReportsResponse> result = service.checkReports(date, date);
@@ -213,9 +218,11 @@ class ReportsServiceTest {
         LocalDate date = LocalDate.of(2021, 1, 1);
         given(reportsServiceConfig.getReportCodes()).willReturn(Set.of("SERVICE_A"));
         // Only domestic report exists
-        given(reportRepository.findByReportDateBetween(date, date)).willReturn(List.of(
-            Report.builder().reportCode("SERVICE_A").reportDate(date).isInternational(false).build()
-        ));
+        given(
+            reportRepository
+                .findAllByReportDateBetweenAndReportCodeIn(date, date, List.of("SERVICE_A")))
+            .willReturn(
+                List.of(Report.builder().reportCode("SERVICE_A").reportDate(date).isInternational(false).build()));
 
         // when
         List<MissingReportsResponse> result = service.checkReports(date, date);

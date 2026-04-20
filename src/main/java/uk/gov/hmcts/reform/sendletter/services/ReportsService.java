@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sendletter.config.ReportsServiceConfig;
 import uk.gov.hmcts.reform.sendletter.entity.LettersCountSummaryRepository;
-import uk.gov.hmcts.reform.sendletter.entity.Report;
 import uk.gov.hmcts.reform.sendletter.entity.ReportRepository;
 import uk.gov.hmcts.reform.sendletter.entity.reports.ServiceLettersCountSummary;
 import uk.gov.hmcts.reform.sendletter.model.out.LettersCountSummary;
@@ -16,6 +15,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -91,26 +91,25 @@ public class ReportsService {
         LocalDate endDate
     ) {
         Set<String> expectedCodes = reportsServiceConfig.getReportCodes();
-        List<Report> actualReports = reportRepository.findByReportDateBetween(startDate, endDate);
+        Set<String> presentReports = reportRepository.findAllByReportDateBetweenAndReportCodeIn(
+            startDate, endDate, expectedCodes.stream().toList())
+                .stream()
+                .map(r -> r.getReportDate() + r.getReportCode() + r.isInternational())
+                .collect(Collectors.toSet());
 
-        List<MissingReportsResponse> missing = new ArrayList<>();
+        List<MissingReportsResponse> missingReports = new ArrayList<>();
 
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             for (String code : expectedCodes) {
-                final LocalDate currentDate = date;
-                // Check Domestic
-                if (actualReports.stream().noneMatch(r ->
-                    r.getReportCode().equals(code) && r.getReportDate().equals(currentDate) && !r.isInternational())) {
-                    missing.add(new MissingReportsResponse(code, false));
+                if (!presentReports.contains(date.toString() + code + "false")) {
+                    missingReports.add(new MissingReportsResponse(code, false, date));
                 }
-                // Check International
-                if (actualReports.stream().noneMatch(r ->
-                    r.getReportCode().equals(code) && r.getReportDate().equals(currentDate) && r.isInternational())) {
-                    missing.add(new MissingReportsResponse(code, true));
+                if (!presentReports.contains(date.toString() + code + "true")) {
+                    missingReports.add(new MissingReportsResponse(code, true, date));
                 }
             }
         }
-        return missing;
+        return missingReports;
     }
 
     /**
