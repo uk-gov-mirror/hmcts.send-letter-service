@@ -71,7 +71,7 @@ public class TaskController {
      * @param authHeader Auth header from the request containing the API key
      * @return a {@link List} of {@link PostedReportTaskResponse} records
      */
-    @GetMapping("/process-reports")
+    @GetMapping("/processed-reports")
     public ResponseEntity<List<PostedReportTaskResponse>> retrieveReports(
         @RequestHeader(value = AUTHORIZATION, required = false) String authHeader,
         @RequestParam(name = "after", required = false) LocalDateTime afterDate) {
