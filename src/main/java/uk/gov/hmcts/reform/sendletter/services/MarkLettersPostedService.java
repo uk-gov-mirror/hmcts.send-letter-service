@@ -112,6 +112,7 @@ public class MarkLettersPostedService {
                         // but an error report will be added to indicate that a report couldn't be married
                         // up to a specific service.
                         currentReport.set(Report.builder()
+                            .reportName(parsedReport.path)
                             .reportCode("UNKNOWN")
                             .reportDate(parsedReport.reportDate)
                             .isInternational(false)
@@ -125,6 +126,7 @@ public class MarkLettersPostedService {
                         // initialise a report now so that we can ensure a report in the case of an
                         // exceptional failure during the markAsPosted iteration below.
                         currentReport.set(Report.builder()
+                            .reportName(parsedReport.path)
                             .reportCode(reportInfo.reportCode)
                             .reportDate(reportInfo.reportDate)
                             .isInternational(reportInfo.isInternational)
