@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TaskController.class)
@@ -48,16 +49,23 @@ class TaskControllerTest {
     private ReportRepository reportRepository;
 
     @Test
-    void processReportsShouldReturn204WhenEmpty() throws Exception {
+    void processedReportsShouldReturn204WhenEmpty() throws Exception {
         when(reportRepository.findByProcessedAtAfter(any())).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/tasks/process-reports")
+        mockMvc.perform(get("/tasks/processed-reports")
                 .header("Authorization", AUTH_HEADER))
             .andExpect(status().isNoContent());
     }
 
     @Test
-    void processReportsShouldReturn200WithList() throws Exception {
+    void processReportsShouldReturn204() throws Exception {
+        mockMvc.perform(post("/tasks/process-reports")
+                .header("Authorization", AUTH_HEADER))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void processedReportsShouldReturn200WithList() throws Exception {
         final LocalDate reportDate = LocalDate.now();
         Report report = Report.builder()
             .reportCode("CODE1")
@@ -68,7 +76,7 @@ class TaskControllerTest {
 
         when(reportRepository.findByProcessedAtAfter(any())).thenReturn(List.of(report));
 
-        String responseBodyStr = mockMvc.perform(get("/tasks/process-reports")
+        String responseBodyStr = mockMvc.perform(get("/tasks/processed-reports")
                 .header("Authorization", AUTH_HEADER))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
@@ -96,7 +104,7 @@ class TaskControllerTest {
 
     @Test
     void shouldReturn401WhenMissingApiKey() throws Exception {
-        mockMvc.perform(get("/tasks/process-reports"))
+        mockMvc.perform(get("/tasks/processed-reports"))
             .andExpect(status().isUnauthorized());
     }
 
@@ -104,7 +112,7 @@ class TaskControllerTest {
     void shouldReturn401WhenInvalidApiKey() throws Exception {
         // Would normally expect a 403, but historically the api has been
         // written to throw an unauthorised in this situation.
-        mockMvc.perform(get("/tasks/process-reports")
+        mockMvc.perform(get("/tasks/processed-reports")
                 .header("Authorization", INVALID_AUTH_HEADER))
             .andExpect(status().isUnauthorized());
     }
