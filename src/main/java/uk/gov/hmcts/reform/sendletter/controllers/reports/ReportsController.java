@@ -84,9 +84,9 @@ public class ReportsController {
     @GetMapping(path = "/check-reports")
     @Operation(description = "Checks if all reports for a date range are present")
     public ResponseEntity<List<MissingReportsResponse>> checkReports(
-        @RequestParam(name = "startDate", defaultValue = "#{T(java.time.LocalDate).now()}")
+        @RequestParam(name = "startDate", defaultValue = "#{T(java.time.LocalDate).now().minusDays(7)}")
         @DateTimeFormat(iso = DATE) LocalDate startDate,
-        @RequestParam(name = "endDate", defaultValue = "#{T(java.time.LocalDate).now()}")
+        @RequestParam(name = "endDate", defaultValue = "#{T(java.time.LocalDate).now().minusDays(1)}")
         @DateTimeFormat(iso = DATE) LocalDate endDate
     ) {
         List<MissingReportsResponse> missingReports = reportsService.checkReports(startDate, endDate);

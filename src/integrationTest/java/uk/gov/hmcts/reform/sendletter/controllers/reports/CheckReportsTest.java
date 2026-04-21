@@ -73,24 +73,25 @@ class CheckReportsTest {
     }
 
     @Test
-    void should_return_200_when_parameters_are_missing_and_reports_exist_for_today() throws Exception {
+    void should_return_200_when_parameters_are_missing_and_reports_exist_for_last_week() throws Exception {
         // given
-        LocalDate today = LocalDate.now();
         Set<String> reportCodes = reportsServiceConfig.getReportCodes();
 
         for (String code : reportCodes) {
-            reportRepository.save(Report.builder()
-                .reportName("Test " + code + " Domestic")
-                .reportCode(code)
-                .reportDate(today)
-                .isInternational(false)
-                .build());
-            reportRepository.save(Report.builder()
-                .reportName("Test " + code + " International")
-                .reportCode(code)
-                .reportDate(today)
-                .isInternational(true)
-                .build());
+            for (int day = 1; day <= 7; day++) {
+                reportRepository.save(Report.builder()
+                    .reportName("Test " + code + " Domestic")
+                    .reportCode(code)
+                    .reportDate(LocalDate.now().minusDays(day))
+                    .isInternational(false)
+                    .build());
+                reportRepository.save(Report.builder()
+                    .reportName("Test " + code + " International")
+                    .reportCode(code)
+                    .reportDate(LocalDate.now().minusDays(day))
+                    .isInternational(true)
+                    .build());
+            }
         }
 
         // when
