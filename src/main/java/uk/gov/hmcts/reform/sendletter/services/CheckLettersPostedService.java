@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.sendletter.entity.BasicLetterInfo;
 import uk.gov.hmcts.reform.sendletter.entity.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.entity.ReportRepository;
 import uk.gov.hmcts.reform.sendletter.exception.LetterNotFoundException;
+import uk.gov.hmcts.reform.sendletter.exception.LetterSaveException;
 import uk.gov.hmcts.reform.sendletter.model.out.CheckPostedTaskResponse;
 
 import java.time.LocalDateTime;
@@ -63,6 +64,11 @@ public class CheckLettersPostedService {
                 }
             } catch (LetterNotFoundException e) {
                 log.warn("Letter not found for id {} during posted check", letter.getId());
+            } catch (LetterSaveException e) {
+                // this can happen when trying to retrieve the status of a letter that has
+                // it's ID as an entry in the exception table. In this case we just move on
+                // to the next letter and raise an info logs.
+                log.info("Exception record found for id {} during posted check. Skipping", letter.getId());
             }
         }
         log.info("Completed '{}' task", TASK_NAME);
