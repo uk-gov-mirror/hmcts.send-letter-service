@@ -29,3 +29,4 @@ application-default.yaml
 /bin/*/bin/setup-azurite.sh
 /bin/setup-sftp.sh
 /bin/setup-azurite.sh
+.github/skills

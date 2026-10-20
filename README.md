@@ -44,7 +44,7 @@ its database accordingly. (`MarkLettersPostedTask`)
 
 ### Prerequisites
 
-- [JDK 17](https://www.oracle.com/java)
+- [JDK 25](https://www.oracle.com/java)
 - Project requires Spring Boot v3.x to be present
 
 ### Quick Start
@@ -236,4 +236,3 @@ You can test the different environments of Send Letter Service by using [Send Le
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-

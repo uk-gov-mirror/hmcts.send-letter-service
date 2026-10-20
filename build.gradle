@@ -38,7 +38,7 @@ version = '0.1.1'
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(21)
+    languageVersion = JavaLanguageVersion.of(25)
   }
 }
 
@@ -114,6 +114,7 @@ task smoke(type: Test) {
 
 tasks.withType(Test) {
   useJUnitPlatform()
+  javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 
   testLogging {
     exceptionFormat = 'full'
@@ -308,7 +309,9 @@ processIntegrationTestResources {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-mainClassName = 'uk.gov.hmcts.reform.sendletter.Application'
+application {
+  mainClass = 'uk.gov.hmcts.reform.sendletter.Application'
+}
 
 bootJar {
   getArchiveFileName().set(provider {
