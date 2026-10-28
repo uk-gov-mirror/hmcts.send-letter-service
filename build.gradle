@@ -269,7 +269,7 @@ dependencies {
 
   implementation group: 'io.github.resilience4j', name: 'resilience4j-spring-boot3', version: '2.4.0'
 
-  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.14.0'
+  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.17.3'
 
   testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.1.2'
 
